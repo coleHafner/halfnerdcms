@@ -1,0 +1,1 @@
+php_value include_path ".:/usr/local/lib/php:/usr/local/www/halfnerdcms/classes:/usr/local/www/halfnerdcms/classes/extensions
