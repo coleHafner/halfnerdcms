@@ -1,4 +1,4 @@
-<?
+ <?
 
 /**
  * A class to handle common functions.
@@ -80,6 +80,7 @@ class Common {
 				'css_ex' => "/css/extensions",
 				'images' => "/images",
 				'images_ex' => "/images/extensions",
+				'user_images' => "/images/users",
 				'js' => "/js",
 				'js_ex' => "/js/extensions",
 				'classes' => "/classes",
@@ -98,6 +99,7 @@ class Common {
 				'css_ex' => "/css/extensions",
 				'images' => "/images",
 				'images_ex' => "/images/extensions",
+				'user_images' => "/images/users",
 				'js' => "/js",
 				'js_ex' => "/js/extensions",
 				'classes' => "/classes",
@@ -116,6 +118,7 @@ class Common {
 				'css_ex' => "/css/extensions",
 				'images' => "/images",
 				'images_ex' => "/images/extensions",
+				'user_images' => "/images/users",
 				'js' => "/js",
 				'js_ex' => "/js/extensions",
 				'classes' => "/classes",
@@ -432,8 +435,17 @@ class Common {
 			
 				$style = ( array_key_exists( "extra_style", $vars ) ) ? $vars['extra_style'] : "";
 				
+				if( !array_key_exists( "href", $vars) )
+				{
+					$link_guts = 'id="' . $vars['id'] . '" process="' . $vars['process'] . '" ' . $vars['pk_name'] . '="' . $vars['pk_value'] . '"';
+				}
+				else
+				{
+					$link_guts = 'href="' . $vars['href'] . '"';
+				}
+				
 				$return = '
-				<a href="#" id="' . $vars['id'] . '" process="' . $vars['process'] . '" ' . $vars['pk_name'] . '="' . $vars['pk_value'] . '" class="button rounded_corners color_accent center no_hover bg_color_white" ' . $style . '>
+				<a ' . $link_guts . ' class="button rounded_corners color_accent center no_hover bg_color_white" ' . $style . '>
 					' . $vars['button_value'] . '
 				</a>
 				';

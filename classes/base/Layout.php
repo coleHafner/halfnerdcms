@@ -106,6 +106,7 @@ class Layout
 			<script type="text/javascript" src="' . $file_paths['js'] . '/jquery.halfnerd.article.js"></script>
 			<script type="text/javascript" src="' . $file_paths['js'] . '/jquery.halfnerd.view.js"></script>
 			<script type="text/javascript" src="' . $file_paths['js'] . '/jquery.halfnerd.section.js"></script>
+			<script type="text/javascript" src="' . $file_paths['js'] . '/jquery.halfnerd.user.js"></script>
 			<script type="text/javascript" src="' . $file_paths['js'] . '/jquery.halfnerd.file.js"></script>
 			<script type="text/javascript" src="' . $file_paths['js'] . '/jquery.halfnerd.mail.js"></script>
 			

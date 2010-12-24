@@ -241,26 +241,16 @@ Ui functions
 	
 	this.hideCanvasMod = function( view_id, callback )
 	{
-		var run_callback = true;
-		
-		if( typeof( callback ) == "undefined" )
-		{
-			callback = function(){};
-			run_callback = false;
-			
-		}
+		callback = ( typeof( callback ) == "undefined" ) ? function(){} : callback;
 		
 		//hide canvas
 		$( "#view_canvas_mod_" + view_id ).fadeOut( function(){
 		
 			//show info
 			$( "#view_info_" + view_id ).fadeIn( function(){
-				
-				if( run_callback )
-				{
-					//run callback
-					callback();	
-				}
+			
+				//run callback
+				callback();					
 			});
 			
 		});
@@ -275,14 +265,7 @@ Ui functions
 	
 	this.hideCanvasAdd = function( callback )
 	{
-		var run_callback = true;
-		
-		if( typeof( callback ) == "undefined" )
-		{
-			callback = function(){};
-			run_callback = false;
-			
-		}
+		callback = ( typeof( callback ) == "undefined" ) ? function(){} : callback;
 		
 		//hide info
 		$( "#view_canvas_add" ).slideUp( function(){
@@ -290,6 +273,7 @@ Ui functions
 			//run callback
 			callback();
 		});
+		
 	}//hideCanvas()
 	
 	this.showCanvasDelete = function( view_id )
@@ -309,6 +293,8 @@ Ui functions
 	
 	this.hideCanvasDelete = function( view_id, callback )
 	{
+		callback = ( typeof( callback ) == "undefined" ) ? function(){} : callback;
+		
 		//hide canvas
 		$( "#view_canvas_delete_" + view_id ).fadeOut( function(){
 		

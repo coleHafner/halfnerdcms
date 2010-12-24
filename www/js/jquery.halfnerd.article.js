@@ -214,13 +214,7 @@ Ui functions
 	
 	this.hideCanvasMod = function( article_id, callback )
 	{
-		var run_callback = true;
-		
-		if( typeof( callback ) == "undefined" )
-		{
-			callback = function(){};
-			run_callbck = false;
-		}
+		callback = ( typeof( callback ) == "undefined" ) ? function(){} : callback;
 		
 		//hide canvas
 		$( "#article_canvas_mod_" + article_id ).slideUp( function(){
@@ -228,11 +222,7 @@ Ui functions
 			//show info
 			$( "#article_info_" + article_id ).fadeIn( function(){
 				
-				if( run_callback )
-				{
-					//run callback
-					callback();	
-				}
+				callback();
 			});
 			
 		});
@@ -250,21 +240,12 @@ Ui functions
 	
 	this.hideCanvasAdd = function( callback )
 	{
-		var run_callback = true;
-		
-		if( typeof( callback ) == "undefined" )
-		{
-			run_callback = false;
-			callback = function(){};
-		}
+		callback = ( typeof( callback ) == "undefined" ) ? function(){} : callback;
 		
 		//hide info
 		$( "#article_canvas_add" ).slideUp( function(){
 		
-			if( run_callback )
-			{
-				callback();
-			}
+			callback();
 		});
 	}//hideCanvas()
 	
@@ -285,6 +266,8 @@ Ui functions
 	
 	this.hideCanvasDelete = function( article_id, callback )
 	{
+		callback = ( typeof( callback ) == "undefined" ) ? function(){} : callback;
+		
 		//hide canvas
 		$( "#article_canvas_delete_" + article_id ).slideUp( function(){
 		

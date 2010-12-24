@@ -85,6 +85,17 @@ $(document).ready(function(){
     	.live( "click", function(){
     		$( "#result_section_0" ).html( "" );
     	});
+    	
+    $( "#auto_login" )
+    	.live( "keypress", function( event ){
+
+    		//login on enter
+    		if( event.keyCode == 13 )
+    		{
+	    		auth = new Authentication( 0 );
+	    		auth.validateLoginAttempt();
+	    	}
+    	});
 });
 	
 /**********************************************************************************************************************************

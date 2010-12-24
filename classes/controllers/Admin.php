@@ -83,6 +83,8 @@ class Admin extends Controller{
 					Go ahead, give it a try. You\'ll love it!
 				</p>
 				';
+				
+				$return = array( 'title' => $title, 'title_button' => $title_button, 'html' => $html );
 				break;
 				
 			case "main-nav":
@@ -127,6 +129,8 @@ class Admin extends Controller{
 						
 				</div>
 				';
+				
+				$return = array( 'title' => $title, 'title_button' => $title_button, 'html' => $html );
 				break;
 				
 			case "manage-articles":
@@ -166,6 +170,8 @@ class Admin extends Controller{
 					' . $article_list['html'] . '
 				</div>
 				';
+				
+				$return = array( 'title' => $title, 'title_button' => $title_button, 'html' => $html );
 				break;
 				
 			case "get-article-list":
@@ -299,6 +305,8 @@ class Admin extends Controller{
 					' . $view_list['html'] . '
 				</div>
 				';
+				
+				$return = array( 'title' => $title, 'title_button' => $title_button, 'html' => $html );
 				break;
 				
 			case "get-view-list":
@@ -368,7 +376,7 @@ class Admin extends Controller{
 										';
 										
 								if( strtolower( $v->m_controller_name ) != "admin" &&
-								strtolower( $v->m_controller_name ) != "index" )
+									strtolower( $v->m_controller_name ) != "index" )
 								{
 									$html .= '
 									' . Common::getHtml( "get-button-round", array(
@@ -422,8 +430,117 @@ class Admin extends Controller{
 											
 			case "manage-users":
 				$title = "Control Users, Their Contact Info, and Their Permissions";
-				$title_button = "";
-				$html = "";
+				
+				$title_button = '
+				<div class="title_button_container">
+				
+				' . Common::getHtml( "get-button-round", array(
+						'id' => "user",
+						'process' => "show_add",
+						'pk_name' => "view_id",
+						'pk_value' => "0",
+						'button_value' => "+",
+						'inner_div_style' => 'style="padding-top:2px;padding-left:1px;"',
+						'link_style' => 'style="float:right;"') 
+					) . '		 
+				 
+				 </div>
+				';
+				
+				$users = Authentication::getUsers( "active", "1" );
+				$user_list = $this->getHtml( "get-user-list", array( 'records' => $users ) );
+				
+				$html = '
+				<div class="item_list_container" id="user_list_container">
+					<div class="item_container rounded_corners bg_color_light_tan" hover_enabled="0">
+						' . $user_list['html'] . '
+					</div>
+				</div>
+				';
+				
+				$return = array( 'title' => $title, 'title_button' => $title_button, 'html' => $html );
+				break;
+				
+			case "get-user-list":
+			
+				$users = $vars['records'];
+				$add_form = View::getHtml( "get-edit-form", array( 'active_record' => new Authentication( 0 ) ) );
+				$hover_enabled = ( array_key_exists( "hover_enabled", $vars ) && $vars['hover_enabled'] == TRUE ) ? "1" : "0";
+				
+				$items_per_row = 2;
+				$num_items = count( $users );
+				$num_rows = ceil( $num_items / $items_per_row );
+				
+				$html = '
+				<div id="view_canvas_add" class="item_container padder_10 rounded_corners bg_color_light_tan" style="display:none;" hover_enabled="0">
+					' . $add_form['html'] . '
+				</div>
+				';
+				
+				$html .= '
+				<table class="user_grid">
+					';
+				
+				if( $num_items > 0 )
+				{
+				
+					for( $i = 0; $i < $num_rows; $i++ )
+					{
+						$html .= '
+					<tr>			
+								';
+							
+						for( $j = 1; $j <= $items_per_row; $j++ )
+						{
+						
+							$key = $j + ( $items_per_row * $i );
+							
+							if( $key > $num_items )
+							{
+								//add empty cell
+								$html .= '
+						<td>
+							&nbsp;
+						</td>
+						';
+								break;
+							}
+							
+							$item = $users[$key];
+							$view_form = Authentication::getHtml( "get-view-form", array( 'active_record' => $item ) );
+							
+							$html .= '
+						<td class="bg_color_tan border_dark_grey">
+							<div id="user_info_' . $item->m_authentication_id . '">						
+								' . $view_form['html'] . '
+							</div>
+						</td>
+						';
+						
+						}
+						
+						$html .= '
+					</tr>
+					';	
+								
+					}		
+				}
+				else
+				{
+					$html .= '
+					<tr>
+						<td class="center">
+							There are 0 photos in this album. Check back later...
+						</td>
+					</tr>
+					';
+				}
+				
+				$html .= '
+				</table>
+				';
+									
+				$return = array( 'html' => $html );
 				break;
 				
 			case "manage-account":
@@ -432,11 +549,13 @@ class Admin extends Controller{
 				$html = '
 				<div>
 				</div>';
+				
+				$return = array( 'title' => $title, 'title_button' => $title_button, 'html' => $html );
 				break;
 				
 		}//end switch
 		
-		return array( 'title' => $title, 'title_button' => $title_button, 'html' => $html );
+		return $return;
 		
 	}//getNav()
 	

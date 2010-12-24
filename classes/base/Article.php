@@ -66,6 +66,12 @@ class Article
 	protected $m_body;
 	
 	/**
+	 * Tag string. Space separated tag string.
+	 * @var	string
+	 */
+	protected $m_tag_string;
+	
+	/**
 	 * Post timestamp of the record.
 	 * @var	string
 	 */
@@ -127,6 +133,7 @@ class Article
 			view_id,
 			title,
 			body,
+			tag_string,
 			post_timestamp,
 			priority,
 			active
@@ -146,6 +153,7 @@ class Article
 		$this->m_file_ids = $this->getFiles();
 		$this->m_title = stripslashes( $row['title'] );
 		$this->m_body = stripslashes( $row['body'] );
+		$this->m_tag_string = $row['tag_string'];
 		$this->m_post_timestamp =  ( $this->m_article_id > 0 ) ? $this->m_common->convertTimestamp( $row['post_timestamp'], TRUE ) : "";
 		$this->m_post_timestamp_diff = $row['post_timestamp'];
 		$this->m_priority = $row['priority'];
@@ -171,6 +179,7 @@ class Article
 			'view_id' => $this->m_view_id,
 			'title' => $this->m_title,
 			'body' => $this->m_body,
+			'tag_string' => $this->m_tag_string,
 			'post_timestamp' => $this->m_post_timestamp,
 			'priority' => $this->m_priority,
 			'active' => $this->m_active
@@ -249,6 +258,7 @@ class Article
 			SET 
 				title = '" . $this->m_common->m_db->escapeString( $input['title'] ) . "',
 				body = '" .  $this->m_common->m_db->escapeString( $input['body'] ) . "',
+				tag_string = '" . $this->m_common->m_db->escapeString( $input['tag_string'] ) . "',
 				authentication_id = " . $input['authentication_id'] . ",
 				section_id = " . $input['section_id'] . ",
 				view_id = " . $input['view_id'] . ",
@@ -708,17 +718,19 @@ class Article
 					'title_field' => "username" ) 
 				);
 				
+				$num_tags = ( !is_null( $a->m_tag_string ) ) ? count ( explode( " ", $a->m_tag_string ) ) : "0";
+				
 				$return = array( 'html' => '
 					<div class="header color_accent">
 						' . $a->m_title . '
 					</div>
 					
-					<p class="normal_font">
+					<p class="normal_font padder_10_bottom">
 						' . $body . '
 					</p>
-					
+						
 					<div class="article_meta">
-						Posted by ' . $poster . ' on ' . $a->m_post_timestamp . ' on ' . $view_title . ' in ' . $section_title . ' 
+						Posted by ' . $poster . ' on ' . $a->m_post_timestamp . ' on ' . $view_title . ' in ' . $section_title . ' - ' . $num_tags . ' Tags 
 					</div>
 					'
 				);
@@ -732,18 +744,20 @@ class Article
 				if( $a->m_article_id > 0 )
 				{
 					$auth_id = $a->m_authentication_id;
-					$process = "modify";
 					$title = $a->m_title;
 					$body = $a->m_body;
+					$tag_string = $a->m_tag_string;
+					$process = "modify";
 					$from_add = "0";
 				}
 				else
 				{
 					$auth_id = Authentication::getAuthId();
 					$process = "add";
-					$title = "Article Title";
-					$body = "Article Body";
+					$title = "";
+					$body = "";
 					$from_add = "1";
+					$tag_string = "";
 				}
 				
 				//get view selector
@@ -769,11 +783,17 @@ class Article
 					<form id="article_form_' . $a->m_article_id . '">
 						
 						<div class="padder_10">
-							<input type="text" name="title" class="text_input input_clear text_extra_long" value="' . $title  . '" clear_if="Article Title">
+							<span class="title_span color_faded">
+								Title:
+							</span>
+							<input type="text" name="title" class="text_input text_extra_long" value="' . $title  . '" />
 						</div>
 						
 						<div class="padder_10 padder_no_top">
-							<textarea name="body" id="body" class="text_input input_clear text_extra_long text_area" clear_if="Article Body">' . $body .'</textarea>
+							<span class="title_span color_faded">
+								Guts:
+							</span>
+							<textarea name="body" id="body" class="text_input text_extra_long text_area">' . $body .'</textarea>
 						</div>
 						
 						
@@ -792,6 +812,13 @@ class Article
 								
 							<div class="clear"></div>
 							
+						</div>
+						
+						<div class="padder_10 padder_no_top">
+							<span class="title_span color_faded">
+								Tags ( separate with space ):
+							</span>
+							<input type="text" name="tag_string" class="text_input text_extra_long" value="' . $tag_string  . '" />
 						</div>
 						
 						' . Common::getHtml( "get-form-buttons", array( 

@@ -75,6 +75,12 @@ class Contact
 	protected $m_description;
 	
 	/**
+	 * Use Gravatar flag.
+	 * @var	boolean
+	 */
+	protected $m_use_gravatar;
+	
+	/**
 	 * Active flag.
 	 * @var	boolean
 	 */
@@ -124,6 +130,7 @@ class Contact
 			first_name,
 			last_name,
 			description, 
+			use_gravatar,
 			active
 		FROM 
 			common_Contacts
@@ -142,6 +149,7 @@ class Contact
 		$this->m_first_name = $row['first_name'];
 		$this->m_last_name = $row['last_name'];
 		$this->m_description = stripslashes( $row['description'] ); 
+		$this->m_use_gravatar = $this->m_common->m_db->fixBoolean( $row['use_gravatar'] );
 		$this->m_active = $this->m_common->m_db->fixBoolean( $row['active'] );
 		$this->m_objects_collection = ( $objects ) ? $this->populateObjectsCollection() : array();
 		
@@ -166,6 +174,7 @@ class Contact
 			'first_name' => $this->m_first_name,
 			'last_name' => $this->m_last_name,
 			'description' => $this->m_description,
+			'use_gravatar' => $this->m_gravatar,
 			'active' => $this->m_active,
 			'objects_collection' => $this->m_objects_collection
 		);
@@ -234,7 +243,8 @@ class Contact
 				contact_type_id = " . $input['contact_type_id'] . ",
 				first_name = '" . $this->m_common->m_db->escapeString( ucfirst( strtolower( $input['first_name'] ) ) ) . "',
 				last_name = '" . $this->m_common->m_db->escapeString( ucfirst( strtolower( $input['last_name'] ) ) ) . "',
-				description = '" . $this->m_common->m_db->escapeString( strtolower( $input['description'] ) ) . "'
+				description = '" . $this->m_common->m_db->escapeString( strtolower( $input['description'] ) ) . "',
+				use_gravatar = " . $input['use_gravatar'] . "
 			WHERE 
 				contact_id = " . $this->m_contact_id;
 			

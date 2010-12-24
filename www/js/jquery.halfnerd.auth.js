@@ -23,18 +23,6 @@ $( document ).ready( function(){
 		//do action
 		switch( process.toLowerCase() )
 		{
-			case "add":
-				auth.validateAddModForm( "add", auth.auth_id );
-				break;
-				
-			case "modify":
-				auth.validateAddModForm( "modify", auth.auth_id );
-				break;
-				
-			case "delete":
-				auth.deleteRecord();
-				break;
-				
 			case "change_password":
 				auth.validatePasswordChange();	
 				break;
@@ -69,45 +57,6 @@ function Authentication( auth_id )
 action functions
 **********************************************************************************************************************************/
 
-	this.add = function()
-	{
-		$.ajax({
-			type: 'post',
-			url: "ajax/halfnerd_helper.php?task=authentication&process=add&authentication_id=0",
-			data: $( "#auth_add_mod_form" ).serialize( true ),
-			success: function(){
-				closeColorbox( 0 );
-			}
-		});
-	
-	}//add()
-	
-	this.modify = function()
-	{
-		$.ajax({
-			type: 'post',
-			url: "ajax/halfnerd_helper.php?task=authentication&process=modify&authentication_id=" + this.auth_id,
-			data: $( "#auth_add_mod_form" ).serialize( true ),
-			success: function(){
-				closeColorbox( 0 );
-			}
-		});
-	
-	}//modify()
-	
-	this.deleteRecord = function()
-	{
-		$.ajax({
-			type: 'post',
-			url: "ajax/halfnerd_helper.php?task=authentication&process=delete&authentication_id=" + this.auth_id,
-			data: $( "#auth_add_mod_form" ).serialize( true ),
-			success: function(){
-				closeColorbox( 0 );
-			}
-		});
-	
-	}//modify()
-	
 	this.doPasswordChange = function()
 	{
 		$.ajax({
@@ -238,49 +187,6 @@ validation functions
 		});
 		
 	}//validateLoginAttempt()
-	
-	this.validateAddModForm = function( process, auth_id )
-	{
-		$.ajax({
-			type: 'post',
-			url: 'ajax/halfnerd_helper.php?task=authentication&process=validate&authentication_id=' + auth_id,
-			data: $( "#auth_add_mod_form" ).serialize( true ),
-			success: function( reply ){
-			
-				//get vars
-				var reply_split = reply.split( "^" );
-				var result =  reply_split[0];
-				var message = reply_split[1];  
-				
-				//clear form
-				if( result == 1 )
-				{
-					var inner = new Authentication( auth_id ); 
-					
-					switch( process.toLowerCase() )
-					{
-						case "add":
-							inner.add();
-							break;
-							
-						case "modify":
-							inner.modify();
-							break;
-							
-						case "delete":
-							inner.deleteRecord();
-							break;
-
-					}
-				}
-				else
-				{
-					showMessage( message, 0 );
-				}
-			}
-		});
-		
-	}//validateAddModForm()
 	
 	this.validatePasswordChange = function()
 	{

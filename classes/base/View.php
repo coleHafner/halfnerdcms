@@ -660,11 +660,11 @@ class View
 				}
 				
 				$html = '
-				<div class="padder header color_accent">
+				<div class="header color_accent">
 					' . $v->m_alias . '
 				</div>
 				
-				<div class="padder">
+				<div>
 					<table>
 					';
 					

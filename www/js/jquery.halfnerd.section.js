@@ -201,6 +201,8 @@ Ui functions
 	
 	this.hideManager = function( callback )
 	{
+		callback = ( typeof( callback ) == "undefined" ) ? function(){} : callback;
+		
 		$( "#section_manager" ).slideUp( function(){
 			callback();
 		});
@@ -224,6 +226,8 @@ Ui functions
 	
 	this.hideCanvasMod = function( section_id, callback )
 	{
+		callback = ( typeof( callback ) == "undefined" ) ? function(){} : callback;
+		
 		//show modify buttons
 		$( "#section_mod_confirm_" + section_id ).fadeOut( function(){
 		
@@ -250,6 +254,8 @@ Ui functions
 	
 	this.hideCanvasDelete = function( section_id, callback )
 	{
+		callback = ( typeof( callback ) == "undefined" ) ? function(){} : callback;
+		
 		//show delete buttons
 		$( "#section_delete_confirm_" + section_id ).fadeOut( function( ){
 		

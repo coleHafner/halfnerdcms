@@ -111,25 +111,6 @@ switch( $task )
 		
 		switch( $process )
 		{
-			case "validate":
-				$form_result = $a->checkInput( $_POST, $a->m_common->m_db->fixBoolean( $_GET['from_add'] ) );
-				$result = ( !$form_result ) ? 1:0;
-				$message =   ( !$form_result ) ? "Crew member updated." : $form_result;
-				echo $result . "^" . $message;
-				break;
-				
-			case "add":
-				echo $a->add( $_POST );
-				break;
-				
-			case "modify":
-				echo $a->modify( $_POST, $a->m_common->m_db->fixBoolean( $_GET['from_add'] ) );
-				break;
-				
-			case "delete":
-				echo $a->delete( TRUE );
-				break;
-				
 			case "check_current_login":
 				echo ( $auth->validateCurrentLogin() ) ? 1 : 0;
 				break;
@@ -350,6 +331,33 @@ switch( $task )
 				);
 				
 				echo $view_html['html'];
+				break;
+		}
+		break;
+		
+	case "user":
+		
+		$a = new Authentication( $_GET['authentication_id'] );
+		
+		switch( $process )
+		{
+			case "validate":
+				$form_result = $a->checkInput( $_POST, $a->m_common->m_db->fixBoolean( $_GET['from_add'] ) );
+				$result = ( !$form_result ) ? 1:0;
+				$message =   ( !$form_result ) ? "Crew member updated." : $form_result;
+				echo $result . "^" . $message;
+				break;
+				
+			case "add":
+				echo $a->add( $_POST );
+				break;
+				
+			case "modify":
+				echo $a->modify( $_POST, $a->m_common->m_db->fixBoolean( $_GET['from_add'] ) );
+				break;
+				
+			case "delete":
+				echo $a->delete( TRUE );
 				break;
 		}
 		break;

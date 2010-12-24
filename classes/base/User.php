@@ -1,17 +1,16 @@
 <?
 /**
- * A class to handle the site authentication.
+ * A class to handle the site User.
  * @since	20100911, Hafner
  */
 
 require_once( "base/Article.php" );
 require_once( "base/Common.php" );
-require_once( "base/Contact.php" );
 require_once( "base/FormHandler.php" );
 require_once( "base/Session.php" );
 require_once( "base/File.php" );
 
-class Authentication
+class User
 {
 	/**
 	 * Instance of the Common class.
@@ -26,16 +25,10 @@ class Authentication
 	protected $m_form;
 	
 	/**
-	 * PK of the Authentication Record.
+	 * PK of the User Record.
 	 * @var	int
 	 */
-	protected $m_authentication_id;
-	
-	/**
-	 * Id of the contact linked to this auth record.
-	 * @var	int
-	 */
-	protected $m_contact_id;
+	protected $m_user_id;
 	
 	/**
 	 * Nickname.
@@ -56,6 +49,42 @@ class Authentication
 	protected $m_password;
 	
 	/**
+	 * Id of the thumbnail file for this contact.
+	 * @var	int
+	 */
+	protected $m_thumb_id;
+	
+	/**
+	 * first name of the contact record.
+	 * @var	string
+	 */
+	protected $m_first_name;
+	
+	/**
+	 * last name of the contact record.
+	 * @var	string
+	 */
+	protected $m_last_name;
+	
+	/**
+	 * Description of the current contact.
+	 * @var	string
+	 */
+	protected $m_bio;
+	
+	/**
+	 * Array of permissions aliases for this auth user.
+	 * @var	array
+	 */
+	protected $m_permissions;
+	
+	/**
+	 * Use Gravatar flag.
+	 * @var	boolean
+	 */
+	protected $m_use_gravatar;
+	
+	/**
 	 * Active flag.
 	 * @var	boolean
 	 */
@@ -68,22 +97,16 @@ class Authentication
 	protected $m_linked_objects;
 	
 	/**
-	 * Array of permissions aliases for this auth user.
-	 * @var	array
-	 */
-	protected $m_permissions;
-	
-	/**
 	 * Constructs the object.
 	 * @since	20100618, hafner
 	 * @return	State
-	 * @param	int				$auth_id			id of the current user
+	 * @param	int				$user_id			id of the current user
 	 */
-	public function __construct( $auth_id, $objects = FALSE )
+	public function __construct( $user_id, $objects = FALSE )
 	{
 		$this->m_common = new Common();
 		$this->m_form = new FormHandler( 1 );
-		$this->m_authentication_id = ( is_numeric( $auth_id ) ) ? $auth_id : 0;
+		$this->m_user_id = ( is_numeric( $user_id ) ) ? $user_id : 0;
 		$this->setMemberVars( $objects );
 		
 	}//constructor
@@ -99,31 +122,32 @@ class Authentication
 		//get member vars
 		$sql = "
 		SELECT 
-			a.authentication_id,
-			a.username,
-			a.password,
-			a.active,
-			a.email,
-			c.contact_id
-			
+			user_id,
+			username,
+			email,
+			password,
+			first_name,
+			last_name,
+			bio,
+			use_gravatar,
+			active
 		FROM 
-			common_Authentication a
-			
-		LEFT JOIN common_Contacts c ON
-			c.authentication_id = a.authentication_id	
-			
+			common_Users			
 		WHERE 
-			a.authentication_id = " . $this->m_authentication_id;
+			user_id = " . $this->m_user_id;
 		
 		$result = $this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
 		$row = ( $this->m_common->m_db->numRows( $result ) > 0 ) ? $this->m_common->m_db->fetchAssoc( $result ) : array();
 		
 		//set member vars
-		$this->m_authentication_id = $row['authentication_id'];
-		$this->m_contact_id = $row['contact_id'];
+		$this->m_user_id = $row['user_id'];
 		$this->m_username = $row['username'];
 		$this->m_email = $row['email'];
 		$this->m_password = $row['password'];
+		$this->m_first_name = $row['first_name'];
+		$this->m_last_name = $row['last_name'];
+		$this->m_bio = $this->m_common->m_db->escapeString( $row['bio'] );
+		$this->m_use_gravatar = $this->m_common->m_db->fixBoolean( $row['use_gravatar'] );
 		$this->m_active = $this->m_common->m_db->fixBoolean( $row['active'] );
 		$this->m_permissions = $this->permissionsGet();
 		$this->m_linked_objects = ( $objects ) ? $this->setLinkedObjects() : array(); 
@@ -141,11 +165,15 @@ class Authentication
 	public function getDataArray( $fix_clob = TRUE ) 
 	{
 		return array(
-			'authentication_id' => $this->m_authentication_id,
+			'user_id' => $this->m_user_id,
 			'contact_id' => $this->m_contact_id,
 			'username' => $this->m_username,
 			'email' => $this->m_email,
 			'password' => $this->m_password,
+			'first_name' => $this->m_first_name,
+			'last_name' => $this->m_last_name,
+			'bio' => $this->m_bio,
+			'use_gravatar' => $this->m_use_gravatar,
 			'active' => $this->m_active
 		);
 		
@@ -177,9 +205,9 @@ class Authentication
 		if( !$this->m_form->m_error )
 		{
 			//only set upload_timestamp on add
-			$input['authentication_id'] = $this->m_common->m_db->insertBlank( 'common_Authentication', 'authentication_id' );
-			$this->m_authentication_id = (int) $input['authentication_id'];
-			$return = $this->m_authentication_id;
+			$input['user_id'] = $this->m_common->m_db->insertBlank( 'common_Users', 'user_id' );
+			$this->m_user_id = (int) $input['user_id'];
+			$return = $this->m_user_id;
 			$this->modify( $input, TRUE );
 		}
 		else
@@ -209,13 +237,13 @@ class Authentication
 		if( !$this->m_form->m_error )
 		{
 			$sql = "
-			UPDATE common_Authentication
+			UPDATE common_Users
 			SET username = '" . $input['username'] . "',
 				password = '" .  $this->passwordEncrypt( $this->passwordSalt(), $input['password'] ) . "'
-			WHERE authentication_id = " . $this->m_authentication_id;
+			WHERE user_id = " . $this->m_user_id;
 			
 			$this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
-			$return = $this->m_authentication_id;
+			$return = $this->m_user_id;
 			
 			//update permissions
 			$this->updatePermissions( $input, $from_add );
@@ -239,7 +267,7 @@ class Authentication
 	public function delete( $deactivate = TRUE )
 	{
 		//setup vars
-		$articles = Article::getArticlesForAuth( $this->m_authentication_id );
+		$articles = Article::getArticlesForAuth( $this->m_user_id );
 		
 		if( $deactivate )
 		{
@@ -250,17 +278,17 @@ class Authentication
 			}
 			
 			$sql = "
-			UPDATE common_Authentication
+			UPDATE common_Users
 			SET active = 0
-			WHERE authentication_id = " . $this->m_authentication_id;
+			WHERE user_id = " . $this->m_user_id;
 			$this->m_common->m_db->query( $sql, __FILE__, __LINE__ );	
 		}
 		else
 		{
 			$sql = "
 			DELETE
-			FROM common_AuthenticationToPermission
-			WHERE authentication_id = " . $this->m_authentication_id;
+			FROM common_UsersToPermission
+			WHERE user_id = " . $this->m_user_id;
 			$this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
 			
 			foreach( $articles as $i => $article_id )
@@ -271,8 +299,8 @@ class Authentication
 			
 			$sql = "
 			DELETE
-			FROM common_Authentication
-			WHERE authentication_id = " . $this->m_authentication_id;
+			FROM common_Users
+			WHERE user_id = " . $this->m_user_id;
 			$this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
 		}
 		
@@ -287,8 +315,8 @@ class Authentication
 			//delete all permissions for this user
 			$sql = "
 			DELETE
-			FROM common_AuthenticationToPermission
-			WHERE authentication_id = " . $this->m_authentication_id;
+			FROM common_UsersToPermission
+			WHERE user_id = " . $this->m_user_id;
 			$this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
 		}
 			
@@ -298,8 +326,8 @@ class Authentication
 			foreach( $input['permissions'] as $i => $alias )
 			{
 				$sql = "
-				INSERT INTO common_AuthenticationToPermission( authentication_id, permission_id )
-				VALUES( " . $this->m_authentication_id . ", ( SELECT permission_id FROM common_Permissions WHERE LOWER( alias ) = '" . $alias . "'  ) )
+				INSERT INTO common_UsersToPermission( user_id, permission_id )
+				VALUES( " . $this->m_user_id . ", ( SELECT permission_id FROM common_Permissions WHERE LOWER( alias ) = '" . $alias . "'  ) )
 				";
 				
 				$this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
@@ -391,8 +419,8 @@ class Authentication
 			if( !$this->m_form->m_error )
 			{
 				$dup_check = array( 
-					'table_name' => "common_Authentication",
-					'pk_name' => "authentication_id",
+					'table_name' => "common_Users",
+					'pk_name' => "user_id",
 					'check_values' => array( 'email' => strtolower( $input['email'] ) )
 				);
 				
@@ -421,8 +449,8 @@ class Authentication
 	public function permissionsAdd( $permission_id )
 	{
 		$sql = "
-		INSERT INTO common_AuthenticationToPermission( authentication_id, permission_id )
-		VALUES( " . $this->m_authentication_id . ", " . $permission_id . " )";
+		INSERT INTO common_UsersToPermission( user_id, permission_id )
+		VALUES( " . $this->m_user_id . ", " . $permission_id . " )";
 		
 		$this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
 
@@ -467,9 +495,9 @@ class Authentication
 							
 							<div class="center">
 								' . Common::getHtml( 'get-button', array(
-									'pk_name' => "auth_id",
+									'pk_name' => "user_id",
 									'pk_value' => "0",
-									'id' => "authentication",
+									'id' => "User",
 									'process' => "login",
 									'button_value' => "Login",
 									'extra_style' => 'style="width:70px;"'
@@ -506,7 +534,7 @@ class Authentication
 						&nbsp;|&nbsp
 						<a href="' . $common->makeLink( array( 'v' => "admin", 'sub' => 'manage-account' ) ) . '">My Account</a>
 						&nbsp;|&nbsp
-						<a href="#" id="authentication" process="kill_login">Logout</a>
+						<a href="#" id="User" process="kill_login">Logout</a>
 					</div>
 				</div>
 				';
@@ -519,7 +547,7 @@ class Authentication
 				$con = $vars['active_contact'];
 				$adm_checked = ( is_array( $auth->m_permissions ) && in_array( 'ADM', $auth->m_permissions ) ) ? 'checked="checked"' : "";
 				$mov_checked = ( is_array( $auth->m_permissions ) && in_array( 'MOV', $auth->m_permissions ) ) ? 'checked="checked"' : "";
-				$process = ( $auth->m_authentication_id > 0 ) ? "modify" : "add";
+				$process = ( $auth->m_user_id > 0 ) ? "modify" : "add";
 				
 				$body = '
 				<div class="cc_main_content" style="text-align:center;height:230px;">
@@ -575,7 +603,7 @@ class Authentication
 					</form>
 					
 					<div>
-						<img src="/images/btn_save.gif" id="authentication" process="' . $process . '" contact_id="' . $con->m_contact_id . '" authentication_id="' . $auth->m_authentication_id . '"/>
+						<img src="/images/btn_save.gif" id="User" process="' . $process . '" contact_id="' . $con->m_contact_id . '" user_id="' . $auth->m_user_id . '"/>
 					</div>							
 					 	
 				</div>
@@ -626,7 +654,7 @@ class Authentication
 				</form>
 				
 				<div class="center">
-					<a href="#" id="authentication" process="change_password" class="no_hover">
+					<a href="#" id="User" process="change_password" class="no_hover">
 						<div class="button rounded_corners padder">
 							Save
 						</div>
@@ -680,7 +708,7 @@ class Authentication
 								'href' => $common->makeLink( array( 
 									'v' => "admin",
 									'sub' => 'manage-user',
-									'id1' => $u->m_authentication_id ) ) ) 
+									'id1' => $u->m_user_id ) ) ) 
 							) . '
 						</div>
 						
@@ -700,7 +728,7 @@ class Authentication
 			
 				$user = $vars['active_record'];
 				
-				if( $u->m_authentication_id > 0 )
+				if( $u->m_user_id > 0 )
 				{
 					$process = "modify";
 					$title = $u->m_username;
@@ -709,7 +737,7 @@ class Authentication
 				}
 				else
 				{
-					$auth_id = Authentication::getAuthId();
+					$user_id = User::getAuthId();
 					$process = "add";
 					$title = "User Nickname";
 					$body = "User Email";
@@ -725,10 +753,10 @@ class Authentication
 				<div class="padder_10">
 					' . Common::getHtml( "title-bar", array( 'title' => ucWords( $process ) . " User", 'classes' => '' ) ) . '
 					
-					<div id="result_' . $process . '_' . $u->m_authentication_id . '" class="result">
+					<div id="result_' . $process . '_' . $u->m_user_id . '" class="result">
 					</div>
 	
-					<form id="article_form_' . $u->m_authentication_id . '">
+					<form id="article_form_' . $u->m_user_id . '">
 						
 						<div class="padder_10">
 							<input type="text" name="title" class="text_input input_clear text_extra_long" value="' . $title  . '" clear_if="Article Title">
@@ -775,7 +803,7 @@ class Authentication
 							) 
 						) . '
 													
-						<input type="hidden" name="authentication_id" value="' . $auth_id . '"/>
+						<input type="hidden" name="user_id" value="' . $user_id . '"/>
 						<input type="hidden" name="from_add" value="' . $from_add . '"/>
 						
 					</form>
@@ -813,8 +841,8 @@ class Authentication
 			strlen( trim( $password ) ) > 0 )
 		{
 			$sql = "
-			SELECT authentication_id, password
-			FROM common_Authentication
+			SELECT user_id, password
+			FROM common_Users
 			WHERE ( LOWER( username ) = '" . strtolower( $username ) . "' OR LOWER( email ) = '" . strtolower( $username ) . "' ) AND
 			active = 1";
 			
@@ -905,8 +933,8 @@ class Authentication
 			//if we have a current login, set the auth object.
 			if( $this->validateCurrentLogin() )
 			{
-				$auth_id = self::getAuthId();
-				$controller->setAuth( $auth_id );
+				$user_id = self::getAuthId();
+				$controller->setAuth( $user_id );
 			}
 
 			$controller->setContent();
@@ -952,17 +980,17 @@ class Authentication
 	public function permissionsGet()
 	{
 		$return = FALSE;
-		//$auth_id = ( ( $this->m_authentication_id ) > 0 ) ? $this->m_authentication_id : 0;
+		//$user_id = ( ( $this->m_user_id ) > 0 ) ? $this->m_user_id : 0;
 		
 		$sql = "
 		SELECT 
 			p.alias AS alias
 		FROM 
-			common_AuthenticationToPermission a2p
+			common_UsersToPermission a2p
 		JOIN common_Permissions p ON
 			p.permission_id = a2p.permission_id  
 		WHERE 
-			a2p.authentication_id = " . $this->m_authentication_id;
+			a2p.user_id = " . $this->m_user_id;
 		
 		$result = $this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
 		
@@ -981,7 +1009,7 @@ class Authentication
 	
 	/**
 	 * Validates the current session.
-	 * Returns authentication_id ( int ) if session is valid, FALSE otherwise.
+	 * Returns user_id ( int ) if session is valid, FALSE otherwise.
 	 * @since	20100922, Hafner
 	 * @return 	mixed
 	 */
@@ -992,7 +1020,7 @@ class Authentication
 		
 		//get auth id
 		$sql = "
-		SELECT authentication_id
+		SELECT user_id
 		FROM common_Sessions
 		WHERE session_id = '" . $_SESSION['sid'] . "' AND
 		end_timestamp IS NULL";
@@ -1059,9 +1087,9 @@ class Authentication
 	public function passwordUpdate( $new_pass )
 	{
 		$sql = "
-		UPDATE common_Authentication 
+		UPDATE common_Users 
 		SET password = '" . $this->passwordEncrypt( $this->passwordSalt(), $new_pass ) . "'
-		WHERE authentication_id = " . $this->m_authentication_id;
+		WHERE user_id = " . $this->m_user_id;
 		
 		$this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
 		
@@ -1094,9 +1122,9 @@ class Authentication
 		$common = new Common();
 		
 		$sql = "
-		SELECT authentication_id
-		FROM common_Authentication
-		WHERE authentication_id > 0 AND
+		SELECT user_id
+		FROM common_Users
+		WHERE user_id > 0 AND
 		" . $field . " = " . $value . "
 		ORDER BY username ASC";
 		
@@ -1104,7 +1132,7 @@ class Authentication
 		
 		while( $row = $common->m_db->fetchRow( $result ) )
 		{
-			$return[$i] = new Authentication( $row[0], TRUE );
+			$return[$i] = new User( $row[0], TRUE );
 			$i++;
 		}
 		
