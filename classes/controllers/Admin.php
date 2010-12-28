@@ -6,6 +6,7 @@
 
 
 require_once( "base/View.php" );
+require_once( "base/User.php" );
 require_once( "base/Article.php" );
 require_once( "base/Section.php" );
 require_once( "base/Controller.php" );
@@ -447,11 +448,17 @@ class Admin extends Controller{
 				 </div>
 				';
 				
-				$users = Authentication::getUsers( "active", "1" );
+				$users = User::getUsers( "active", "1" );
 				$user_list = $this->getHtml( "get-user-list", array( 'records' => $users ) );
+				$add_form = User::getHtml( "get-edit-form", array( 'active_record' => new User( 0 ) ) );
 				
 				$html = '
 				<div class="item_list_container" id="user_list_container">
+					
+					<div id="user_canvas_add" class="item_container padder_10 rounded_corners bg_color_light_tan" style="display:none;" hover_enabled="0">
+						' . $add_form['html'] . '
+					</div>
+	
 					<div class="item_container rounded_corners bg_color_light_tan" hover_enabled="0">
 						' . $user_list['html'] . '
 					</div>
@@ -464,18 +471,11 @@ class Admin extends Controller{
 			case "get-user-list":
 			
 				$users = $vars['records'];
-				$add_form = View::getHtml( "get-edit-form", array( 'active_record' => new Authentication( 0 ) ) );
 				$hover_enabled = ( array_key_exists( "hover_enabled", $vars ) && $vars['hover_enabled'] == TRUE ) ? "1" : "0";
 				
 				$items_per_row = 2;
 				$num_items = count( $users );
 				$num_rows = ceil( $num_items / $items_per_row );
-				
-				$html = '
-				<div id="view_canvas_add" class="item_container padder_10 rounded_corners bg_color_light_tan" style="display:none;" hover_enabled="0">
-					' . $add_form['html'] . '
-				</div>
-				';
 				
 				$html .= '
 				<table class="user_grid">
@@ -507,11 +507,11 @@ class Admin extends Controller{
 							}
 							
 							$item = $users[$key];
-							$view_form = Authentication::getHtml( "get-view-form", array( 'active_record' => $item ) );
+							$view_form = User::getHtml( "get-view-form", array( 'active_record' => $item ) );
 							
 							$html .= '
 						<td class="bg_color_tan border_dark_grey">
-							<div id="user_info_' . $item->m_authentication_id . '">						
+							<div id="user_info_' . $item->m_user_id . '">						
 								' . $view_form['html'] . '
 							</div>
 						</td>
@@ -529,8 +529,8 @@ class Admin extends Controller{
 				{
 					$html .= '
 					<tr>
-						<td class="center">
-							There are 0 photos in this album. Check back later...
+						<td class="center" colspan="2">
+							There are 0 users in this album. Check back later...
 						</td>
 					</tr>
 					';

@@ -414,8 +414,11 @@ class Common {
 				break;
 				
 			case "get-form-buttons":
+			
+				$table_style = ( array_key_exists( "table_style", $vars ) ) ? $vars['table_style'] : 'style="postion:relative;margin:auto;"';
+			
 				$return = '
-				 <table style="postion:relative;margin:auto;">
+				 <table ' . $table_style . '>
 					<tr>
 						<td class="center">
 							' . self::getHtml( "get-button", $vars['left'] ) . '

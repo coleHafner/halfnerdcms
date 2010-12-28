@@ -7,12 +7,11 @@ session_start();
 require_once( "base/Article.php" );
 require_once( "base/Authentication.php" );
 require_once( "base/Common.php" );
-require_once( "base/EnvVar.php" );
 require_once( "base/Session.php" );
 require_once( "controllers/Admin.php" );
 
 $common = new Common();
-$auth = new Authentication( Authentication::getAuthId() );
+$auth = new Authentication( Authentication::getUserId() );
 
 $task = strtolower( trim( $_GET['task'] ) );
 $process = strtolower( trim( $_GET['process'] ) );
@@ -25,37 +24,8 @@ switch( $task )
 	
 		switch( $process )
 		{
-			case "toggle_alert":
-				$_SESSION['alert'] = $_POST['alert_status'];
-				break;
-				
-			case "kill":
-				//set end timestamp for current session
-				$s = new Session( $_SESSION['sid'], TRUE );
-				$s->delete( TRUE );
-				
-				//kill session
-				session_destroy();
-				break;
-				
 			case "store_login":
-				//get auth id ( it has already been validated @ validate_login, so no need for the password )
-				$sql = "
-				SELECT authentication_id
-				FROM common_Authentication
-				WHERE ( LOWER( username ) = '" . $_POST['username'] . "' 
-				OR LOWER( email ) = '" . strtolower( $_POST['username'] ) . "' ) AND
-				active = 1";
-				
-				$result = $common->m_db->query( $sql, __FILE__, __LINE__ );
-				$row = $common->m_db->fetchAssoc( $result );
-				$auth_id = $row['authentication_id'];
-				
-				$input = array( 'authentication_id' => $auth_id );
-				$s = new Session( 0 );
-				$sid = $s->add( $input );
-				$s->setMemberVars(FALSE );
-				$_SESSION['sid'] = $sid;
+				$_SESSION['sid'] = Session::createSession( $_POST['username'] );
 				break;
 				
 			case "validate_login":

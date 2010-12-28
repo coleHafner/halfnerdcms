@@ -6,7 +6,7 @@
 
 require_once( "base/Common.php" );
 require_once( "base/View.php" );
-require_once( "base/Authentication.php" );
+require_once( "base/User.php" );
 
 abstract class Controller{
 	
@@ -40,10 +40,10 @@ abstract class Controller{
 	protected $m_linked_objects;
 	
 	/**
-	 * Instance of the authentication user currently logged in.
+	 * Instance of the User object ( current login ).
 	 * @var	int
 	 */
-	protected $m_auth;
+	protected $m_user;
 	
 	/**
 	 * A function to set the member vars.
@@ -57,7 +57,7 @@ abstract class Controller{
 		$this->m_controller_vars = ( is_array( $controller_vars ) ) ? $controller_vars : array();
 		$this->m_view_id = $this->setViewId();
 		$this->m_linked_objects = ( $objects ) ? $this->setLinkedObjects() : array();
-		$this->m_auth = FALSE;
+		$this->m_user = FALSE;
 		
 		return TRUE;
 		
@@ -72,7 +72,7 @@ abstract class Controller{
 	public function setLinkedObjects()
 	{
 		return array(
-			'view' => new View( $this->m_view_id, TRUE )
+			'view' => new View( $this->m_view_id, FALSE )
 		);
 	}//setLinkedObjects()
 	
@@ -89,7 +89,7 @@ abstract class Controller{
 		$sql = "
 		SELECT view_id
 		FROM common_Views
-		WHERE LOWER( controller_name ) = '" . strtolower( $v ) . "'";
+		WHERE LOWER( controller_name ) = '" . strtolower( trim ( $v ) ) . "'";
 		
 		$result = $this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
 		$row = $this->m_common->m_db->fetchRow( $result );
@@ -98,18 +98,18 @@ abstract class Controller{
 		
 	}//setViewId()
 	
-	public function setAuth( $auth_id )
+	public function setUser( $user_id )
 	{
-		$this->m_auth = new Authentication( $auth_id, TRUE );
+		$this->m_user = new User( $user_id, TRUE );
 		
-	}//setAuth()
+	}//setUser()
 	
 	public function hasValidAuthLogin()
 	{
 		$return = FALSE;
 		
-		if( is_object( $this->m_auth ) &&
-			$this->m_auth->m_authentication_id > 0 )
+		if( is_object( $this->m_user ) &&
+			$this->m_user->m_user_id > 0 )
 		{
 			$return = TRUE;
 		}
@@ -118,11 +118,11 @@ abstract class Controller{
 		
 	}//hasValidAuthLogin()
 	
-	public function getLoginString()
+	public function getActiveUser()
 	{
-		return Authentication::getHtml( "login-string", array( 'active_record' => $this->m_auth ) );
-	}//getHtml();
-	
+		return $this->m_user;
+	}//getActiveUser()
+		
 	/**
 	 * Sets the content for the current controller
 	 * Always returns TRUE

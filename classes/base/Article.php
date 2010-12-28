@@ -33,7 +33,7 @@ class Article
 	 * Id of the person who wrote this article.
 	 * @var	int
 	 */
-	protected $m_authentication_id;
+	protected $m_user_id;
 	
 	/**
 	 * Id of the section to which this article belongs.
@@ -128,7 +128,7 @@ class Article
 		$sql = "
 		SELECT 
 			article_id,
-			authentication_id,
+			user_id,
 			section_id,
 			view_id,
 			title,
@@ -147,7 +147,7 @@ class Article
 		
 		//set member vars
 		$this->m_article_id = $row['article_id'];
-		$this->m_authentication_id = $row['authentication_id'];
+		$this->m_user_id = $row['user_id'];
 		$this->m_section_id = $row['section_id'];
 		$this->m_view_id = $row['view_id'];
 		$this->m_file_ids = $this->getFiles();
@@ -174,7 +174,7 @@ class Article
 	{
 		return array(
 			'article_id' => $this->m_article_id,
-			'authentication_id' => $this->m_authentication_id,
+			'user_id' => $this->m_user_id,
 			'section_id' => $this->m_section_id,
 			'view_id' => $this->m_view_id,
 			'title' => $this->m_title,
@@ -215,7 +215,7 @@ class Article
 			//only set upload_timestamp on add
 			$req_fields = array( 
 				'post_timestamp' => strtotime( date( "Y-m-d h:i:s" ) ), 
-				'authentication_id' => 0, 
+				'user_id' => 0, 
 				'section_id' => 0, 
 				'view_id' => 0
 			);
@@ -259,7 +259,7 @@ class Article
 				title = '" . $this->m_common->m_db->escapeString( $input['title'] ) . "',
 				body = '" .  $this->m_common->m_db->escapeString( $input['body'] ) . "',
 				tag_string = '" . $this->m_common->m_db->escapeString( $input['tag_string'] ) . "',
-				authentication_id = " . $input['authentication_id'] . ",
+				user_id = " . $input['user_id'] . ",
 				section_id = " . $input['section_id'] . ",
 				view_id = " . $input['view_id'] . ",
 				priority = " . $this->getAutoPriority( $input['section_id'], $input['view_id'] ) . "
@@ -361,9 +361,9 @@ class Article
 		//check existing auth_id
 		if( !$this->m_form->m_error )
 		{
-			if( !array_key_exists( 'authentication_id', $input ) || 
-				!is_numeric( $input['authentication_id'] ) ||
-				$input['authentication_id'] == 0 )
+			if( !array_key_exists( 'user_id', $input ) || 
+				!is_numeric( $input['user_id'] ) ||
+				$input['user_id'] == 0 )
 			{
 				$this->m_form->m_error = "You must provide an authentication id.";
 			}
@@ -373,8 +373,8 @@ class Article
 		if( !$this->m_form->m_error )
 		{
 			$vars = array( 
-				'table_name' => "common_Authentication", 
-				'check_values' => array( 'authentication_id' => $input['authentication_id'] ) 
+				'table_name' => "common_Users", 
+				'check_values' => array( 'user_id' => $input['user_id'] ) 
 			);
 			
 			$error = $this->m_form->checkKeyExists( TRUE, $vars );
@@ -446,7 +446,7 @@ class Article
 	public function setLinkedObjects()
 	{
 		return array( 
-			'authentication' => new Authentication( $this->m_authentication_id ),
+			'authentication' => new Authentication( $this->m_user_id ),
 			'section' => new Section( $this->m_section_id ),
 			'view' => new View( $this->m_view_id )
 		);
@@ -712,9 +712,9 @@ class Article
 					'title_field' => "title" ) 
 				);
 				
-				$poster = $a->m_common->m_db->getTitleFromId( $a->m_authentication_id, array(  
-					'table'	=> "common_Authentication",
-					'pk_name' => "authentication_id",
+				$poster = $a->m_common->m_db->getTitleFromId( $a->m_user_id, array(  
+					'table'	=> "common_Users",
+					'pk_name' => "user_id",
 					'title_field' => "username" ) 
 				);
 				
@@ -743,7 +743,7 @@ class Article
 				
 				if( $a->m_article_id > 0 )
 				{
-					$auth_id = $a->m_authentication_id;
+					$user_id = $a->m_user_id;
 					$title = $a->m_title;
 					$body = $a->m_body;
 					$tag_string = $a->m_tag_string;
@@ -752,7 +752,7 @@ class Article
 				}
 				else
 				{
-					$auth_id = Authentication::getAuthId();
+					$user_id = Authentication::getUserId();
 					$process = "add";
 					$title = "";
 					$body = "";
@@ -840,7 +840,7 @@ class Article
 							) 
 						) . '
 													
-						<input type="hidden" name="authentication_id" value="' . $auth_id . '"/>
+						<input type="hidden" name="user_id" value="' . $user_id . '"/>
 						<input type="hidden" name="from_add" value="' . $from_add . '"/>
 						
 					</form>

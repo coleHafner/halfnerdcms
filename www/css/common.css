@@ -113,6 +113,11 @@ Alignment and spacing
 	padding:10px;
 }
 
+.padder_10_left {
+	padding-left:10px;
+}
+
+
 .padder_15 {
 	padding:15px;
 }

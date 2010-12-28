@@ -4,11 +4,12 @@
  * @since	20100911, Hafner
  */
 
-require_once( "base/Article.php" );
-require_once( "base/Common.php" );
-require_once( "base/FormHandler.php" );
-require_once( "base/Session.php" );
 require_once( "base/File.php" );
+require_once( "base/Common.php" );
+require_once( "base/Article.php" );
+require_once( "base/Session.php" );
+require_once( "base/UserType.php" );
+require_once( "base/FormHandler.php" );
 
 class User
 {
@@ -338,29 +339,6 @@ class User
 		
 	}//permissionsUpdate()
 	
-	public function checkLoginForm( $input )
-	{
-		//check missing username
-		if( !array_key_exists( "username", $input ) || 
-			strlen( trim( $input['username'] ) ) == 0 )
-		{
-			$this->m_form->m_error = "You must choose a username.";
-		}
-		
-		//check missing password
-		if( !$this->m_form->m_error )
-		{
-			if( !array_key_exists( "password", $input ) || 
-				strlen( trim( $input['password'] ) ) == 0 )
-			{
-				$this->m_form->m_error = "You must choose a password.";
-			}
-		}
-		
-		return $this->m_form->m_error;
-		
-	}//checkLoginForm()
-	
 	/**
 	 * Validates the form input for creating/modifying a new File record.
 	 * Returns FALSE on success, error message string otherwise.
@@ -392,7 +370,8 @@ class User
 		//check missing password
 		if( !$this->m_form->m_error )
 		{
-			if( !array_key_exists( "password", $input ) || strlen( trim( $input['password'] ) ) == 0 )
+			if( !array_key_exists( "password", $input ) || 
+				strlen( trim( $input['password'] ) ) == 0 )
 			{
 				$this->m_form->m_error = "You must choose a password.";
 			}
@@ -437,7 +416,8 @@ class User
 	
 	public function setLinkedObjects()
 	{
-		return array( 'contact' => new Contact( $this->m_contact_id, FALSE ) );
+		return array();
+		
 	}//setLinkedObjects()
 	
 	/**
@@ -471,151 +451,7 @@ class User
 		
 		switch( strtolower( $cmd ) )
 		{
-			case "show-login-form":
-				
-				$divs = $common->getHtml( "full-div", array() );
-				
-				$return = array( 'body' => '
-					<div class="padder rounded_corners login_form_container bg_color_light_tan border_dark_grey">
-						<form id="auth_login_form">
-							
-							<div class="center header">
-								Login to manage the site\'s content.
-							</div>
-							
-							<div id="result_login_attempt" class="result"></div>
-							
-							<div class="center bottom_spacer">
-								<input type="text" class="input text_input text_long font_normal input_clear" name="username" value="Username or Email" clear_if="Username or Email" />
-							</div>
-							
-							<div class="center bottom_spacer">
-								<input type="password" class="input text_input text_long font_normal input_clear" name="password" value="passwd" clear_if="passwd" id="auto_login" />
-							</div>
-							
-							<div class="center">
-								' . Common::getHtml( 'get-button', array(
-									'pk_name' => "user_id",
-									'pk_value' => "0",
-									'id' => "User",
-									'process' => "login",
-									'button_value' => "Login",
-									'extra_style' => 'style="width:70px;"'
-									
-								) ) . '
-							</div>
-							
-						</form>
-					</div>
-					'
-				);
-				break;
-				
-			case "get-access-restricted-message":
-				$return = array(
-					'body' =>
-						'<div style="position:relative;margin-top:50px;text-align:center;color:#FF0000;font-weight:bold;line-height:1.8em;">
-							You do not have access to this section <br/>
-							Please contact your administrator.
-						</div>
-						'
-				);
-				break;
-				
-			case "login-string":
-				
-				$admin_link = $common->makeLink( array( 'v' => 'admin' ) );
-				$auth = $vars['active_record'];
-				
-				$body = '
-				<div class="login_string_container bg_color_white font_small">
-					<div>
-						Howdy, ' . ucwords( $auth->m_username ) . '
-						&nbsp;|&nbsp
-						<a href="' . $common->makeLink( array( 'v' => "admin", 'sub' => 'manage-account' ) ) . '">My Account</a>
-						&nbsp;|&nbsp
-						<a href="#" id="User" process="kill_login">Logout</a>
-					</div>
-				</div>
-				';
-				$return = array( 'body' => $body );
-				break;
-				
-			case "auth-add-mod-form":
-				
-				$auth = $vars['active_auth'];
-				$con = $vars['active_contact'];
-				$adm_checked = ( is_array( $auth->m_permissions ) && in_array( 'ADM', $auth->m_permissions ) ) ? 'checked="checked"' : "";
-				$mov_checked = ( is_array( $auth->m_permissions ) && in_array( 'MOV', $auth->m_permissions ) ) ? 'checked="checked"' : "";
-				$process = ( $auth->m_user_id > 0 ) ? "modify" : "add";
-				
-				$body = '
-				<div class="cc_main_content" style="text-align:center;height:230px;">
-					
-					<div class="result" id="result">
-					</div>
-				
-					<div style="font-weight:bold;margin-bottom:10px;">
-						To allow this user to login and manage the site\'s content, you must create a login.
-					</div>
-					
-					<form id="auth_add_mod_form">
-						<table cellspacing="10" style="margin:auto;">
-							
-							<tr>
-								<td style="color:#FF0000;text-align:right;">
-									Email Address:
-								</td>
-								<td>
-									<input type="text" class="text_input" name="username" value="' . $auth->m_username . '" style="width:225px;" clear_if=""/>
-								</td>
-							</tr>
-							
-							<tr>
-								<td style="color:#FF0000;text-align:right;">
-									Password:
-								</td>
-								<td>
-									<input type="password" class="text_input" name="password" value="' . $auth->m_password . '" style="width:225px;" clear_if=""/>
-								</td>
-							</tr>
-							
-							<tr>
-								<td style="text-align:right;">
-									<input type="checkbox" name="permissions[]" value="adm" ' . $adm_checked . '/>
-								</td>
-								<td style="color:#FF0000;text-align:left;">
-									User can manage login permissions.
-								</td>
-							</tr>
-							
-							<tr>
-								<td style="text-align:right;">
-									<input type="checkbox" name="permissions[]" value="mov" ' . $mov_checked . '/>
-								</td>
-								<td style="color:#FF0000;text-align:left;">
-									User can add new movies
-								</td>
-							</tr>
-							
-						</table>
-						
-					</form>
-					
-					<div>
-						<img src="/images/btn_save.gif" id="User" process="' . $process . '" contact_id="' . $con->m_contact_id . '" user_id="' . $auth->m_user_id . '"/>
-					</div>							
-					 	
-				</div>
-				';
-				
-				$return = array(
-					'title' => "Add User Login",
-					'body' => $body
-				);
-				break;
-				
-			case "show-password-form":
+			case "get-password-form":
 				$body = '
 				<div class="center header">
 					Change Password
@@ -668,12 +504,11 @@ class User
 			case "get-view-form":
 			
 				$u = $vars['active_record'];
-				$c = $u->m_linked_objects['contact'];
-				$ct = new ContactType( $c->m_contact_type_id );
+				$ct = new UserType( $c->m_contact_type_id );
 				$contact_type_title = ( strlen( $ct->m_title ) > 0 ) ? $ct->m_title : "User";
 				
 				//get user image
-				if( !$c->m_use_gravatar )
+				if( !$u->m_use_gravatar )
 				{
 					$thumb_id = ( $c->m_thumb_id > 0 ) ? $c->m_thumb_id : $common->m_db->getIdFromTitle( "default.jpg", array( 
 						'pk_name' => "file_id", 
@@ -692,128 +527,193 @@ class User
 				$html = '
 				<div class="padder">
 					
-					<div>
-						<div class="thumb_holder bg_color_white user_holder padder border_dark_grey" >
-							<img src="' . $img_src . '" />
+					<div class="thumb_holder bg_color_white user_holder padder border_dark_grey">
+						<img src="' . $img_src . '" />
+					</div>
+					
+					<div class="user_holder" style="width:50%;">
+						
+						<div class="header color_accent user_name">
+							' . ucwords( $u->m_username ) . '
 						</div>
 						
-						<div class="user_holder">
-							<div class="header color_accent user_name">
-								' . ucwords( $u->m_username ) . '
-							</div>
+						<div>
 							' . $contact_type_title . '
-							' . Common::getHtml( 'get-button', array(
-								'button_value' => "Modify",
-								'extra_style' => 'style="width:81px;margin-top:15px;"',
-								'href' => $common->makeLink( array( 
-									'v' => "admin",
-									'sub' => 'manage-user',
-									'id1' => $u->m_user_id ) ) ) 
+						</div>
+						
+						<div class="padder_10_top">
+							' . Common::getHtml( "get-form-buttons", array( 
+							
+								'left' => array(
+									'button_value' => "Modify",
+									'extra_style' => 'style="width:41px;"',
+									'href' => $common->makeLink( array( 
+										'v' => "admin", 
+										'sub' => "manage-users", 
+										'id1' => $u->m_user_id ) 
+									) 
+								),
+									
+								'right' => array(
+									'pk_name' => "user_id",
+									'pk_value' => $u->m_user_id,
+									'process' => "show_delete",
+									'id' => "user",
+									'button_value' => "Delete",
+									'extra_style' => 'style="width:41px;"' ),
+									
+								'table_style' => 'style="position:relative;width:150px;left:-3px;"' 
+								) 
 							) . '
 						</div>
-						
-						<div class="clear"></div>
 					</div>
+						
+					<div class="clear"></div>
 				</div>
 				';
 				
 				$return = array( 'html' => $html );
 				break;
 				
-			case "get-add-form":
-				
-				break;
-								
 			case "get-edit-form":
 			
-				$user = $vars['active_record'];
+				$u = $vars['active_record'];
 				
 				if( $u->m_user_id > 0 )
 				{
 					$process = "modify";
-					$title = $u->m_username;
+					$username = $u->m_username;
 					$email = $u->m_email;
-					$from_add = "0";
+					$first_name = $u->m_first_name;
+					$last_name = $u->m_last_name;
+					$bio = $u->m_bio;
 				}
 				else
 				{
-					$user_id = User::getAuthId();
 					$process = "add";
-					$title = "User Nickname";
-					$body = "User Email";
-					$from_add = "1";
+					$username = "";
+					$email = "";
+					$first_name = "";
+					$last_name = "";
+					$bio = "";
 				}
 				
 				$html = '
-				<input type="text" name="username" class="" clear_if="" />
-				<input type="text" name="email" class="" clear_if="" />
-				<input type="password" name="password" class="" clear_if="" />
-				<input type="password" name="password_copy" class="" clear_if="" />
-
-				<div class="padder_10">
-					' . Common::getHtml( "title-bar", array( 'title' => ucWords( $process ) . " User", 'classes' => '' ) ) . '
+				<form id="user_add_form">
+				
+					<div class="padder center header color_accent">
+						' . ucfirst( $process ) . ' User
+					</div>
 					
-					<div id="result_' . $process . '_' . $u->m_user_id . '" class="result">
+					<div class="padder center result" id="result_add_0">
+					</div>
+					
+					<div class="header">
+						Login Info
+					</div>
+					
+					<div class="padder_10_left">
+						<div style="position:relative;float:left;width:48%;">
+							<div class="padder">
+								<span class="title_span">
+									Username:
+								</span>
+								<input name="username" type="text" class="text_input text_extra_long" value="' . $username . '" />
+							</div>
+													
+							<div class="padder">
+								<span class="title_span">
+									Email:
+								</span>
+								<input name="email" type="text" class="text_input text_extra_long" value="' . $email . '" />
+							</div>
+						</div>
+						
+						<div style="position:relative;float:left;width:4%;">
+							&nbsp;
+						</div>
+						
+						<div style="position:relative;float:left;width:48%;">
+							<div class="padder">
+								<span class="title_span">
+									Password:
+								</span>
+								<input name="password" type="password" class="text_input text_extra_long" value="" />
+							</div>
+													
+							<div class="padder">
+								<span class="title_span">
+									Re-type Password:
+								</span>
+								<input name="password_copy" type="password" class="text_input text_extra_long" value="" />
+							</div>
+						</div>
+						
+						<div class="clear"></div>
+						
 					</div>
 	
-					<form id="article_form_' . $u->m_user_id . '">
-						
-						<div class="padder_10">
-							<input type="text" name="title" class="text_input input_clear text_extra_long" value="' . $title  . '" clear_if="Article Title">
+					<div class="header padder_10_top">
+						Personal Info
+					</div>
+
+					<div class="padder_10_left">
+						<div class="padder">
+							<span class="title_span">
+								First Name:
+							</span>
+							<input name="first_name" type="text" class="text_input text_extra_long" value="' . $first_name . '" />
 						</div>
 						
-						<div class="padder_10 padder_no_top">
-							<textarea name="body" id="body" class="text_input input_clear text_extra_long text_area" clear_if="Article Body">' . $body .'</textarea>
-						</div>
-						
-						
-						<div class="padder_10">
-							' . Common::getHtml( "selector-module", array( 
-								'title' => "View", 
-								'content' => $view_selector,
-								'content_class' => "" ) ) . '
-								
-							' . Common::getHtml( "selector-module-spacer", array() ) . '
+						<div class="padder">
 							
-							' . Common::getHtml( "selector-module", array( 
-								'title' => "Section", 
-								'content' => $section_selector,
-								'content_class' => "article_section_selector_" . $a->m_article_id ) ) . '
-								
-							<div class="clear"></div>
-							
+							<span class="title_span">
+								Last Name:
+							</span>
+							<input name="last_name" type="text" class="text_input text_extra_long" value="' . $last_name . '" />
 						</div>
+						
+						<div class="padder">
+							<span class="title_span">
+								About:
+							</span>
+							<textarea name="bio" class="text_input text_extra_long text_area">' . $bio . '</textarea>
+						</div>
+						
+					</div>
+					
+					<div class="padder">
 						
 						' . Common::getHtml( "get-form-buttons", array( 
 						
 							'left' => array( 
-								'pk_name' => "article_id",
-								'pk_value' => $a->m_article_id,
+								'pk_name' => "user_id",
+								'pk_value' => $u->m_user_id,
 								'process' => $process,
-								'id' => "article",
+								'id' => "user",
 								'button_value' => ucwords( $process ),
 								'extra_style' => 'style="width:41px;"' ),
 								
 							'right' => array(
-								'pk_name' => "article_id",
-								'pk_value' => $a->m_article_id,
+								'pk_name' => "user_id",
+								'pk_value' => $u->m_user_id,
 								'process' => "cancel_" . $process,
-								'id' => "article",
-								'button_value' => "Cancel" ) 
+								'id' => "user",
+								'button_value' => "Cancel",
+								'extra_style' => 'style="width:41px;"' ) 
 							) 
 						) . '
-													
-						<input type="hidden" name="user_id" value="' . $user_id . '"/>
-						<input type="hidden" name="from_add" value="' . $from_add . '"/>
-						
-					</form>
-				</div>
+							
+					</div>
+					
+				</form>
 				';
-								
+						
 				$return = array( 'html' => $html );
 				break;
 								
 			case "get-delete-form":
+				$return = array( 'html' => "" );
 				break;
 				
 			default:
@@ -824,47 +724,6 @@ class User
 		return $return;
 		
 	}//getHtml()
-	
-	/**
-	 * Viadates the auth login.
-	 * Returns TRUE if login username/password is valid, FALSE otherwise.
-	 * @since	20100912, Hafner
-	 * @return	boolean
-	 * @param	string		$username		username (email address)
-	 * @param	string		$password		password
-	 */
-	public function validateLogin( $username, $password )
-	{
-		$return = FALSE;
-		
-		if( strlen( trim( $username ) ) > 0 &&
-			strlen( trim( $password ) ) > 0 )
-		{
-			$sql = "
-			SELECT user_id, password
-			FROM common_Users
-			WHERE ( LOWER( username ) = '" . strtolower( $username ) . "' OR LOWER( email ) = '" . strtolower( $username ) . "' ) AND
-			active = 1";
-			
-			$result = $this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
-			
-			if( $this->m_common->m_db->numRows( $result ) == 1 )
-			{	
-				//grab encrypted password
-				$row = $this->m_common->m_db->fetchRow( $result );
-				$encrypted_password = $row[1];
-				
-				//compare passwords
-				if( $this->passwordCompare( $password, $encrypted_password ) )
-				{
-					$return = TRUE;
-				}
-			}
-		}
-		
-		return $return;
-		
-	}//validateLogin()
 	
 	/**
 	 * Validates a password string.
@@ -890,88 +749,6 @@ class User
 	}//passwordValidate()
 	
 	/**
-	 * Determines if the current login is valid or if there is a current login. 
-	 * Returns TRUE if there is a current login and it's valid, FALSE otherwise.
-	 * @since	20100912, Hafner
-	 * @return	boolean
-	 */
-	public function validateCurrentLogin()
-	{
-		$return = FALSE;
-		
-		if( array_key_exists( "sid", $_SESSION ) &&
-			Session::validateSessionId( $_SESSION['sid'] ) )
-		{
-			$return = TRUE;
-		}
-		
-		return $return;
-		
-	}//validateCurrentLogin()
-	
-	/**
-	 * Controls the page access. 
-	 * Returns HTML string.
-	 * @since	20100912, Hafner
-	 * @return	string
-	 * @param 	object		$controller		instance of the current controller
-	 */
-	public function controlPageAccess( $controller )
-	{
-		$show_page_content = TRUE;
-		
-		if( $controller->getAuthStatus() )
-		{
-			if( !$this->validateCurrentLogin() )	
-			{
-				$show_page_content = FALSE;
-			}
-		}
-		
-		if( $show_page_content )
-		{
-			//if we have a current login, set the auth object.
-			if( $this->validateCurrentLogin() )
-			{
-				$user_id = self::getAuthId();
-				$controller->setAuth( $user_id );
-			}
-
-			$controller->setContent();
-			$return = $controller->getContent();
-		}
-		else
-		{
-			$html = self::getHtml( "show-login-form", array() );
-			$return = $html['body'];
-		}
-		
-		return $return;
-		
-	}//controlPageAccess()
-	
-   /**
-	* Gets a string message if login is invalid.
-	* Returns FALSE if login is valid, string error message otherwise.
-	* @author	Version 20100912, Hafner
-	* @return	mixed
-	* @param	string		$username		username
-	* @param	string		$password		password
-	*/
-	public function getLoginMessage( $username, $password )
-	{
-		$return = FALSE;
-		
-		if( !$this->validateLogin( $username, $password ) )
-		{
-			$return = "Login invalid. Please try again.";
-		}
-		
-		return $return;
-		
-	}//getLoginMessage()
-	
-	/**
 	 * Collects array of permissions for this user.
 	 * Returns array of permission aliases.
 	 * @return	array
@@ -986,7 +763,7 @@ class User
 		SELECT 
 			p.alias AS alias
 		FROM 
-			common_UsersToPermission a2p
+			common_UserToPermission a2p
 		JOIN common_Permissions p ON
 			p.permission_id = a2p.permission_id  
 		WHERE 
@@ -1006,36 +783,6 @@ class User
 		return $return;
 		
 	}//permissionsGet()
-	
-	/**
-	 * Validates the current session.
-	 * Returns user_id ( int ) if session is valid, FALSE otherwise.
-	 * @since	20100922, Hafner
-	 * @return 	mixed
-	 */
-	public static function getAuthId()
-	{
-		$return = FALSE;
-		$common = new Common();
-		
-		//get auth id
-		$sql = "
-		SELECT user_id
-		FROM common_Sessions
-		WHERE session_id = '" . $_SESSION['sid'] . "' AND
-		end_timestamp IS NULL";
-		
-		$result = $common->m_db->query( $sql, __FILE__, __LINE__ );
-		
-		if( $common->m_db->numRows( $result ) > 0 )
-		{
-			$row = $common->m_db->fetchRow( $result );
-			$return = $row[0];
-		}
-		
-		return $return;
-		
-	}//getAuthId()
 	
 	public function passwordValidateChange( $post )
 	{
@@ -1094,6 +841,7 @@ class User
 		$this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
 		
 		return TRUE;
+		
 	}//passwordUpdate()
 	
 	public function passwordEncrypt( $salt, $plain_text_password )
@@ -1182,5 +930,5 @@ class User
 		}
 	}//__set()
 	
-}//class View
+}//class User
 ?>

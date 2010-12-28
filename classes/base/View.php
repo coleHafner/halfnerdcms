@@ -779,9 +779,9 @@ class View
 				else
 				{
 					$process = "add";
-					$alias = "Nav Display Name";
-					$controller_name = "Controller Class Name";
-					$external_link = "External Link";
+					$alias = "";
+					$controller_name = "";
+					$external_link = "";
 					$show_in_nav = "";
 					$requires_auth = "";
 					$controller_disabled = '';
@@ -815,19 +815,34 @@ class View
 							<div>
 								<div style="position:relative;float:left;width:35%;">
 									<div class="padder_10">
-										<input type="text" name="alias" class="text_input input_clear text_long" value="' . $alias . '" clear_if="Nav Display Name" />
+										
+										<span class="title_span">
+											Nav Display Name:
+										</span>
+										
+										<input type="text" name="alias" class="text_input text_long" value="' . $alias . '" />
 									</div>
 									
 									<div class="padder_10 padder_no_top">
-										<input type="text" name="controller_name" class="text_input input_clear text_long ' . $disabled_class . '" value="' . $controller_name . '" clear_if="Controller Class Name" ' . $controller_disabled . ' />
+										
+										<span class="title_span">
+											Controller File Name:
+										</span>
+										
+										<input type="text" name="controller_name" class="text_input text_long ' . $disabled_class . '" value="' . $controller_name . '" ' . $controller_disabled . ' />
 									</div>
 									
 									<div class="padder_10 padder_no_top">
-										<input type="text" name="external_link" class="text_input input_clear text_long" value="' . $external_link . '" clear_if="External Link" />
+										
+										<span class="title_span">
+											External Link:
+										</span>
+										
+										<input type="text" name="external_link" class="text_input text_long" value="' . $external_link . '" />
 									</div>
 								</div>
 								
-								<div style="position:relative;float:left;width:65%;padding-top:30px;">
+								<div style="position:relative;float:left;width:65%;padding-top:50px;">
 								
 									<div class="padder_10">
 										' . Common::getHtml( "selector-module", array( 

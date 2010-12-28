@@ -7,7 +7,7 @@
 
 require_once( "base/Common.php" );
 require_once( "base/FormHandler.php" );
-require_once( "base/Authentication.php" );
+require_once( "base/User.php" );
 
 class Session
 {
@@ -33,7 +33,7 @@ class Session
 	 * Id of the authentication record associated with this object.
 	 * @var	string
 	 */
-	protected $m_authentication_id;
+	protected $m_user_id;
 	
 	/**
 	 * Ip address of the session.
@@ -93,7 +93,7 @@ class Session
 		$sql = "
 		SELECT 
 			session_id,
-			authentication_id,
+			user_id,
 			ip,
 			browser,
 			start_timestamp,
@@ -108,7 +108,7 @@ class Session
 		
 		//set member vars
 		$this->m_session_id = $row['session_id'];
-		$this->m_authentication_id = $row['authentication_id'];
+		$this->m_user_id = $row['user_id'];
 		$this->m_ip = $row['ip'];
 		$this->m_browser - $row['browser'];
 		$this->m_start_timestamp = $row['start_timestamp'];
@@ -129,7 +129,7 @@ class Session
 	{
 		return array(
 			'session_id' => $this->m_session_id,
-			'authentication_id' => $this->m_authentication_id,
+			'user_id' => $this->m_user_id,
 			'ip' => $this->m_ip,
 			'browser' => $this->m_browser,
 			'start_timestamp' => $this->m_username,
@@ -168,7 +168,7 @@ class Session
 			
 			//insert blank record
 			$sql = "
-			INSERT INTO common_Sessions( session_id, authentication_id, start_timestamp, ip )
+			INSERT INTO common_Sessions( session_id, user_id, start_timestamp, ip )
 			VALUES( '" . $sid . "', 0, " . strtotime( "now" ) . ", '" . $_SERVER['REMOTE_ADDR'] . "' )";
 			
 			$this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
@@ -205,7 +205,7 @@ class Session
 		{
 			$sql = "
 			UPDATE common_Sessions
-			SET authentication_id = " . $input['authentication_id'] . ",
+			SET user_id = " . $input['user_id'] . ",
 			ip = '" . $_SERVER['REMOTE_ADDR'] . "',
 			browser = '" . $_SERVER['HTTP_USER_AGENT'] . "'
 			WHERE session_id = '" . $this->m_session_id . "'";
@@ -268,14 +268,14 @@ class Session
 		if( !$this->m_form->m_error )
 		{
 			$cons = array( 
-				'table_name' => "common_Authentication",
-				'pk_name' => "authentication_id",
-				'pk_value' => $input['authentication_id']
+				'table_name' => "common_Users",
+				'pk_name' => "user_id",
+				'pk_value' => $input['user_id']
 			);
 			
 			if( !$this->m_common->m_db->keyExists( $cons ) )
 			{
-				$this->m_form->m_error = "Error: invalid authentication id '" . $input['authentication_id'] . "'. This should not happen.";
+				$this->m_form->m_error = "Error: Invalid user id '" . $input['user_id'] . "'. This should not happen. . . ever.";
 			}
 			
 		}
@@ -286,7 +286,7 @@ class Session
 	
 	public function setLinkedObjects()
 	{
-		return array( 'authentication' => new Authentication( $this->m_authentication_id, TRUE ) );
+		return array( 'user' => new User( $this->m_user_id, TRUE ) );
 		
 	}//setLinkedObjects()
 	
@@ -374,6 +374,30 @@ class Session
 		return $sid;
 			
 	}//getUniqueSessionId()
+	
+	public static function createSession( $username )
+	{
+		$common = new Common();
+		
+		//get auth id ( it has already been validated @ validate_login, so no need for the password )
+		$sql = "
+		SELECT user_id
+		FROM common_Users
+		WHERE ( LOWER( username ) = '" . strtolower( $username ) . "' OR
+		LOWER( email ) = '" . strtolower( $username  ) . "' ) AND
+		active = 1";
+		
+		$result = $common->m_db->query( $sql, __FILE__, __LINE__ );
+		$row = $common->m_db->fetchAssoc( $result );
+		$user_id = $row['user_id'];
+		
+		$s = new Session( 0 );
+		$sid = $s->add( array( 'user_id' => $user_id ) );
+		$s->setMemberVars( FALSE );
+		
+		return $s->m_session_id;
+		
+	}//createSession()
 	
    /**
 	* Get a member variable's value

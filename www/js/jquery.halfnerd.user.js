@@ -35,6 +35,14 @@ $( document ).ready( function(){
 				user.deleteRecord();
 				break;
 				
+			case "show_add":
+				user.showCanvasAdd();
+				break;
+				
+			case "cancel_add":
+				user.hideCanvasAdd();
+				break;
+				
 			default:
 				//show colorbox
 				$.colorbox({ href:"ajax/halfnerd_helper.php?task=user&process=" + process + "&user_id=" + user.user_id });
@@ -138,5 +146,104 @@ validation functions
 		});
 		
 	}//validateAddModForm()
+	
+/**********************************************************************************************************************************
+ui functions
+**********************************************************************************************************************************/
+
+this.showCanvasMod = function( user_id )
+	{
+		//hide info
+		$( "#user_info_" + user_id ).fadeOut( function( ){
+		
+			$( "#user_canvas_delete_" + user_id ).fadeOut( function( ){
+			
+				//new obj
+				var inner = new Article( 0 );
+				
+				var callback = function(){
+					//show canvas
+					$( "#user_canvas_mod_" + user_id ).slideDown();
+					
+					//disable hover
+					$( "#user_canvas_mod_" + user_id ).attr( "hover_enabled", "0" );
+				}
+				
+				//hide add
+				inner.hideCanvasAdd( callback );
+				
+			});
+		});
+	}//showCanvas()
+	
+	this.hideCanvasMod = function( user_id, callback )
+	{
+		callback = ( typeof( callback ) == "undefined" ) ? function(){} : callback;
+		
+		//hide canvas
+		$( "#user_canvas_mod_" + user_id ).slideUp( function(){
+		
+			//show info
+			$( "#user_info_" + user_id ).fadeIn( function(){
+				
+				callback();
+			});
+			
+		});
+	}//hideCanvasMod()
+	
+	this.showCanvasAdd = function( callback )
+	{
+		callback = ( typeof( callback ) == "undefined" ) ? function(){} : callback;
+		
+		//show add form
+		$( "#user_canvas_add" ).slideDown( function(){
+			callback();
+		});
+				
+	}//showCanvas()
+	
+	this.hideCanvasAdd = function( callback )
+	{
+		callback = ( typeof( callback ) == "undefined" ) ? function(){} : callback;
+		
+		//hide info
+		$( "#user_canvas_add" ).slideUp( function(){
+			callback();
+		});
+		
+	}//hideCanvas()
+		
+	this.showCanvasDelete = function( user_id )
+	{
+		//hide info
+		$( "#user_info_" + user_id ).fadeOut( function( ){
+		
+			$( "#user_canvas_mod_" + user_id ).fadeOut( function( ){
+			
+				//show canvas
+				$( "#user_canvas_delete_" + user_id ).slideDown();
+				
+			});
+		});
+		
+	}//showCanvas()
+	
+	this.hideCanvasDelete = function( user_id, callback )
+	{
+		callback = ( typeof( callback ) == "undefined" ) ? function(){} : callback;
+		
+		//hide canvas
+		$( "#user_canvas_delete_" + user_id ).slideUp( function(){
+		
+			//show info
+			$( "#user_info_" + user_id ).fadeIn( function(){
+				
+				//run callback
+				callback();	
+			});
+			
+		});
+	}//hideCanvas()
 	
 }//class User

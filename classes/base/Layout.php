@@ -6,7 +6,6 @@
 
 require_once( 'base/Common.php' );
 require_once( 'base/View.php' );
-require_once( "base/EnvVar.php" );
 require_once( "services/PicasaAlbum.php" );
 
 class Layout

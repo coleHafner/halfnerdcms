@@ -114,6 +114,7 @@ session functions
 			url:"ajax/halfnerd_helper.php?task=session&process=store_login",
 			data: $( "#auth_login_form" ).serialize( true ),
 			success: function( reply ){
+				
 				reloadPage( 0 );
 			}
 		});
@@ -168,7 +169,7 @@ validation functions
 			url:"ajax/halfnerd_helper.php?task=session&process=validate_login",
 			data: $( "#auth_login_form" ).serialize( true ),
 			success: function( reply ){
-			
+				
 				//get result
 				var reply_split = reply.split( "^" );
 				var result =  reply_split[0];
@@ -176,8 +177,8 @@ validation functions
 				
 				if( result == 1 )
 				{
-					var inner_auth = new Authentication(); 
-					inner_auth.doLogin();
+					var inner = new Authentication( 0 ); 
+					inner.doLogin();
 				}
 				else
 				{
