@@ -117,6 +117,9 @@ Alignment and spacing
 	padding-left:10px;
 }
 
+.padder_20_left {
+	padding-left:20px;
+}
 
 .padder_15 {
 	padding:15px;
@@ -138,6 +141,15 @@ Alignment and spacing
 	float:left;
 }
 
+.left_floater {
+	position:relative;
+	float:left;
+}
+
+.padder_5_right {
+	padding-right:5px;
+}
+
 .padder_10_top {
 	padding-top:10px;
 }
@@ -153,6 +165,12 @@ Fonts and borders
 .header {
 	position:relative;
 	font-size:14px;
+	font-weight:bold;
+}
+
+.header_sub {
+	position:relative;
+	font-size:12px;
 	font-weight:bold;
 }
 
@@ -237,6 +255,10 @@ Colors
 
 .color_primary {
 	color:#000;
+}
+
+.color_terciary {
+	color:#ADADAD;
 }
 
 .color_orange {
@@ -357,7 +379,6 @@ a.title_bar_button {
 	position:relative;
 	margin:auto;
 	width:200px;
-	height:30px;
 	margin-top:10px;
 }
 
@@ -383,8 +404,14 @@ Modules
 	position:relative;
 	float:left;
 	width:48%;
-	height:80px;
 	border:1px solid #999;
+	height:80px;
+}
+
+.selector_module_basic{
+	position:relative;
+	float:left;
+	width:48%;
 }
 
 .selector_module_spacer {
@@ -393,6 +420,17 @@ Modules
 		width:3%;
 		height:100px;
 }
+
+.manager_items {
+	position:relative;
+	width:100%;
+	border-collapse:collapse;
+}
+
+.manager_items tr{
+	height:45px;
+}
+
 
 /******************************************************************************************************************************************
 Navigation and Logo
@@ -537,19 +575,6 @@ Users
 .user_name {
 	position:relative;
 	margin-bottom:5px;
-}
-
-/******************************************************************************************************************************************
-Sections
-******************************************************************************************************************************************/
-.section_items {
-	position:relative;
-	width:100%;
-	border-collapse:collapse;
-}
-
-.section_items tr{
-	height:45px;
 }
 
 /******************************************************************************************************************************************

@@ -6,12 +6,14 @@ session_start();
 //require classes
 require_once( "base/Article.php" );
 require_once( "base/Authentication.php" );
+require_once( "controllers/Admin.php" );
 require_once( "base/Common.php" );
 require_once( "base/Session.php" );
-require_once( "controllers/Admin.php" );
+require_once( "base/User.php" );
+require_once( "base/UserType.php" );
 
 $common = new Common();
-$auth = new Authentication( Authentication::getUserId() );
+$user = new User( Authentication::getUserId() );
 
 $task = strtolower( trim( $_GET['task'] ) );
 $process = strtolower( trim( $_GET['process'] ) );
@@ -247,6 +249,39 @@ switch( $task )
 		}		break;
 		break;
 		
+	case "user_type":
+		
+		$ut = new UserType( $_GET['user_type_id'] );
+		
+		switch( $process )
+		{
+			case "validate":
+				$form_result = $ut->checkInput( $_POST, $ut->m_common->m_db->fixBoolean( $_POST['from_add'] ) );
+				$result = ( !$form_result ) ? 1:0;
+				$message =   ( !$form_result ) ? "User Type Saved" : $form_result;
+				
+				echo $result . "^" . $message; 
+				break;
+				
+			case "add":
+				echo $ut->add( $_POST );
+				break;
+				
+			case "modify":
+				echo trim( $ut->modify( $_POST, FALSE ) );
+				break;
+				
+			case "delete":
+				echo $ut->delete( TRUE );
+				break;
+				
+			case "get-type-list":
+				$records = UserType::getUserTypes( "active", "1" );
+				$list = UserType::getHtml( 'get-type-list', array( 'records' => $records ) );
+				echo $list['html'];
+		}		break;
+		break;
+		
 	case "view":
 	
 		$view = new View( $_GET['view_id'] );
@@ -307,27 +342,37 @@ switch( $task )
 		
 	case "user":
 		
-		$a = new Authentication( $_GET['authentication_id'] );
+		$u = new User( $_GET['user_id'] );
+		$is_addition = ( $u->m_user_id == 0 ) ? TRUE : FALSE;
 		
 		switch( $process )
 		{
 			case "validate":
-				$form_result = $a->checkInput( $_POST, $a->m_common->m_db->fixBoolean( $_GET['from_add'] ) );
+				$form_result = $u->checkInput( $_POST, $is_addition );				
 				$result = ( !$form_result ) ? 1:0;
-				$message =   ( !$form_result ) ? "Crew member updated." : $form_result;
+				$message =   ( !$form_result ) ? "User Updated." : $form_result;
 				echo $result . "^" . $message;
 				break;
 				
 			case "add":
-				echo $a->add( $_POST );
+				echo $u->add( $_POST );
 				break;
 				
 			case "modify":
-				echo $a->modify( $_POST, $a->m_common->m_db->fixBoolean( $_GET['from_add'] ) );
+				echo $u->modify( $_POST, $is_addition );
 				break;
 				
 			case "delete":
-				echo $a->delete( TRUE );
+				echo $u->delete( TRUE );
+				break;
+				
+			case "refresh_user_type_selector":
+				$user_types = UserType::getHtml( 'get-radio-selectors', array( 
+					'active_record' => new UserType( 0 ),
+					'active_user' => new User( $_GET['user_id'] ) )
+				);
+				
+				echo $user_types['html'];
 				break;
 		}
 		break;
@@ -437,165 +482,6 @@ switch( $task )
 			case "send":
 				$email = new EmailMessage();
 				$email->sendMail( $_POST );
-				break;
-		}
-		break;
-		
-	case "contact":
-	
-		$c = new Contact( $_GET['contact_id'], TRUE );
-		
-		switch( $process )
-		{
-			case "validate":
-				$form_result = $c->checkInput( $_POST, $c->m_common->m_db->fixBoolean( $_GET['from_add'] ) );
-				
-				$result = ( !$form_result ) ? 1:0;
-				$message =   ( !$form_result ) ? "Contact saved." : $form_result;
-				
-				echo $result . "^" . $message;
-				break;
-				
-			case "add":
-				echo $c->add( $_POST );
-				break;
-				
-			case "modify":
-				echo $c->modify( $_POST, FALSE );
-				break;
-				
-			case "delete":
-				$c->delete( TRUE );
-				break;
-				
-			case "show-add-mod":
-				//setup vars
-				$echo_content = TRUE;
-				$action = ( $c->m_contact_id > 0 ) ? "modify" : "add";
-				
-				//compile params
-				$details_vars = array( 'active_contact' => $c, 'action' => $action, 'authentication_id' => $auth->m_authentication_id );
-				$step_vars = array( 'current_step' => 1, 'total_steps' => 3 );
-				
-				//grab html
-				$step_meter_html = $c->getHtml( "get-step-meter", $step_vars );
-				$step_nav_html = $c->getHtml( "get-step-nav", $step_vars );
-				$details_form_html = $c->getHtml( "get-contact-details-form",  $details_vars );
-				
-				//compile body
-				$body = '
-				<div id="step-meter">
-					' .  $step_meter_html['body'] . '
-				</div>
-				
-				<div id="main-content" class="cc_main_content">
-					' . $details_form_html['body'] . '
-				</div>
-				
-				<div id="step-nav">
-					' . $step_nav_html['body'] . '
-				</div>
-				
-				<input type="hidden" id="current-step" value="' . $step_vars['current_step'] . '"/>
-				<input type="hidden" id="total-steps" value="' . $step_vars['total_steps'] . '"/>
-				
-				<input type="hidden" id="active-contact-id" value="' . $c->m_contact_id . '"/>
-				<input type="hidden" id="active-thumb-id" value="' . $c->m_objects_collection['thumb_file']->m_file_id . '"/>
-				<input type="hidden" id="active-full-img-id" value="' . $c->m_objects_collection['full_img_file']->m_file_id . '"/>
-				
-				<input type="hidden" id="link-trigger-id" value="contact-step"/>
-				<input type="hidden" id="step-is-complete" value="0"/>
-				';
-				
-				$html = array(
-					'title' => ucfirst( $action ) . ' Crew Member',
-					'body' => $body
-				);
-				break;
-				
-			case "show-auth-set":
-				
-				$echo_content = TRUE;
-				$auth = $c->m_objects_collection['authentication'];
-				$action = ( $auth->m_authentication_id > 0 ) ? "modify" : "add"; 
-				
-				$auth_vars = array( 'active_contact' => $c, 'action' => $action, 'active_auth' => $auth );
-				$html = $c->m_objects_collection['authentication']->getHtml( "auth-add-mod-form", $auth_vars );
-				break;
-				
-			case "link_auth":  
-				echo $c->addAuth( $_POST['authentication_id'] );
-				break;
-				
-			case "show_crew_member":
-				$echo_content = TRUE;
-				$html = $c->getHtml( "show_crew_member", array( 'active_contact' => &$c ) );
-				break;
-				
-			case "show-delete":
-				$echo_content = TRUE;
-				$html = $c->getHtml( "show-delete", array( 'active_contact' => $c ) ); 
-				break;
-		}
-		break;
-		
-	case "contact_type":
-		
-		$ct = new ContactType( $_GET['contact_type_id'], TRUE );
-		
-		switch( $process )
-		{
-			case "validate":
-				$form_result = $ct->checkInput( $_POST, $ct->m_common->m_db->fixBoolean( $_GET['from_add'] ) );
-				
-				$result = ( !$form_result ) ? 1:0;
-				$message =   ( !$form_result ) ? "Job Title Saved." : $form_result;
-				
-				echo $result . "^" . $message;
-				break;
-				
-			case "add":
-				echo $ct->add( $_POST );
-				break;
-				
-			case "modify":
-				echo $ct->modify( $_POST, FALSE );
-				break;
-				
-			case "delete":
-				$ct->delete( TRUE );
-				break;
-			
-			case "show-add":
-				$ct_vars['active_ct'] = $ct;
-				$html = $ct->getHtml( "show-add", $ct_vars );
-
-				echo '
-				<div class="admin_title_bar">
-					' .  $html['title'] . '
-				</div>
-				' . $html['body'];
-				break;
-				
-			case "show-mod":
-				
-				$ct_vars['active_ct'] = $ct;
-				$html = $ct->getHtml( "show-mod", $ct_vars );
-				
-				echo $html['mod_form'] . "^" . $html['save_buttons'];
-				break;	
-				
-			case "hide-mod":
-				
-				$ct_vars['active_ct'] = $ct;
-				$html = $ct->getHtml( "hide-mod", $ct_vars );
-				
-				echo $html['mod_form'] . "^" . $html['save_buttons'];
-				break;
-				
-			case "get-count":
-				$records = $ct->getAllRecords( array() );
-				echo ( !is_array( $records ) ) ? "0" : "1";
 				break;
 		}
 		break;

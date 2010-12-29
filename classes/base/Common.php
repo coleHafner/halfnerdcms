@@ -397,14 +397,18 @@ class Common {
 				break;
 				
 			case "selector-module":
+			
+				$container_style = ( array_key_exists( "container_style", $vars ) ) ? $vars['container_style'] : "";
+				$content_style = ( array_key_exists( "content_style", $vars ) ) ? $vars['content_style'] : "";
+			
 				$return = '
-				<div class="rounded_corners bg_color_tan selector_module border_dark_grey">
+				<div class="rounded_corners bg_color_tan selector_module border_dark_grey" ' . $container_style . '>
 				
 					<div class="padder">
 						<div class="bg_color_white rounded_corners padder center color_orange">
 							<b>' . $vars['title'] . '</b>
 						</div>
-						<div class="padder center ' . $vars['content_class'] . '">
+						<div class="center ' . $vars['content_class'] . '" ' . $content_style . '>
 							' .  $vars['content'] . '
 						</div>
 					</div>

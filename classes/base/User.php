@@ -32,6 +32,12 @@ class User
 	protected $m_user_id;
 	
 	/**
+	 * PK of the User Record.
+	 * @var	int
+	 */
+	protected $m_user_type_id;
+	
+	/**
 	 * Nickname.
 	 * @var	string
 	 */
@@ -124,6 +130,7 @@ class User
 		$sql = "
 		SELECT 
 			user_id,
+			user_type_id,
 			username,
 			email,
 			password,
@@ -142,12 +149,13 @@ class User
 		
 		//set member vars
 		$this->m_user_id = $row['user_id'];
+		$this->m_user_type_id = $row['user_type_id'];
 		$this->m_username = $row['username'];
 		$this->m_email = $row['email'];
 		$this->m_password = $row['password'];
-		$this->m_first_name = $row['first_name'];
-		$this->m_last_name = $row['last_name'];
-		$this->m_bio = $this->m_common->m_db->escapeString( $row['bio'] );
+		$this->m_first_name = stripslashes( $row['first_name'] );
+		$this->m_last_name = stripslashes( $row['last_name'] );
+		$this->m_bio = stripslashes( $row['bio'] );
 		$this->m_use_gravatar = $this->m_common->m_db->fixBoolean( $row['use_gravatar'] );
 		$this->m_active = $this->m_common->m_db->fixBoolean( $row['active'] );
 		$this->m_permissions = $this->permissionsGet();
@@ -167,6 +175,7 @@ class User
 	{
 		return array(
 			'user_id' => $this->m_user_id,
+			'user_type_id' => $this->m_user_type_id,
 			'contact_id' => $this->m_contact_id,
 			'username' => $this->m_username,
 			'email' => $this->m_email,
@@ -237,17 +246,35 @@ class User
 
 		if( !$this->m_form->m_error )
 		{
+			//optional params
+			$first_name = ( strlen( $input['first_name'] ) > 0 ) ? "'" . addslashes( $input['first_name'] ) . "'" : "NULL";
+			$last_name = ( strlen( $input['last_name'] ) > 0 ) ? "'" . addslashes( $input['last_name'] ) . "'" : "NULL";
+			$bio = ( strlen( $input['bio'] ) > 0 ) ? "'" . addslashes( $input['bio'] ) . "'" : "NULL";
+			$password_update = "";
+			
+			//password
+			if( strlen( $input['password'] ) > 0 )
+			{
+				$password_update = "
+				password = '" .  $this->passwordEncrypt( $this->passwordSalt(), $input['password'] ) . "',";
+			}
+			
 			$sql = "
 			UPDATE common_Users
-			SET username = '" . $input['username'] . "',
-				password = '" .  $this->passwordEncrypt( $this->passwordSalt(), $input['password'] ) . "'
+			SET user_type_id = " . $input['user_type_id'] . ",
+				username = '" . $input['username'] . "',
+				email = '" . $input['email'] . "',
+				" . $password_update . "
+				first_name = " . $first_name . ",
+				last_name = " . $last_name . ",
+				bio = " . $bio . "
 			WHERE user_id = " . $this->m_user_id;
-			
+
 			$this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
 			$return = $this->m_user_id;
 			
 			//update permissions
-			$this->updatePermissions( $input, $from_add );
+			$this->permissionsUpdate( $input, $from_add );
 		}
 		else
 		{
@@ -316,28 +343,40 @@ class User
 			//delete all permissions for this user
 			$sql = "
 			DELETE
-			FROM common_UsersToPermission
-			WHERE user_id = " . $this->m_user_id;
+			FROM common_UserToPermission
+			WHERE user_id = " . $this->m_user_id;			
 			$this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
 		}
 			
-		if( array_key_exists( "permissions", $input ) )
+		//add permissions
+		foreach( $input as $k => $v )
 		{
-			//add permissions
-			foreach( $input['permissions'] as $i => $alias )
+			if( strpos( $k, "permission_" ) !== FALSE )
 			{
-				$sql = "
-				INSERT INTO common_UsersToPermission( user_id, permission_id )
-				VALUES( " . $this->m_user_id . ", ( SELECT permission_id FROM common_Permissions WHERE LOWER( alias ) = '" . $alias . "'  ) )
-				";
-				
-				$this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
+				$this->permissionAdd( $input[$k] );
 			}
 		}
 		
 		return TRUE;
 		
 	}//permissionsUpdate()
+	
+   /**
+	* Adds a permission to this auth record. 
+	* @return	boolean
+	* @since	20101018, hafner
+	* @param	int			$permission_id		pk of common_Permissions
+	*/
+	public function permissionAdd( $permission_id )
+	{
+		$sql = "
+		INSERT INTO common_UserToPermission( user_id, permission_id )
+		VALUES( " . $this->m_user_id . ", " . $permission_id . " )";	
+		$this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
+
+		return TRUE;
+		
+	}//permissionAdd()
 	
 	/**
 	 * Validates the form input for creating/modifying a new File record.
@@ -367,45 +406,108 @@ class User
 			}
 		}
 		
-		//check missing password
-		if( !$this->m_form->m_error )
-		{
-			if( !array_key_exists( "password", $input ) || 
-				strlen( trim( $input['password'] ) ) == 0 )
-			{
-				$this->m_form->m_error = "You must choose a password.";
-			}
-		}
-		
 		//check valid email
 		if( !$this->m_form->m_error )
 		{
 			$this->m_form->m_error = $this->m_common->validateEmailAddress( $input['email'] );
 		}
-			
-		//check valid password
+		
+		//check user type
 		if( !$this->m_form->m_error )
 		{
-			if( !$this->passwordValidate( $password ) )
+			if( !array_key_exists( "user_type_id", $input ) || 
+				$input['user_type_id'] == 0 )
 			{
-				$this->m_form->m_error = "Password is invalid. It may not contain any of the following characters: semicolons (;), single quotes ('), double quotes (\"), or spaces.";
+				$this->m_form->m_error = "You select a user title.";
 			}
 		}
 		
-		//check duplicate email
+		//check valid user type
+		if( !$this->m_form->m_error )
+		{
+			$sql = "
+			SELECT count(*)
+			FROM common_UserTypes
+			WHERE user_type_id = " . $input['user_type_id'] . " AND
+			active = 1";
+			
+			$result = $this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
+			$row = $this->m_common->m_db->fetchRow( $result );
+			
+			if( $row[0] == 0 )
+			{
+				$this->m_form->m_error = "Error: invalid user type. This should not happen.";
+			}
+		}
+
 		if( $is_addition )
 		{
+			//check duplicate email
+			if( $is_addition )
+			{
+				if( !$this->m_form->m_error )
+				{
+					$dup_check = array( 
+						'table_name' => "common_Users",
+						'pk_name' => "user_id",
+						'check_values' => array( 'email' => strtolower( $input['email'] ) )
+					);
+					
+					if( is_numeric( $this->m_common->m_db->checkDuplicate( $dup_check ) ) )
+					{
+						$this->m_form->m_error = "That email already exists. You must choose a unique email address.";
+					}
+				}
+			}
+			
+			//check duplicate username
+			if( $is_addition )
+			{
+				if( !$this->m_form->m_error )
+				{
+					$dup_check = array( 
+						'table_name' => "common_Users",
+						'pk_name' => "user_id",
+						'check_values' => array( 'username' => strtolower( $input['username'] ) )
+					);
+					
+					if( is_numeric( $this->m_common->m_db->checkDuplicate( $dup_check ) ) )
+					{
+						$this->m_form->m_error = "That username already exists. You must choose a unique username.";
+					}
+				}
+			}
+			
+		}//check duplicates if is_addition
+			
+		//check password input
+		if( $is_addition || strlen( $input['password'] ) > 0 )
+		{
+			//check missing password
 			if( !$this->m_form->m_error )
 			{
-				$dup_check = array( 
-					'table_name' => "common_Users",
-					'pk_name' => "user_id",
-					'check_values' => array( 'email' => strtolower( $input['email'] ) )
-				);
-				
-				if( is_numeric( $this->m_common->m_db->checkDuplicate( $dup_check ) ) )
+				if( !array_key_exists( "password", $input ) || 
+					strlen( trim( $input['password'] ) ) == 0 )
 				{
-					$this->m_form->m_error = "That email already exists. You must choose a unique email address.";
+					$this->m_form->m_error = "You must choose a password.";
+				}
+			}
+			
+			//check password match
+			if( !$this->m_form->m_error )
+			{
+				if( $input['password'] != $input['password_copy'] )
+				{
+					$this->m_form->m_error = "Password do not match. Please re-type.";
+				}
+			}
+			
+			//check valid password
+			if( !$this->m_form->m_error )
+			{
+				if( !$this->passwordValidate( $password ) )
+				{
+					$this->m_form->m_error = "Password is invalid. It may not contain any of the following characters: semicolons (;), single quotes ('), double quotes (\"), or spaces.";
 				}
 			}
 		}
@@ -416,27 +518,9 @@ class User
 	
 	public function setLinkedObjects()
 	{
-		return array();
+		return array( 'user_type' => new UserType( $this->m_user_type_id ) );
 		
 	}//setLinkedObjects()
-	
-	/**
-	* Adds a permission to this auth record. 
-	* @return	boolean
-	* @since	20101018, hafner
-	* @param	int			$permission_id		pk of common_Permissions
-	*/
-	public function permissionsAdd( $permission_id )
-	{
-		$sql = "
-		INSERT INTO common_UsersToPermission( user_id, permission_id )
-		VALUES( " . $this->m_user_id . ", " . $permission_id . " )";
-		
-		$this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
-
-		return TRUE;
-		
-	}//permissionsAdd()
 	
 	/**
 	* Returns HTML
@@ -577,29 +661,40 @@ class User
 				
 			case "get-edit-form":
 			
+				//user for which to display details
 				$u = $vars['active_record'];
+				
+				//user object of the currently logged in user
+				$active_user = $vars['active_user'];
 				
 				if( $u->m_user_id > 0 )
 				{
 					$process = "modify";
 					$username = $u->m_username;
 					$email = $u->m_email;
+					
 					$first_name = $u->m_first_name;
 					$last_name = $u->m_last_name;
 					$bio = $u->m_bio;
+					
+					$password_label = "Change Password:";
+					
 				}
 				else
 				{
 					$process = "add";
 					$username = "";
 					$email = "";
+					
 					$first_name = "";
 					$last_name = "";
 					$bio = "";
+					
+					$password_label = "Password:";
 				}
 				
 				$html = '
-				<form id="user_add_form">
+				<form id="user_add_mod_form_' . $u->m_user_id . '">
 				
 					<div class="padder center header color_accent">
 						' . ucfirst( $process ) . ' User
@@ -608,12 +703,12 @@ class User
 					<div class="padder center result" id="result_add_0">
 					</div>
 					
-					<div class="header">
+					<div class="header_sub color_terciary">
 						Login Info
 					</div>
 					
 					<div class="padder_10_left">
-						<div style="position:relative;float:left;width:48%;">
+						<div class="selector_module_basic">
 							<div class="padder">
 								<span class="title_span">
 									Username:
@@ -629,14 +724,14 @@ class User
 							</div>
 						</div>
 						
-						<div style="position:relative;float:left;width:4%;">
+						<div class="selector_module_basic" style="width:15px;">
 							&nbsp;
 						</div>
 						
-						<div style="position:relative;float:left;width:48%;">
+						<div class="selector_module_basic">
 							<div class="padder">
 								<span class="title_span">
-									Password:
+									' . $password_label . '
 								</span>
 								<input name="password" type="password" class="text_input text_extra_long" value="" />
 							</div>
@@ -650,10 +745,49 @@ class User
 						</div>
 						
 						<div class="clear"></div>
+						';
 						
+				if( in_array( 'SPR', $active_user->m_permissions ) )
+				{
+					//user permission html
+					$user_permissions = Permission::getHtml( 'get-permissions-list-readonly', array( 
+						'active_user_record' => $u ) 
+					);
+					
+					//user type html
+					$user_types = UserType::getHtml( 'get-radio-selectors', array( 
+						'active_record' => new UserType( $u->m_user_type_id ),
+						'active_user' => $u )
+					);
+	
+					$html .= '
+						<div class="padder padder_10_top">
+							' . Common::getHtml( "selector-module", array( 
+								'title' => "User Title", 
+								'content' => $user_types['html'],
+								'content_class' => "user_type_selector_" . $u->m_user_id . " padder_10_top",
+								'container_style' => 'style="height:auto;"',
+								'content_style' => 'style="text-align:left;"' ) ) . '
+								
+							' . Common::getHtml( "selector-module-spacer", array() ) . '
+							
+							' . Common::getHtml( "selector-module", array( 
+								'title' => "User Permissions", 
+								'content' => $user_permissions['html'],
+								'content_class' => "",
+								'container_style' => 'style="height:auto;"',
+								'content_style' => 'style="text-align:left;"' ) ) . '
+								
+							<div class="clear"></div>
+							
+						</div>
+						';
+				}
+						
+				$html .= '
 					</div>
 	
-					<div class="header padder_10_top">
+					<div class="header_sub color_terciary padder_10_top">
 						Personal Info
 					</div>
 
@@ -768,7 +902,7 @@ class User
 			p.permission_id = a2p.permission_id  
 		WHERE 
 			a2p.user_id = " . $this->m_user_id;
-		
+			
 		$result = $this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
 		
 		if( $this->m_common->m_db->numRows( $result ) > 0 )
@@ -880,7 +1014,7 @@ class User
 		
 		while( $row = $common->m_db->fetchRow( $result ) )
 		{
-			$return[$i] = new User( $row[0], TRUE );
+			$return[$i] = new User( $row[0], FALSE );
 			$i++;
 		}
 		

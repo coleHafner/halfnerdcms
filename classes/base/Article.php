@@ -775,7 +775,10 @@ class Article
 				
 				$html = '
 				<div class="padder_10">
-					' . Common::getHtml( "title-bar", array( 'title' => ucWords( $process ) . " Article", 'classes' => '' ) ) . '
+					' . Common::getHtml( "title-bar", array( 
+						'title' => ucWords( $process ) . " Article", 
+						'classes' => '' ) 
+					) . '
 					
 					<div id="result_' . $process . '_' . $a->m_article_id . '" class="result">
 					</div>
@@ -783,14 +786,14 @@ class Article
 					<form id="article_form_' . $a->m_article_id . '">
 						
 						<div class="padder_10">
-							<span class="title_span color_faded">
+							<span class="title_span">
 								Title:
 							</span>
 							<input type="text" name="title" class="text_input text_extra_long" value="' . $title  . '" />
 						</div>
 						
 						<div class="padder_10 padder_no_top">
-							<span class="title_span color_faded">
+							<span class="title_span">
 								Guts:
 							</span>
 							<textarea name="body" id="body" class="text_input text_extra_long text_area">' . $body .'</textarea>
@@ -815,7 +818,7 @@ class Article
 						</div>
 						
 						<div class="padder_10 padder_no_top">
-							<span class="title_span color_faded">
+							<span class="title_span">
 								Tags ( separate with space ):
 							</span>
 							<input type="text" name="tag_string" class="text_input text_extra_long" value="' . $tag_string  . '" />

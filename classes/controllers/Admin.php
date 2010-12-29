@@ -10,6 +10,7 @@ require_once( "base/User.php" );
 require_once( "base/Article.php" );
 require_once( "base/Section.php" );
 require_once( "base/Controller.php" );
+require_once( "base/Permission.php" );
 
 class Admin extends Controller{
 	
@@ -188,10 +189,6 @@ class Admin extends Controller{
 				
 				<div id="article_canvas_add" class="item_container padder_10 rounded_corners bg_color_light_tan" style="display:none;" hover_enabled="0">
 					' . $add_form['html'] . '
-				</div>
-				
-				<div id="section_manager" class="item_container padder_10 rounded_corners bg_color_light_tan" style="display:none;" hover_enabled="0">
-					' . $section_manager['html'] . '
 				</div>
 				
 				<ul id="article_list">
@@ -430,30 +427,64 @@ class Admin extends Controller{
 				break;
 											
 			case "manage-users":
-				$title = "Control Users, Their Contact Info, and Their Permissions";
+				$title = "Manage Site Users";
 				
 				$title_button = '
-				<div class="title_button_container">
+				<div class="title_button_container" style="width:auto;">
 				
 				' . Common::getHtml( "get-button-round", array(
 						'id' => "user",
 						'process' => "show_add",
-						'pk_name' => "view_id",
+						'pk_name' => "user_id",
 						'pk_value' => "0",
 						'button_value' => "+",
 						'inner_div_style' => 'style="padding-top:2px;padding-left:1px;"',
 						'link_style' => 'style="float:right;"') 
-					) . '		 
+					) . '
+					
+					' . Common::getHtml( "get-button-round", array(
+						'id' => "user_type",
+						'process' => "show_manager",
+						'pk_name' => "user_type_id",
+						'pk_value' => "0",
+						'button_value' => "Manage Types",
+						'inner_div_style' => 'style="padding-top:4px;padding-left:1px;font-size:10px;"',
+						'link_style' => 'style="float:right;width:90px;"') 
+					) . '
+					
+					' . Common::getHtml( "get-button-round", array(
+						'id' => "permission",
+						'process' => "show_manager",
+						'pk_name' => "permission_id",
+						'pk_value' => "0",
+						'button_value' => "Manage Permissions",
+						'inner_div_style' => 'style="padding-top:4px;padding-left:1px;font-size:10px;"',
+						'link_style' => 'style="float:right;width:120px;"') 
+					) . '
 				 
 				 </div>
 				';
 				
 				$users = User::getUsers( "active", "1" );
 				$user_list = $this->getHtml( "get-user-list", array( 'records' => $users ) );
-				$add_form = User::getHtml( "get-edit-form", array( 'active_record' => new User( 0 ) ) );
+				$user_type_manager = UserType::getHtml( "get-manager", array() );
+				
+				$add_form = User::getHtml( "get-edit-form", array( 
+					'active_record' => new User( 0 ),
+					'active_user' => $this->m_user ) 
+				);
 				
 				$html = '
 				<div class="item_list_container" id="user_list_container">
+					
+					<div id="user_type_manager" class="item_container padder_10 rounded_corners bg_color_light_tan" style="display:none;" hover_enabled="0">
+						' . $user_type_manager['html'] . '
+					</div>
+					
+					<div id="permission_manager" class="item_container padder_10 rounded_corners bg_color_light_tan" style="display:none;" hover_enabled="0">
+						' . $user_type_manager['html'] . '
+					</div>
+
 					
 					<div id="user_canvas_add" class="item_container padder_10 rounded_corners bg_color_light_tan" style="display:none;" hover_enabled="0">
 						' . $add_form['html'] . '
@@ -471,7 +502,6 @@ class Admin extends Controller{
 			case "get-user-list":
 			
 				$users = $vars['records'];
-				$hover_enabled = ( array_key_exists( "hover_enabled", $vars ) && $vars['hover_enabled'] == TRUE ) ? "1" : "0";
 				
 				$items_per_row = 2;
 				$num_items = count( $users );
@@ -507,7 +537,10 @@ class Admin extends Controller{
 							}
 							
 							$item = $users[$key];
-							$view_form = User::getHtml( "get-view-form", array( 'active_record' => $item ) );
+							$view_form = User::getHtml( "get-view-form", array( 
+								'active_record' => $item,
+								'active_user' => $this->m_user ) 
+							);
 							
 							$html .= '
 						<td class="bg_color_tan border_dark_grey">

@@ -229,9 +229,10 @@ class UserType
 	{
 		//check missing alias
 		if( !array_key_exists( "title", $input ) || 
-			strlen( trim( $input['title'] ) ) == 0 )
+			strlen( trim( $input['title'] ) ) == 0 ||
+			strtolower( $input['title'] ) == "new user type" )
 		{
-			$this->m_form->m_error = "You must select a Title.";
+			$this->m_form->m_error = "You must specify a title.";
 		}
 		
 		return $this->m_form->m_error;
@@ -254,6 +255,220 @@ class UserType
 	{
 		switch( strtolower( trim( $cmd ) ) )
 		{				
+			case "get-manager":
+								
+				$records = self::getUserTypes( "active", "1" );
+				$list = self::getHtml( 'get-type-list', array( 'records' => $records ) );
+				
+				$html = '
+				<div class="padder_20_bottom">
+					
+					<div class="padder_10 center header color_accent">
+						Manage User Types
+					</div>
+					
+					<div id="result_user_type_0" class="result">
+					</div>
+					
+					<div class="padder" id="user_type_items_container">			
+						' . $list['html'] . '
+					</div>
+									
+				</div>
+				';
+				
+				$return = array( 'html' => $html );
+				break;
+				
+			case "get-type-list":
+				
+				$records = $vars['records'];
+				
+				$html = '
+				<table class="manager_items">
+					<tr id="section_item_add" class="bg_color_tan" >
+						<td style="width:33%">
+						
+							<div class="padder_10_left" >
+								<form id="user_type_form_0">
+									<input type="text" name="title" class="text_input text_long center color_black input_clear" value="New User Type" clear_if="New User Type" />
+									<input type="hidden" name="from_add" value="1" />
+								</form>
+							</div>
+							
+							
+						</td>
+						
+						<td class="center" style="width:33%">
+							
+							' . Common::getHtml( "get-button", array( 
+								'pk_name' => "user_type_id",
+								'pk_value' => "0",
+								'process' => "add",
+								'id' => "user_type",
+								'button_value' => "Add",
+								'extra_style' => 'style="width:41px;"' ) 
+							) . '
+						</td>
+						
+						<td class="center" style="width:34%">
+								' . Common::getHtml( "get-button", array( 
+								'pk_name' => "user_type_id",
+								'pk_value' => "0",
+								'process' => "hide_manager",
+								'id' => "user_type",
+								'button_value' => "Hide Manager",
+								'extra_style' => 'style="width:110px;"' ) 
+							) . '
+						</td>
+						
+					</tr>
+				';
+				
+				foreach( $records as $i => $ut )
+				{						
+					$bg_color = ( $i%2 ) ? "bg_color_light_tan" : "bg_color_tan";
+					
+					$html .= '
+					<tr id="user_type_item_' . $ut->m_user_type_id . '" class="' . $bg_color . '" >
+						<td style="width:33%">
+							<div id="user_type_title_' . $ut->m_user_type_id . '" class="header_sub color_black padder_10_left">
+								' . $ut->m_title . '
+							</div>
+							
+							<div id="user_type_title_box_' . $ut->m_user_type_id . '" class="padder_10_left" style="display:none;" >
+								<form id="user_type_form_' . $ut->m_user_type_id . '">
+									<input type="text" name="title" class="text_input text_long center color_black" value="' . $ut->m_title . '" />
+									<input type="hidden" name="from_add" value="0" />
+								</form>
+							</div>
+
+						</td>
+						
+						<td class="center" style="width:33%">
+							
+							<div id="user_type_mod_init_' . $ut->m_user_type_id . '">
+								' . Common::getHtml( "get-button-round", array(
+									'id' => "user_type",
+									'process' => "show_modify",
+									'pk_name' => "user_type_id",
+									'pk_value' => $ut->m_user_type_id,
+									'button_value' => "m",
+									'inner_div_style' => 'style="padding-top:2px;padding-left:1px;"',
+									'link_style' => 'style="margin:auto;"' ) 
+								) . '
+							</div>
+							
+							<div id="user_type_mod_confirm_' . $ut->m_user_type_id . '" style="display:none;">
+								' . Common::getHtml( "get-form-buttons", array( 
+									'left' => array(
+										'pk_name' => "user_type_id",
+										'pk_value' => $ut->m_user_type_id,
+										'process' => "modify",
+										'id' => "user_type",
+										'button_value' => "Modify",
+										'extra_style' => 'style="width:41px;"' ),
+									
+									'right' => array(
+										'pk_name' => "user_type_id",
+										'pk_value' => $ut->m_user_type_id,
+										'process' => "cancel_modify",
+										'id' => "user_type",
+										'button_value' => "Cancel",
+										'extra_style' => 'style="width:41px;"' ) )
+									) . '
+							</div>
+							
+						</td>
+						
+						<td class="center" style="width:34%">
+							
+							<div id="user_type_delete_init_' . $ut->m_user_type_id . '">
+								' . Common::getHtml( "get-button-round", array(
+										'id' => "user_type",
+										'process' => "show_delete",
+										'pk_name' => "user_type_id",
+										'pk_value' => $ut->m_user_type_id,
+										'button_value' => "x",
+										'inner_div_style' => 'style="padding-top:2px;padding-left:1px;"',
+										'link_style' => 'style="margin:auto;"' ) 
+									) . '
+							</div>
+							
+							<div id="user_type_delete_confirm_' . $ut->m_user_type_id . '" style="display:none;">
+								' . Common::getHtml( "get-form-buttons", array( 
+									'left' => array(
+										'pk_name' => "user_type_id",
+										'pk_value' => $ut->m_user_type_id,
+										'process' => "delete",
+										'id' => "user_type",
+										'button_value' => "Delete",
+										'extra_style' => 'style="width:41px;"' ),
+									
+									'right' => array(
+										'pk_name' => "user_type_id",
+										'pk_value' => $ut->m_user_type_id,
+										'process' => "cancel_delete",
+										'id' => "user_type",
+										'button_value' => "Cancel",
+										'extra_style' => 'style="width:41px;"' ) )
+									) . '
+							</div>
+						
+						</td>
+						
+					</tr>
+					';
+				}
+				
+				$html .= '
+				</table>
+				';
+				
+				$return = array( 'html' => $html );
+				break;
+				
+			case "get-radio-selectors":
+
+				$active_ut = $vars['active_record'];
+				$active_user = $vars['active_user'];
+				$all_ut = self::getUserTypes( "active", "1" );
+				
+				$html = '
+				<div class="padder spacer_bottom padder_10_left">
+					<div style="float:right;">
+						<a href="#" id="user" process="refresh_user_type_selector" user_id="' . $active_user->m_user_id . '">
+							Refresh
+						</a>
+					</div>
+				</div>
+				';
+				
+				foreach( $all_ut as $i => $ut )
+				{
+					$selected = ( $ut->m_user_type_id == $active_ut->m_user_type_id ) ? 'checked="checked"' : "";
+					$row_class = ( $i%2 ) ? "bg_color_tan" : "bg_color_light_tan";
+					
+					$html .= '
+					<div class="padder ' . $row_class . '">
+						<table>
+							<tr class="' . $row_class . '">	
+								<td style="vertical-align:top;">
+									<input type="radio" name="user_type_id" ' . $selected . ' value="' . $ut->m_user_type_id . '"/>&nbsp;
+								</td>
+														
+								<td>
+									<span class="header_sub color_accent">' . $ut->m_title . '</span>
+								</td>
+							</tr>
+						</table>
+					</div>
+					';
+				}
+				
+				$return = array( 'html' => $html );
+				break;
+				
 			default:
 				throw new Exception( "Error: Invalid HTML command." );
 				break;
@@ -262,6 +477,31 @@ class UserType
 		return $return;
 		
 	}//getHtml()
+	
+	public static function getUserTypes( $field, $value )
+	{
+		$i = 1;
+		$return = array();
+		$common = new Common();
+		
+		$sql = "
+		SELECT user_type_id
+		FROM common_UserTypes
+		WHERE user_type_id > 0 AND
+		" . $field . " = " . $value . "
+		ORDER BY title ASC";
+		
+		$result = $common->m_db->query( $sql, __FILE__, __LINE__ );
+		
+		while( $row = $common->m_db->fetchRow( $result ) )
+		{
+			$return[$i] = new UserType( $row[0], FALSE );
+			$i++;
+		}
+		
+		return $return;
+		
+	}//getUserTypes()
 		
    /**
 	* Get a member variable's value

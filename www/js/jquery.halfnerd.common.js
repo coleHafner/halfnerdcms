@@ -23,6 +23,11 @@ $(document).ready(function(){
     	.live( "click", function(){
 	    	clearInputValue( $( this ) );
 	    })
+	    
+      	.live( "focus", function(){
+	    	clearInputValue( $( this ) );
+	    })
+
     
     	.live( "blur", function(){
     		restoreInputValue( $( this ) );
@@ -152,10 +157,10 @@ form functions
 function showMessage( message, message_status, process, pk_id )
 {
 	var id = "#result_" + process + "_" + pk_id;
-	
+
 	if( message_status == 1 )
 	{
-		$( id ).removeClass( "result_failure" ).addClass( "color_orange" ).html( message );
+		$( id ).removeClass( "result_failure" ).addClass( "color_accent" ).html( message );
 	}
 	else
 	{

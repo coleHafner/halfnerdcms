@@ -327,16 +327,18 @@ class Section
 				
 			case "get-section-list":
 				
-				$sections = $vars['records'];
+				$records = $vars['records'];
 				
 				$html = '
-				<table class="section_items">
+				<table class="manager_items">
 					<tr id="section_item_add" class="bg_color_tan" >
-						<td class="center" style="width:33%">
-							<form id="section_form_0">
-								<input type="text" name="title" class="text_input text_long center header color_black input_clear section_title" value="Section Title" clear_if="Section Title" />
-								<input type="hidden" name="from_add" value="1" />
-							</form>
+						<td style="width:33%">
+							<div class="padder_10_left">
+								<form id="section_form_0">
+									<input type="text" name="title" class="text_input text_long center color_black input_clear" value="Section Title" clear_if="Section Title" />
+									<input type="hidden" name="from_add" value="1" />
+								</form>
+							</div>
 						</td>
 						
 						<td class="center" style="width:33%">
@@ -357,7 +359,7 @@ class Section
 								'pk_value' => "0",
 								'process' => "hide_manager",
 								'id' => "section",
-								'button_value' => "Hide Sections",
+								'button_value' => "Hide Manager",
 								'extra_style' => 'style="width:110px;"' ) 
 							) . '
 						</td>
@@ -365,19 +367,20 @@ class Section
 					</tr>
 				';
 				
-				foreach( $sections as $i => $s )
+				foreach( $records as $i => $s )
 				{						
 					$bg_color = ( $i%2 ) ? "bg_color_tan" : "bg_color_light_tan";
+					
 					$html .= '
 					<tr id="section_item_' . $s->m_section_id . '" class="' . $bg_color . '" >
-						<td class="center" style="width:33%">
-							<div class="header color_black" id="section_title_' . $s->m_section_id . '">
+						<td style="width:33%">
+							<div class="header_sub color_black padder_10_left" id="section_title_' . $s->m_section_id . '">
 								' . $s->m_title . '
 							</div>
 							
-							<div id="section_title_box_' . $s->m_section_id . '" style="display:none;">
+							<div id="section_title_box_' . $s->m_section_id . '" class="padder_10_left" style="display:none;">
 								<form id="section_form_' . $s->m_section_id . '">
-									<input type="text" name="title" class="text_input text_long center header color_black section_title" value="' . $s->m_title . '" />
+									<input type="text" name="title" class="text_input text_long center color_black section_title" value="' . $s->m_title . '" />
 									<input type="hidden" name="from_add" value="0" />
 								</form>
 							</div>
@@ -464,13 +467,14 @@ class Section
 				</table>
 				';
 				
-				return array( 'html' => $html );
+				$return = array( 'html' => $html );
 				break;
 								
 			default:
 				//throw new exception( "Error: Invalid HTML option." );
 				$return = array();
 				break;
+				
 		}//end switch
 		
 		return $return;

@@ -103,13 +103,14 @@ class Layout
 			<script type="text/javascript" src="' . $file_paths['js'] . '/jquery.halfnerd.common.js"></script>
 			<script type="text/javascript" src="' . $file_paths['js'] . '/jquery.halfnerd.auth.js"></script>
 			<script type="text/javascript" src="' . $file_paths['js'] . '/jquery.halfnerd.article.js"></script>
-			<script type="text/javascript" src="' . $file_paths['js'] . '/jquery.halfnerd.view.js"></script>
-			<script type="text/javascript" src="' . $file_paths['js'] . '/jquery.halfnerd.section.js"></script>
-			<script type="text/javascript" src="' . $file_paths['js'] . '/jquery.halfnerd.user.js"></script>
 			<script type="text/javascript" src="' . $file_paths['js'] . '/jquery.halfnerd.file.js"></script>
 			<script type="text/javascript" src="' . $file_paths['js'] . '/jquery.halfnerd.mail.js"></script>
+			<script type="text/javascript" src="' . $file_paths['js'] . '/jquery.halfnerd.section.js"></script>
+			<script type="text/javascript" src="' . $file_paths['js'] . '/jquery.halfnerd.user.js"></script>
+			<script type="text/javascript" src="' . $file_paths['js'] . '/jquery.halfnerd.usertype.js"></script>
+			<script type="text/javascript" src="' . $file_paths['js'] . '/jquery.halfnerd.view.js"></script>
 			
-			<!--			
+			<!--
 			<script type="text/javascript" src="' . $file_paths['js'] . '/jquery.halfnerd.values.js"></script>
 			-->
 						
@@ -133,7 +134,7 @@ class Layout
 		
 		
 		<!--nav section-->
-		<div class="nav_section bg_color_light_tan">
+		<div class="nav_section bg_color_tan">
 			
 			<!--nav container-->
 			<div class="container_12 nav_container">
@@ -148,7 +149,7 @@ class Layout
 						</div>
 						
 						<div class="logo_words_container header_mega color_accent">
-							Halfnerd CMS
+							Halfnerd <span class="color_orange">CMS</span>
 						</div>
 						
 						' . $login . '
@@ -189,7 +190,7 @@ class Layout
 		</div>
 		<!--/main content section-->
 		
-		<!--footer section-->
+		<!--
 		<div class="footer_section bg_color_white">
 		
 			<div class="container_12">
@@ -204,7 +205,7 @@ class Layout
 				
 			</div> 
 		</div>
-		<!--/footer section-->
+		-->
 		
 		<iframe class="input text_input" style="height:200px;width:300px;display:none;" id="hidden_frame" name="hidden_frame" ></iframe>
 		';

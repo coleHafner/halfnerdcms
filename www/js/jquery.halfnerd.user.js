@@ -43,6 +43,10 @@ $( document ).ready( function(){
 				user.hideCanvasAdd();
 				break;
 				
+			case "refresh_user_type_selector":
+				user.refreshUserTypeSelector( user.user_id );
+				break;
+				
 			default:
 				//show colorbox
 				$.colorbox({ href:"ajax/halfnerd_helper.php?task=user&process=" + process + "&user_id=" + user.user_id });
@@ -66,36 +70,34 @@ action functions
 		$.ajax({
 			type: 'post',
 			url: "ajax/halfnerd_helper.php?task=user&process=add&user_id=0",
-			data: $( "#auth_add_mod_form" ).serialize( true ),
-			success: function(){
-				closeColorbox( 0 );
+			data: $( "#user_add_mod_form_0" ).serialize( true ),
+			success: function( reply ){
+				alert( reply )
 			}
 		});
 	
 	}//add()
 	
-	this.modify = function()
+	this.modify = function( user_id )
 	{
 		$.ajax({
 			type: 'post',
 			url: "ajax/halfnerd_helper.php?task=user&process=modify&user_id=" + this.user_id,
-			data: $( "#auth_add_mod_form" ).serialize( true ),
-			success: function(){
-				closeColorbox( 0 );
+			data: $( "#user_add_mod_form_" + user_id ).serialize( true ),
+			success: function( reply ){
+				alert( "mod_reply: " + reply );
 			}
 		});
 	
 	}//modify()
 	
-	this.deleteRecord = function()
+	this.deleteRecord = function( user_id )
 	{
 		$.ajax({
 			type: 'post',
 			url: "ajax/halfnerd_helper.php?task=user&process=delete&user_id=" + this.user_id,
-			data: $( "#auth_add_mod_form" ).serialize( true ),
-			success: function(){
-				closeColorbox( 0 );
-			}
+			data: $( "#user_add_mod_form_" + user_id ).serialize( true ),
+			success: function(){}
 		});
 	
 	}//modify()
@@ -109,9 +111,9 @@ validation functions
 		$.ajax({
 			type: 'post',
 			url: 'ajax/halfnerd_helper.php?task=user&process=validate&user_id=' + user_id,
-			data: $( "#auth_add_mod_form" ).serialize( true ),
+			data: $( "#user_add_mod_form_" + user_id ).serialize( true ),
 			success: function( reply ){
-			
+				alert( "reply: " + reply );
 				//get vars
 				var reply_split = reply.split( "^" );
 				var result =  reply_split[0];
@@ -129,7 +131,7 @@ validation functions
 							break;
 							
 						case "modify":
-							inner.modify();
+							inner.modify( user_id );
 							break;
 							
 						case "delete":
@@ -140,7 +142,7 @@ validation functions
 				}
 				else
 				{
-					showMessage( message, 0 );
+					showMessage( message, result, "add", 0 );
 				}
 			}
 		});
@@ -150,8 +152,31 @@ validation functions
 /**********************************************************************************************************************************
 ui functions
 **********************************************************************************************************************************/
-
-this.showCanvasMod = function( user_id )
+	
+	this.showCanvasAdd = function( callback )
+	{
+		var user_type = new UserType( 0 );
+		
+		user_type.hideManager( function(){
+			
+			//show add form
+			$( "#user_canvas_add" ).slideDown();
+		});
+				
+	}//showCanvasAdd()
+	
+	this.hideCanvasAdd = function( callback )
+	{
+		callback = ( typeof( callback ) == "undefined" ) ? function(){} : callback;
+		
+		//hide info
+		$( "#user_canvas_add" ).slideUp( function(){
+			callback();
+		});
+		
+	}//hideCanvasAdd()
+	
+	this.showCanvasMod = function( user_id )
 	{
 		//hide info
 		$( "#user_info_" + user_id ).fadeOut( function( ){
@@ -191,29 +216,7 @@ this.showCanvasMod = function( user_id )
 			
 		});
 	}//hideCanvasMod()
-	
-	this.showCanvasAdd = function( callback )
-	{
-		callback = ( typeof( callback ) == "undefined" ) ? function(){} : callback;
-		
-		//show add form
-		$( "#user_canvas_add" ).slideDown( function(){
-			callback();
-		});
-				
-	}//showCanvas()
-	
-	this.hideCanvasAdd = function( callback )
-	{
-		callback = ( typeof( callback ) == "undefined" ) ? function(){} : callback;
-		
-		//hide info
-		$( "#user_canvas_add" ).slideUp( function(){
-			callback();
-		});
-		
-	}//hideCanvas()
-		
+			
 	this.showCanvasDelete = function( user_id )
 	{
 		//hide info
@@ -245,5 +248,18 @@ this.showCanvasMod = function( user_id )
 			
 		});
 	}//hideCanvas()
+	
+	this.refreshUserTypeSelector = function( user_id )
+	{
+		$.ajax({
+			type: 'post',
+			url: '/ajax/halfnerd_helper.php?task=user&process=refresh_user_type_selector&user_id=' + user_id,
+			data:{},
+			success: function( reply ){
+
+				$( ".user_type_selector_" + user_id ).html( reply );
+			}
+		});
+	}//refreshUserTypeSelector()
 	
 }//class User
