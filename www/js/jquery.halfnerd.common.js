@@ -171,24 +171,18 @@ function showMessage( message, message_status, process, pk_id )
 
 function showGlobalMessage( message, status, callback )
 {
-	var run_callback = true;
+	//determine callback
+	callback = ( typeof( callback ) == "undefined" ) ? function(){} : callback;
 	
-	if( typeof( callback ) == "undefined" )
-	{
-		callback = "default";
-		run_callback = false;
-	}
-	
+	//show message
 	$( 'body' ).append( '<div class="global_message rounded_corners border_dark_grey bg_color_orange center header font_color_white" id="global_message">' + message + '</div>' );
 	
+	//hide message + run callback function
 	$( "#global_message" ).delay( 1500 ).fadeOut( "slow", function(){
 	
 		$( this ).remove();
 		
-		if( run_callback )
-		{
-			callback();
-		}
+		callback();
 	});
 	
 }//showGlobalMessage()

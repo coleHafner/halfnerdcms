@@ -374,6 +374,12 @@ switch( $task )
 				
 				echo $user_types['html'];
 				break;
+				
+			case "refresh_user_list":
+				$admin = new Admin( array() );
+				$user_list_html = $admin->getHtml( "get-user-list", array( 'records' => User::getUsers( "active", "1" ) ) );
+				echo $user_list_html['html'];
+				break;
 		}
 		break;
 		

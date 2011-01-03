@@ -475,7 +475,7 @@ class Admin extends Controller{
 				);
 				
 				$html = '
-				<div class="item_list_container" id="user_list_container">
+				<div class="item_list_container">
 					
 					<div id="user_type_manager" class="item_container padder_10 rounded_corners bg_color_light_tan" style="display:none;" hover_enabled="0">
 						' . $user_type_manager['html'] . '
@@ -490,7 +490,7 @@ class Admin extends Controller{
 						' . $add_form['html'] . '
 					</div>
 	
-					<div class="rounded_corners border_dark_grey user_container">
+					<div class="rounded_corners border_dark_grey user_container" id="user_list_container">
 						' . $user_list['html'] . '
 					</div>
 				</div>

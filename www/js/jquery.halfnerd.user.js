@@ -80,7 +80,9 @@ action functions
 			url: "ajax/halfnerd_helper.php?task=user&process=add&user_id=0",
 			data: $( "#user_add_mod_form_0" ).serialize( true ),
 			success: function( reply ){
-				alert( reply )
+			
+				//show delete confirmation
+				showGlobalMessage( "User Added", 1, function(){ reloadPage( 1500 ) } );
 			}
 		});
 	
@@ -93,7 +95,6 @@ action functions
 			url: "ajax/halfnerd_helper.php?task=user&process=modify&user_id=" + this.user_id,
 			data: $( "#user_add_mod_form_" + user_id ).serialize( true ),
 			success: function( reply ){
-				alert( "mod_reply: " + reply );
 			}
 		});
 	
@@ -105,7 +106,17 @@ action functions
 			type: 'post',
 			url: "ajax/halfnerd_helper.php?task=user&process=delete&user_id=" + this.user_id,
 			data: $( "#user_add_mod_form_" + user_id ).serialize( true ),
-			success: function(){}
+			success: function( reply ){
+				
+				//build callback
+				var callback = function(){
+					var inner = new User( 0 );
+					inner.refreshUserList( function(){} );
+				}
+				
+				//show message and refresh list
+				showGlobalMessage( "User Deleted", 1, callback );
+			}
 		});
 	
 	}//modify()
@@ -121,7 +132,7 @@ validation functions
 			url: 'ajax/halfnerd_helper.php?task=user&process=validate&user_id=' + this.user_id,
 			data: $( "#user_add_mod_form_" + user_id ).serialize( true ),
 			success: function( reply ){
-				alert( "reply: " + reply );
+				
 				//get vars
 				var reply_split = reply.split( "^" );
 				var result =  reply_split[0];
@@ -216,6 +227,25 @@ ui functions
 			success: function( reply ){
 
 				$( ".user_type_selector_" + user_id ).html( reply );
+			}
+		});
+	}//refreshUserTypeSelector()
+	
+	this.refreshUserList = function( callback )
+	{
+		callback = ( typeof( callback ) == "undefined" ) ? function(){} : callback;
+		
+		$.ajax({
+			type: 'post',
+			url: '/ajax/halfnerd_helper.php?task=user&process=refresh_user_list&user_id=0',
+			data:{},
+			success: function( new_list ){
+				
+				//show new list
+				$( "#user_list_container" ).html( new_list );
+				
+				//run callback
+				callback();
 			}
 		});
 	}//refreshUserTypeSelector()

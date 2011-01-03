@@ -295,13 +295,12 @@ class User
 	public function delete( $deactivate = TRUE )
 	{
 		//setup vars
-		$articles = Article::getArticlesForAuth( $this->m_user_id );
+		$articles = Article::getArticles( "user_id", $this->m_user_id );
 		
 		if( $deactivate )
 		{
-			foreach( $articles as $i => $article_id )
+			foreach( $articles as $i => $a )
 			{
-				$a = new Article( $article_id );
 				$a->delete( TRUE );
 			}
 			
