@@ -588,8 +588,8 @@ class User
 			case "get-view-form":
 			
 				$u = $vars['active_record'];
-				$ct = new UserType( $c->m_contact_type_id );
-				$contact_type_title = ( strlen( $ct->m_title ) > 0 ) ? $ct->m_title : "User";
+				$ut = new UserType( $u->m_user_type_id );
+				$user_type_title = ( strlen( $ut->m_title ) > 0 ) ? $ut->m_title : "User";
 				
 				//get user image
 				if( !$u->m_use_gravatar )
@@ -608,6 +608,9 @@ class User
 					$img_src = "http://www.gravatar.com/avatar/" . md5( strtolower( trim( $u->m_email ) ) ) . '&s=80';
 				}
 				
+				//shorten bio
+				$truncated_bio = ( strlen( $u->m_bio ) > 75 ) ? substr( $u->m_bio, 0, 73 ) . "..." : $u->m_bio;
+				
 				$html = '
 				<div class="padder">
 					
@@ -617,39 +620,45 @@ class User
 					
 					<div class="user_holder" style="width:50%;">
 						
-						<div class="header color_accent user_name">
+						<div class="header color_black user_name">
 							' . ucwords( $u->m_username ) . '
 						</div>
 						
-						<div>
-							' . $contact_type_title . '
+						<div class="header_sub color_terciary">
+							' . $user_type_title . '
 						</div>
 						
-						<div class="padder_10_top">
+						<div id="user_bio_' . $u->m_user_id . '" class="padder_10_top color_black">
+							' . $truncated_bio . '
+						</div>
+						
+						<div id="user_delete_controls_' . $u->m_user_id . '" class="padder_10_top" style="display:none;">
 							' . Common::getHtml( "get-form-buttons", array( 
-							
-								'left' => array(
-									'button_value' => "Modify",
-									'extra_style' => 'style="width:41px;"',
-									'href' => $common->makeLink( array( 
-										'v' => "admin", 
-										'sub' => "manage-users", 
-										'id1' => $u->m_user_id ) 
-									) 
-								),
-									
-								'right' => array(
+			
+								'left' => array( 
 									'pk_name' => "user_id",
 									'pk_value' => $u->m_user_id,
-									'process' => "show_delete",
+									'process' => "delete",
 									'id' => "user",
 									'button_value' => "Delete",
 									'extra_style' => 'style="width:41px;"' ),
 									
-								'table_style' => 'style="position:relative;width:150px;left:-3px;"' 
-								) 
-							) . '
+								'right' => array(
+									'pk_name' => "user_id",
+									'pk_value' => $u->m_user_id,
+									'process' => "cancel_delete",
+									'id' => "user",
+									'button_value' => "Cancel",
+									'extra_style' => 'style="width:41px;"' ),
+								
+								'table_style' => 'style="position:relative;width:150px;left:-5px;"'
+								
+								)
+								 
+							) . '								
 						</div>
+
+						
 					</div>
 						
 					<div class="clear"></div>
@@ -745,46 +754,6 @@ class User
 						</div>
 						
 						<div class="clear"></div>
-						';
-						
-				if( in_array( 'SPR', $active_user->m_permissions ) )
-				{
-					//user permission html
-					$user_permissions = Permission::getHtml( 'get-permissions-list-readonly', array( 
-						'active_user_record' => $u ) 
-					);
-					
-					//user type html
-					$user_types = UserType::getHtml( 'get-radio-selectors', array( 
-						'active_record' => new UserType( $u->m_user_type_id ),
-						'active_user' => $u )
-					);
-	
-					$html .= '
-						<div class="padder padder_10_top">
-							' . Common::getHtml( "selector-module", array( 
-								'title' => "User Title", 
-								'content' => $user_types['html'],
-								'content_class' => "user_type_selector_" . $u->m_user_id . " padder_10_top",
-								'container_style' => 'style="height:auto;"',
-								'content_style' => 'style="text-align:left;"' ) ) . '
-								
-							' . Common::getHtml( "selector-module-spacer", array() ) . '
-							
-							' . Common::getHtml( "selector-module", array( 
-								'title' => "User Permissions", 
-								'content' => $user_permissions['html'],
-								'content_class' => "",
-								'container_style' => 'style="height:auto;"',
-								'content_style' => 'style="text-align:left;"' ) ) . '
-								
-							<div class="clear"></div>
-							
-						</div>
-						';
-				}
-						
-				$html .= '
 					</div>
 	
 					<div class="header_sub color_terciary padder_10_top">
@@ -815,7 +784,52 @@ class User
 						</div>
 						
 					</div>
+					';
 					
+				if( in_array( 'SPR', $active_user->m_permissions ) )
+				{
+					//user permission html
+					$user_permissions = Permission::getHtml( 'get-permissions-list-readonly', array( 
+						'active_user_record' => $u ) 
+					);
+					
+					//user type html
+					$user_types = UserType::getHtml( 'get-radio-selectors', array( 
+						'active_record' => new UserType( $u->m_user_type_id ),
+						'active_user' => $u )
+					);
+	
+					$html .= '
+					<div class="header_sub color_terciary padder_10_top">
+						User Access Info
+					</div>
+					
+					<div class="padder_10_left">
+						<div class="padder padder_10_top">
+							' . Common::getHtml( "selector-module", array( 
+								'title' => "User Title", 
+								'content' => $user_types['html'],
+								'content_class' => "user_type_selector_" . $u->m_user_id . " padder_10_top",
+								'container_style' => 'style="height:auto;"',
+								'content_style' => 'style="text-align:left;"' ) ) . '
+								
+							' . Common::getHtml( "selector-module-spacer", array() ) . '
+							
+							' . Common::getHtml( "selector-module", array( 
+								'title' => "User Permissions", 
+								'content' => $user_permissions['html'],
+								'content_class' => "",
+								'container_style' => 'style="height:auto;"',
+								'content_style' => 'style="text-align:left;"' ) ) . '
+								
+							<div class="clear"></div>
+							
+						</div>
+					</div>
+					';
+				}
+			
+				$html .= '
 					<div class="padder">
 						
 						' . Common::getHtml( "get-form-buttons", array( 
@@ -839,7 +853,7 @@ class User
 						) . '
 							
 					</div>
-					
+
 				</form>
 				';
 						

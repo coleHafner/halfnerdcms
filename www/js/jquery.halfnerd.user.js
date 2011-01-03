@@ -43,6 +43,14 @@ $( document ).ready( function(){
 				user.hideCanvasAdd();
 				break;
 				
+			case "show_delete":
+				user.showCanvasDelete( user.user_id );
+				break;
+				
+			case "cancel_delete":
+				user.hideCanvasDelete( user.user_id );
+				break;
+				
 			case "refresh_user_type_selector":
 				user.refreshUserTypeSelector( user.user_id );
 				break;
@@ -110,7 +118,7 @@ validation functions
 	{
 		$.ajax({
 			type: 'post',
-			url: 'ajax/halfnerd_helper.php?task=user&process=validate&user_id=' + user_id,
+			url: 'ajax/halfnerd_helper.php?task=user&process=validate&user_id=' + this.user_id,
 			data: $( "#user_add_mod_form_" + user_id ).serialize( true ),
 			success: function( reply ){
 				alert( "reply: " + reply );
@@ -176,78 +184,28 @@ ui functions
 		
 	}//hideCanvasAdd()
 	
-	this.showCanvasMod = function( user_id )
+	this.showCanvasDelete = function( user_id, callback )
 	{
-		//hide info
-		$( "#user_info_" + user_id ).fadeOut( function( ){
+		callback = ( typeof( callback ) == "undefined" ) ? function(){} : callback;	
 		
-			$( "#user_canvas_delete_" + user_id ).fadeOut( function( ){
-			
-				//new obj
-				var inner = new Article( 0 );
-				
-				var callback = function(){
-					//show canvas
-					$( "#user_canvas_mod_" + user_id ).slideDown();
-					
-					//disable hover
-					$( "#user_canvas_mod_" + user_id ).attr( "hover_enabled", "0" );
-				}
-				
-				//hide add
-				inner.hideCanvasAdd( callback );
-				
-			});
-		});
-	}//showCanvas()
-	
-	this.hideCanvasMod = function( user_id, callback )
-	{
-		callback = ( typeof( callback ) == "undefined" ) ? function(){} : callback;
-		
-		//hide canvas
-		$( "#user_canvas_mod_" + user_id ).slideUp( function(){
-		
-			//show info
-			$( "#user_info_" + user_id ).fadeIn( function(){
-				
-				callback();
-			});
-			
-		});
-	}//hideCanvasMod()
-			
-	this.showCanvasDelete = function( user_id )
-	{
-		//hide info
-		$( "#user_info_" + user_id ).fadeOut( function( ){
-		
-			$( "#user_canvas_mod_" + user_id ).fadeOut( function( ){
-			
-				//show canvas
-				$( "#user_canvas_delete_" + user_id ).slideDown();
-				
-			});
+		//hide bio
+		$( "#user_bio_" + user_id ).fadeOut( function(){
+			$( "#user_delete_controls_" + user_id ).fadeIn();
 		});
 		
-	}//showCanvas()
+	}//showCanvasDelete()
+		
 	
 	this.hideCanvasDelete = function( user_id, callback )
 	{
 		callback = ( typeof( callback ) == "undefined" ) ? function(){} : callback;
 		
-		//hide canvas
-		$( "#user_canvas_delete_" + user_id ).slideUp( function(){
-		
-			//show info
-			$( "#user_info_" + user_id ).fadeIn( function(){
-				
-				//run callback
-				callback();	
-			});
-			
+		//hide bio
+		$( "#user_delete_controls_" + user_id ).fadeOut( function(){
+			$( "#user_bio_" + user_id ).fadeIn();
 		});
-	}//hideCanvas()
+		
+	}//hideCanvasDelete()
 	
 	this.refreshUserTypeSelector = function( user_id )
 	{

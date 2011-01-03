@@ -59,7 +59,7 @@ $(document).ready(function(){
     	
     $( ".item_container" )
     	.live( "mouseenter", function(){
-    	
+
     		if( hasAttr( $( this ), "hover_enabled" ) && 
     			$( this ).attr( "hover_enabled" ) == "1" )
     		{
@@ -69,7 +69,7 @@ $(document).ready(function(){
 	    			$( this ).find( "#item_control" ).hide();
 	    		});
 	    		
-	    		//show selected bg color and admin options for current article_container
+	    		//show selected bg color and admin options for current item_container
 	    		$( this ).removeClass( "bg_color_light_tan" ).addClass( "bg_color_tan" );
 	    		$( this ).find( "#item_control" ).show();
 	    	}

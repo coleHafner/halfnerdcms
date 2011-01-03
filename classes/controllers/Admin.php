@@ -490,7 +490,7 @@ class Admin extends Controller{
 						' . $add_form['html'] . '
 					</div>
 	
-					<div class="item_container rounded_corners bg_color_light_tan" hover_enabled="0">
+					<div class="rounded_corners border_dark_grey user_container">
 						' . $user_list['html'] . '
 					</div>
 				</div>
@@ -543,9 +543,32 @@ class Admin extends Controller{
 							);
 							
 							$html .= '
-						<td class="bg_color_tan border_dark_grey">
-							<div id="user_info_' . $item->m_user_id . '">						
+						<td>
+							<div id="user_info_' . $item->m_user_id . '" class="item_container bg_color_light_tan border_dark_grey" hover_enabled="1" style="margin-top:0px;">
+								
 								' . $view_form['html'] . '
+								
+								<div class="title_button_container" id="item_control" style="display:none;">
+									' . Common::getHtml( "get-button-round", array(
+										'id' => "user",
+										'process' => "delete",
+										'pk_name' => "user_id",
+										'pk_value' => $item->m_user_id,
+										'button_value' => "m",
+										'inner_div_style' => 'style="padding-top:2px;padding-left:1px;"',
+										'link_style' => 'style="float:right;"') 
+									) . '
+									' . Common::getHtml( "get-button-round", array(
+										'id' => "user",
+										'process' => "show_delete",
+										'pk_name' => "user_id",
+										'pk_value' => $item->m_user_id,
+										'button_value' => "x",
+										'inner_div_style' => 'style="padding-top:2px;padding-left:1px;"',
+										'link_style' => 'style="float:right;"') 
+									) . '
+								</div>
+								
 							</div>
 						</td>
 						';

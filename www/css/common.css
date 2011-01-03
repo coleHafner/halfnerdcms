@@ -584,7 +584,7 @@ Admin
 	position:relative;
 }
 
-.item_container {
+.item_container, .user_container {
 	position:relative;
 	margin-top:10px;
 	min-height:80px;
@@ -652,10 +652,10 @@ Admin
 }
 
 .admin_menu_container {
-	position:fixed;
-	top:153px;
-	left:170px;
+	position:relative;
 	width:170px;
+	margin:auto;
+	top:45px;
 }
 
 .admin_options_bar {
