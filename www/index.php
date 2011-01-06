@@ -32,9 +32,9 @@ if( !$auth->m_common->controllerFileExists( $requested_controller ) )
 
 //create new controller
 require_once( "controllers/" . $requested_controller );
-$_GET['v'] = ( !array_key_exists( "v", $_GET ) ) ? $layout->m_active_view : $_GET['v'];
-$controller = new $layout->m_active_view( $_GET, TRUE );
+
 $login_string = '';
+$controller = new $layout->m_active_view( $_GET, TRUE );
 
 //set content
 $content = $auth->controlPageAccess( $controller );

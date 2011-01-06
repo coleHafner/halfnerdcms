@@ -72,7 +72,7 @@ $( document ).ready( function(){
 					break;
 					
 				default:
-					$.colorbox({ href:"ajax/halfnerd_helper.php?task=view&process=" + process + "&view_id=" + view.view_id });
+					$.colorbox({ href:'/ajax/halfnerd_helper.php?task=view&process=' + process + '&view_id=' + view.view_id });
 					break;
 			}//end switch
 		});
@@ -91,7 +91,7 @@ action functions
 		//add or modify article
 		$.ajax({
 			type: 'post',
-			url: "ajax/halfnerd_helper.php?task=view&process=add&view_id=0",
+			url: '/ajax/halfnerd_helper.php?task=view&process=add&view_id=0',
 			data: $( form_name ).serialize( true ),
 			success: function( view_id ){	
 			
@@ -99,7 +99,7 @@ action functions
 				var inner = new View( view_id );
 				
 				//show success message
-				showGlobalMessage( "View Added", 1, function(){ reloadPage( 1000 ); } );
+				showMessage( "View Added", 1, function(){ reloadPage( 1000 ); } );
 			}
 		});
 		
@@ -110,18 +110,19 @@ action functions
 		//add or modify article
 		$.ajax({
 			type: 'post',
-			url: "ajax/halfnerd_helper.php?task=view&process=modify&view_id=" + this.view_id,
+			url: '/ajax/halfnerd_helper.php?task=view&process=modify&view_id=' + this.view_id,
 			data: $( form_name ).serialize( true ),
 			success: function( view_id ){		
 				
-				//new object
-				var inner = new View( view_id );
+				//build callback
+				var callback = function() { 
+					var inner = new View( view_id );
+					inner.showNormalList();
+				}
 				
 				//show success message
-				showGlobalMessage( "View Saved", 1 );
+				showMessage( "View Saved", 1, callback );
 				
-				//hide canvas
-				inner.hideCanvasMod( view_id, function(){ reloadPage( 1000 ) } );
 			}
 		});
 		
@@ -131,7 +132,7 @@ action functions
 	{
 		$.ajax({
 			type:'post',
-			url: "ajax/halfnerd_helper.php?task=view&process=delete&view_id=" + this.view_id,
+			url: '/ajax/halfnerd_helper.php?task=view&process=delete&view_id=' + this.view_id,
 			data: "",
 			success: function( view_id ){
 				
@@ -139,7 +140,7 @@ action functions
 				var inner = new View( view_id );
 				
 				//show success message
-				showGlobalMessage( "View Deleted", 1, function(){ reloadPage( 1000 ); } );
+				showMessage( "View Deleted", 1, function(){ reloadPage( 1000 ); } );
 			}
 		});
 	}//delete()
@@ -152,11 +153,11 @@ action functions
 		$.ajax({
 			type:'post',
 			data: { view_priorities: list_string },
-			url: "ajax/halfnerd_helper.php?task=view&process=reorder&view_id=0",
+			url: '/ajax/halfnerd_helper.php?task=view&process=reorder&view_id=0',
 			success: function( reply ){
 			
 				//show message and reload
-				showGlobalMessage( "Views Reordered", 1, function(){ reloadPage( 1000 ); } );
+				showMessage( "Views Reordered", 1, function(){ reloadPage( 1000 ); } );
 			}
 		});
 		
@@ -172,7 +173,7 @@ validation functions
 		
 		$.ajax({
 			type: 'post',
-			url: "ajax/halfnerd_helper.php?task=view&process=validate",
+			url: '/ajax/halfnerd_helper.php?task=view&process=validate',
 			data: $( form_name ).serialize( true ),
 			success: function( reply ) {		
 			
@@ -203,7 +204,7 @@ validation functions
 				}
 				else
 				{
-					showMessage( message, 0, process, view_id );	
+					showMessage( message, 0 );	
 				}
 			}
 		});
@@ -244,11 +245,11 @@ Ui functions
 		callback = ( typeof( callback ) == "undefined" ) ? function(){} : callback;
 		
 		//hide canvas
-		$( "#view_canvas_mod_" + view_id ).fadeOut( function(){
-		
+		$( "#view_canvas_mod_" + view_id ).slideUp( function(){
+			
 			//show info
 			$( "#view_info_" + view_id ).fadeIn( function(){
-			
+				
 				//run callback
 				callback();					
 			});
@@ -336,13 +337,11 @@ Ui functions
 			data:{},
 			success: function( html ){
 				
-				//hide reorder form
-				$( "#view_canvas_reorder" ).slideUp( function(){
-					
-					//populate new list content
-					$( "#view_list_container" ).html( html );
+				//populate new list content
+				$( "#view_list_container" ).html( html );
 				
-				});
+				//hide reorder form
+				$( "#view_canvas_reorder" ).slideUp();
 			}
 		});
 	}//showNormalViews()

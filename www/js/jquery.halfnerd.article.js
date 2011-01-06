@@ -64,7 +64,7 @@ $( document ).ready( function(){
 					break;
 					
 				default:
-					$.colorbox({ href:"ajax/halfnerd_helper.php?task=article&process=" + process + "&article_id=" + article.article_id });
+					$.colorbox({ href:'/ajax/halfnerd_helper.php?task=article&process=' + process + '&article_id=' + article.article_id });
 					break;
 			}//end switch
 		});
@@ -83,15 +83,12 @@ action functions
 		//add or modify article
 		$.ajax({
 			type: 'post',
-			url: "ajax/halfnerd_helper.php?task=article&process=add&article_id=0",
+			url: '/ajax/halfnerd_helper.php?task=article&process=add&article_id=0',
 			data: $( form_name ).serialize( true ),
 			success: function( article_id ){	
 			
-				//new object
-				var inner = new Article( article_id );
-				
 				//show success message
-				showGlobalMessage( "Article Added", 1, function(){ reloadPage( 1000 ); } );
+				showMessage( "Article Added", 1, function(){ reloadPage( 1000 ); } );
 			}
 		});
 		
@@ -102,17 +99,12 @@ action functions
 		//add or modify article
 		$.ajax({
 			type: 'post',
-			url: "ajax/halfnerd_helper.php?task=article&process=modify&article_id=" + this.article_id,
+			url: '/ajax/halfnerd_helper.php?task=article&process=modify&article_id=' + this.article_id,
 			data: $( form_name ).serialize( true ),
-			success: function( article_id ){		
-				//new object
-				var inner = new Article( article_id );
-				
+			success: function( article_id ){
+			
 				//show success message
-				showGlobalMessage( "Article Saved", 1 );
-				
-				//hide canvas
-				inner.hideCanvasMod( article_id, function(){ reloadPage( 1000 ) } );
+				showMessage( "Article Saved", 1, function(){ reloadPage( 1000 ) } );
 			}
 		});
 		
@@ -122,15 +114,12 @@ action functions
 	{
 		$.ajax({
 			type:'post',
-			url: "ajax/halfnerd_helper.php?task=article&process=delete&article_id=" + this.article_id,
+			url: '/ajax/halfnerd_helper.php?task=article&process=delete&article_id=' + this.article_id,
 			data: "",
 			success: function( article_id ){
 			
-				//new object
-				var inner = new Article( article_id );
-				
 				//show success message
-				showGlobalMessage( "Article Deleted", 1, function(){ reloadPage( 1000 ) } );
+				showMessage( "Article Deleted", 1, function(){ reloadPage( 1000 ) } );
 			}
 		});
 	}//delete()
@@ -145,7 +134,7 @@ validation functions
 		
 		$.ajax({
 			type: 'post',
-			url: "ajax/halfnerd_helper.php?task=article&process=validate",
+			url: '/ajax/halfnerd_helper.php?task=article&process=validate',
 			data: $( form_name ).serialize( true ),
 			success: function( reply ) {		
 			
@@ -176,7 +165,7 @@ validation functions
 				}
 				else
 				{
-					showMessage( message, 0, process, article_id );	
+					showMessage( message, 0 );	
 				}
 			}
 		});
@@ -285,7 +274,7 @@ Ui functions
 	{
 		$.ajax({
 			type: 'post',
-			url: 'ajax/halfnerd_helper.php?task=article&process=refresh_section_selector&article_id=' + article_id,
+			url: '/ajax/halfnerd_helper.php?task=article&process=refresh_section_selector&article_id=' + article_id,
 			data: {},
 			success: function( section_selector ){
 				$( ".article_section_selector_" + article_id ).html( section_selector );

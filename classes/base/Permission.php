@@ -309,7 +309,7 @@ class Permission
 		switch( strtolower( trim( $cmd ) ) )
 		{				
 			case "get-permissions-list-readonly":
-			
+				
 				$selected_permissions = $vars['active_user_record']->m_permissions;
 				$all_p = self::getPermissions( "active", "1" );
 				
@@ -320,7 +320,7 @@ class Permission
 				foreach( $all_p as $i => $p )
 				{
 					$row_class = ( $i%2 ) ? "bg_color_tan" : "bg_color_light_tan";
-					$checked = ( in_array( $p->m_alias, $selected_permissions ) ) ? 'checked="checked"' : "";
+					$checked = ( in_array( strtolower( $p->m_alias ), $selected_permissions ) ) ? 'checked="checked"' : "";
 					
 					$html .= '
 					<div class="padder ' . $row_class . '">

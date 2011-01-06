@@ -134,7 +134,7 @@ class FileHandler
 		
 		return TRUE;
 		
-	} // resizeImage()
+	}//resizeImage()
 	
 	/**
 	* Attempts to delete files from a web interface using two different methods.
@@ -168,7 +168,12 @@ class FileHandler
 		
 		return TRUE;
 		
-	} // requiredFieldsReceived()
+	}//requiredFieldsReceived()
+	
+	public function validateUserPhoto()
+	{
+			
+	}//validateUserPhoto()
 	
 	/*
 	* Returns the variable name if access is allowed.  Returns FALSE otherwise.

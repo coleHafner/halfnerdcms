@@ -30,7 +30,7 @@ validation functions
 	{
 		$.ajax({
 			type: 'post',
-			url: "ajax/halfnerd_helper.php?task=mail&process=validate",
+			url: '/ajax/halfnerd_helper.php?task=mail&process=validate',
 			data: $( "#email_form" ).serialize( true ),
 			success: function( reply ){
 				
@@ -62,7 +62,7 @@ validation functions
 	{
 		$.ajax({
 			type: 'post',
-			url: "ajax/halfnerd_helper.php?task=mail&process=send",
+			url: '/ajax/halfnerd_helper.php?task=mail&process=send',
 			data: $( "#email_form" ).serialize( true ),
 			success: function( reply ){
 				showMessage( "Mail Sent", 1 );

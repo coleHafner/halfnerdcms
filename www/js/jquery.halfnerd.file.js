@@ -33,7 +33,7 @@ validation functions
 	{
 		$.ajax({
 			type:'post',
-			url: 'ajax/halfnerd_helper.php?task=file&process=validate',
+			url: '/ajax/halfnerd_helper.php?task=file&process=validate',
 			data: { file_path_and_name: file, is_image: "1" },
 			success: function( validation_result ){
 				
@@ -114,7 +114,7 @@ validation functions
 		//check duplicate file name
 		$.ajax({
 			type:'post',
-			url: "ajax/halfnerd_helper.php?task=file&process=check-dup-file-name",
+			url: '/ajax/halfnerd_helper.php?task=file&process=check-dup-file-name',
 			data: { file_path_and_name: file },
 			success: function( reply ) {
 				reply = $.trim( reply );

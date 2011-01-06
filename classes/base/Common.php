@@ -44,7 +44,7 @@ class Common {
 	{
 		$return = "";
 		$counter = 0;
-		$valid_fields = array( "v", "sub", "id1", "id2", "show_tip" );
+		$valid_fields = array( "v", "sub", "id1", "id2" );
 			
 		foreach( $get as $field => $val )
 		{
@@ -52,9 +52,12 @@ class Common {
 			
 			if( in_array( $field, $valid_fields ) )
 			{
-				$delim = ( $counter == 0 ) ? "/?" : "&"; 
-				$return .= $delim . $field . "=" . strtolower( $val );
-				$counter++;
+				
+				//$delim = ( $counter == 0 ) ? "/?" : "&"; 
+				//$return .= $delim . $field . "=" . strtolower( $val );
+				//$counter++;
+				$val = ( strtolower( $field ) == "v" ) ? "_" . $val : $val;
+				$return .= "/" . strtolower( $val );
 			}
 		}//loop through controller vars
 		
@@ -460,11 +463,54 @@ class Common {
 				
 			case "get-button-round":
 			
+				$active = '';
+				$border_class = 'border_color_white';
 				$link_style = $style = ( array_key_exists( "link_style", $vars ) ) ? $vars['link_style'] : "";
 				$inner_div_style = ( array_key_exists( "inner_div_style", $vars ) ) ? $vars['inner_div_style'] : "";
 				
+				//determine selected
+				if( array_key_exists( "selected", $vars ) &&
+					$vars['selected'] == 1 )
+				{
+					$active = 'active="1"';
+					$border_class = 'border_color_orange';
+				}
+				
+				//determine link guts
+				if( !array_key_exists( "href", $vars) )
+				{
+					$link_guts = 'href="#" id="' . $vars['id'] . '" process="' . $vars['process'] . '" ' . $vars['pk_name'] . '="' . $vars['pk_value'] . '"';
+				}
+				else
+				{
+					$link_guts = 'href="' . $vars['href'] . '"';
+				}
+				
 				$return = '
-				<a href="#" id="' . $vars['id'] . '" process="' . $vars['process'] . '" ' . $vars['pk_name'] . '="' . $vars['pk_value'] . '" class="view admin_button bg_color_white center border_color_white" ' . $link_style . '>
+				<a ' . $link_guts . ' class="no_hover admin_button bg_color_white center ' . $border_class . '" ' . $link_style . ' ' . $active . '>
+					<div ' . $inner_div_style . '>
+						' . $vars['button_value'] . '
+					</div>
+				</a>
+				';
+
+				break;
+				
+			case "get-button-square":
+				$link_style = $style = ( array_key_exists( "link_style", $vars ) ) ? $vars['link_style'] : "";
+				$inner_div_style = ( array_key_exists( "inner_div_style", $vars ) ) ? $vars['inner_div_style'] : "";
+				
+				if( !array_key_exists( "href", $vars) )
+				{
+					$link_guts = 'href="#" id="' . $vars['id'] . '" process="' . $vars['process'] . '" ' . $vars['pk_name'] . '="' . $vars['pk_value'] . '"';
+				}
+				else
+				{
+					$link_guts = 'href="' . $vars['href'] . '"';
+				}
+				
+				$return = '
+				<a ' . $link_guts . ' class="orange_hover square_button bg_color_white center border_color_white rounded_corners" ' . $link_style . '>
 					<div ' . $inner_div_style . '>
 						' . $vars['button_value'] . '
 					</div>

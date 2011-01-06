@@ -68,7 +68,7 @@ $( document ).ready( function(){
 					break;
 					
 				default:
-					$.colorbox({ href:"ajax/halfnerd_helper.php?task=section&process=" + process + "&section_id=" + section.section_id });
+					$.colorbox({ href:'/ajax/halfnerd_helper.php?task=section&process=' + process + '&section_id=' + section.section_id });
 					break;
 			}//end switch
 		});
@@ -87,15 +87,19 @@ action functions
 		//add or modify article
 		$.ajax({
 			type: 'post',
-			url: "ajax/halfnerd_helper.php?task=section&process=add&section_id=0",
+			url: '/ajax/halfnerd_helper.php?task=section&process=add&section_id=0',
 			data: $( form_name ).serialize( true ),
 			success: function( section_id ){	
 			
-				//new object
-				var inner = new Section( section_id );
+				var callback = function(){ 
+					//new object
+					var inner = new Section( section_id );
+					
+					//refresh section list
+					inner.refreshSectionList();
+				}
 				
-				//refresh section list
-				inner.refreshSectionList();
+				showMessage( "Section Saved", 1, callback );
 			}
 		});
 		
@@ -106,15 +110,19 @@ action functions
 		//add or modify article
 		$.ajax({
 			type: 'post',
-			url: "ajax/halfnerd_helper.php?task=section&process=modify&section_id=" + this.section_id,
+			url: '/ajax/halfnerd_helper.php?task=section&process=modify&section_id=' + this.section_id,
 			data: $( form_name ).serialize( true ),
 			success: function( section_id ){		
 			
-				//new object
-				var inner = new Section( section_id );
+				var callback = function(){
+					//new object
+					var inner = new Section( section_id );
+					
+					//refresh section list
+					inner.refreshSectionList();
+				}
 				
-				//refresh section list
-				inner.refreshSectionList();
+				showMessage( "Section Saved", 1, callback );
 			}
 		});
 		
@@ -124,15 +132,19 @@ action functions
 	{
 		$.ajax({
 			type:'post',
-			url: "ajax/halfnerd_helper.php?task=section&process=delete&section_id=" + this.section_id,
+			url: '/ajax/halfnerd_helper.php?task=section&process=delete&section_id=' + this.section_id,
 			data: "",
 			success: function( section_id ){
 				
-				//new object
-				var inner = new Section( section_id );
+				var callback = function(){
+					//new object
+					var inner = new Section( section_id );
+					
+					//refresh section list
+					inner.refreshSectionList();
+				}
 				
-				//refresh section list
-				inner.refreshSectionList();
+				showMessage( "Section Deleted", 1, callback );
 			}
 		});
 	}//delete()
@@ -147,7 +159,7 @@ validation functions
 		
 		$.ajax({
 			type: 'post',
-			url: "ajax/halfnerd_helper.php?task=section&process=validate",
+			url: '/ajax/halfnerd_helper.php?task=section&process=validate',
 			data: $( form_name ).serialize( true ),
 			success: function( reply ) {		
 			
@@ -178,7 +190,7 @@ validation functions
 				}
 				else
 				{
-					showMessage( message, 0, "section", "0" );	
+					showMessage( message, 0 );	
 				}
 			}
 		});
@@ -268,7 +280,7 @@ Ui functions
 	{
 		$.ajax({
 			type: 'post',
-			url: 'ajax/halfnerd_helper.php?task=section&process=show_section_list&section_id=0',
+			url: '/ajax/halfnerd_helper.php?task=section&process=show_section_list&section_id=0',
 			data: {},
 			success: function( section_list ){
 				$( "#section_items_container" ).html( section_list );

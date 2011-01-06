@@ -537,7 +537,7 @@ class Admin extends Controller{
 							}
 							
 							$item = $users[$key];
-							$view_form = User::getHtml( "get-view-form", array( 
+							$view_form = User::getHtml( "get-view-form-badge", array( 
 								'active_record' => $item,
 								'active_user' => $this->m_user ) 
 							);
@@ -548,12 +548,12 @@ class Admin extends Controller{
 								
 								' . $view_form['html'] . '
 								
-								<div class="title_button_container" id="item_control" style="display:none;">
+								<div class="title_button_container" id="item_control" style="display:none;width:100px;height:40px;">
 									' . Common::getHtml( "get-button-round", array(
-										'id' => "user",
-										'process' => "delete",
-										'pk_name' => "user_id",
-										'pk_value' => $item->m_user_id,
+										'href' => $this->m_common->makeLink( array(
+											'v' => "users",
+											'sub' => $item->m_username, 
+											'id1' => "update-profile" ) ),
 										'button_value' => "m",
 										'inner_div_style' => 'style="padding-top:2px;padding-left:1px;"',
 										'link_style' => 'style="float:right;"') 
@@ -586,7 +586,7 @@ class Admin extends Controller{
 					$html .= '
 					<tr>
 						<td class="center" colspan="2">
-							There are 0 users in this album. Check back later...
+							There are 0 users... how are you logged in?
 						</td>
 					</tr>
 					';

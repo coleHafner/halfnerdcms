@@ -9,6 +9,7 @@ require_once( "base/Common.php" );
 require_once( "base/FormHandler.php" );
 require_once( "base/Session.php" );
 require_once( "base/File.php" );
+require_once( "base/User.php" );
 
 class Authentication
 {
@@ -119,7 +120,7 @@ class Authentication
 							<div id="result_login_attempt" class="result"></div>
 							
 							<div class="center bottom_spacer">
-								<input type="text" class="input text_input text_long font_normal input_clear" name="username" value="Username or Email" clear_if="Username or Email" />
+								<input type="text" class="input text_input text_long font_normal input_clear" name="username" value="Username or Email" clear_if="Username or Email" id="auto_login"/>
 							</div>
 							
 							<div class="center bottom_spacer">
@@ -166,7 +167,9 @@ class Authentication
 					<div>
 						Howdy, ' . ucwords( $user->m_username ) . '
 						&nbsp;|&nbsp
-						<a href="' . $common->makeLink( array( 'v' => "admin", 'sub' => 'manage-account' ) ) . '">My Account</a>
+						<a href="' . $common->makeLink( array(  'v' => "account", 'sub' => "update-contact" ) ) . '">
+							My Account
+						</a>
 						&nbsp;|&nbsp
 						<a href="#" id="authentication" process="kill_login">Logout</a>
 					</div>
@@ -255,24 +258,31 @@ class Authentication
 	 */
 	public function controlPageAccess( $controller )
 	{
-		$show_page_content = TRUE;
+		$show_page_content = FALSE;
 		
+		//if page requires login
 		if( $controller->getAuthStatus() )
 		{
-			if( !$this->validateCurrentLogin() )	
+			if( $this->validateCurrentLogin() )	
 			{
-				$show_page_content = FALSE;
+				//if we have a current login, set the user object.
+				if( User::userExists( self::getLoginUserId() ) )
+				{
+					$controller->setUser( self::getLoginUserId() );
+					$show_page_content = TRUE;
+				}
 			}
+		}
+		else 
+		{
+			$show_page_content = TRUE;
 		}
 		
 		if( $show_page_content )
 		{
-			//if we have a current login, set the auth object.
-			if( $this->validateCurrentLogin() )
-			{
-				$controller->setUser( self::getUserId() );
-			}
-
+			//if we have a current login, set the user object.
+			$controller->setUser( self::getLoginUserId() );
+			
 			$controller->setContent();
 			$return = $controller->getContent();
 		}
@@ -313,9 +323,9 @@ class Authentication
 	 * @since	20100922, Hafner
 	 * @return 	mixed
 	 */
-	public static function getUserId()
+	public static function getLoginUserId()
 	{
-		$return = FALSE;
+		$return = 0;
 		$common = new Common();
 		
 		//get auth id
@@ -335,7 +345,7 @@ class Authentication
 		
 		return $return;
 		
-	}//getUserId()
+	}//getLoginUserId()
 	
 	public static function passwordEncrypt( $salt, $plain_text_password )
 	{

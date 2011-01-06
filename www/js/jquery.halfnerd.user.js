@@ -7,7 +7,21 @@
 
 $( document ).ready( function(){
 	
-    $( "#user" )
+	$( ".user_toggle_photo_options" )
+		.live( "change", function(){
+			var active_option = $( this ).attr( "active_option" );
+			
+			if( active_option == "gravatar" )
+			{
+				$( "#user_photo_file" ).val( "" );
+			}
+			else if( active_option == "file" )
+			{
+				$( "#user_photo_gravatar" ).attr( "checked", false );
+			}
+		});
+    
+	$( "#user" )
     	.live( "click", function( event ){
     	
     	//cancel event
@@ -32,7 +46,7 @@ $( document ).ready( function(){
 				break;
 				
 			case "delete":
-				user.deleteRecord();
+				user.deleteRecord( user.user_id );
 				break;
 				
 			case "show_add":
@@ -54,10 +68,14 @@ $( document ).ready( function(){
 			case "refresh_user_type_selector":
 				user.refreshUserTypeSelector( user.user_id );
 				break;
+			
+			case "submit_image_form":
+				user.updatePhoto();
+				break;
 				
 			default:
 				//show colorbox
-				$.colorbox({ href:"ajax/halfnerd_helper.php?task=user&process=" + process + "&user_id=" + user.user_id });
+				$.colorbox({ href:'/ajax/halfnerd_helper.php?task=user&process=' + process + '&user_id=' + user.user_id });
 				break;
 		}
 	});
@@ -77,12 +95,12 @@ action functions
 	{
 		$.ajax({
 			type: 'post',
-			url: "ajax/halfnerd_helper.php?task=user&process=add&user_id=0",
+			url: "/ajax/halfnerd_helper.php?task=user&process=add&user_id=0",
 			data: $( "#user_add_mod_form_0" ).serialize( true ),
 			success: function( reply ){
-			
+				
 				//show delete confirmation
-				showGlobalMessage( "User Added", 1, function(){ reloadPage( 1500 ) } );
+				showMessage( "User Added", 1, function(){ reloadPage( 1500 ) } );
 			}
 		});
 	
@@ -92,9 +110,12 @@ action functions
 	{
 		$.ajax({
 			type: 'post',
-			url: "ajax/halfnerd_helper.php?task=user&process=modify&user_id=" + this.user_id,
+			url: "/ajax/halfnerd_helper.php?task=user&process=modify&user_id=" + this.user_id,
 			data: $( "#user_add_mod_form_" + user_id ).serialize( true ),
 			success: function( reply ){
+				
+				//show delete confirmation
+				showMessage( "Changes Saved", 1 );
 			}
 		});
 	
@@ -104,7 +125,7 @@ action functions
 	{
 		$.ajax({
 			type: 'post',
-			url: "ajax/halfnerd_helper.php?task=user&process=delete&user_id=" + this.user_id,
+			url: '/ajax/halfnerd_helper.php?task=user&process=delete&user_id=' + this.user_id,
 			data: $( "#user_add_mod_form_" + user_id ).serialize( true ),
 			success: function( reply ){
 				
@@ -115,11 +136,42 @@ action functions
 				}
 				
 				//show message and refresh list
-				showGlobalMessage( "User Deleted", 1, callback );
+				showMessage( "User Deleted", 1, callback );
 			}
 		});
 	
 	}//modify()
+	
+	this.updatePhoto = function()
+	{
+		if( $( "#user_photo_file" ).val().length == 0 )
+		{
+			$.ajax({
+				type: 'post',
+				url: '/ajax/halfnerd_helper.php?task=user&process=update_photo&user_id=' + this.user_id,
+				data: $( "#user_image_upload_" + user_id ).serialize( true ),
+				success: function( reply ){
+					
+					showMessage( "Photo Updated", 1, function(){ reloadPage() } );
+				}
+			});
+		}
+		else
+		{
+			var validation_result = validateImageFile( "#user_photo_file" );
+			
+			if( validation_result.length > 0 )
+			{
+				//show error
+				showMessage( validation_result, 0 );
+			}
+			else
+			{
+				//submit form
+				$( "#user_image_upload_" + this.user_id ).submit();
+			}
+		}
+	}//updatePhoto()
 	
 /**********************************************************************************************************************************
 validation functions
@@ -127,9 +179,11 @@ validation functions
 
 	this.validateAddModForm = function( process, user_id )
 	{
+		//task=user&process=validate&user_id=' + this.user_id,
+		
 		$.ajax({
 			type: 'post',
-			url: 'ajax/halfnerd_helper.php?task=user&process=validate&user_id=' + this.user_id,
+			url: '/ajax/halfnerd_helper.php?task=user&process=validate&user_id=' + this.user_id,
 			data: $( "#user_add_mod_form_" + user_id ).serialize( true ),
 			success: function( reply ){
 				
@@ -161,7 +215,7 @@ validation functions
 				}
 				else
 				{
-					showMessage( message, result, "add", 0 );
+					showMessage( message, result );
 				}
 			}
 		});

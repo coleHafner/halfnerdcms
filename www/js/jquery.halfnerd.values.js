@@ -37,7 +37,7 @@ $( document ).ready( function(){
 				
 			default:
 				//show colorbox
-				$.colorbox({ href:"ajax/halfnerd_helper.php?task=single_value&process=" + process + "&single_val_id=" + single_val_id });
+				$.colorbox({ href:'/ajax/halfnerd_helper.php?task=single_value&process=' + process + '&single_val_id=' + single_val_id });
 				break;
 		}
 	});
@@ -55,7 +55,7 @@ action functions
 	{
 		$.ajax({
 			type: 'post',
-			url: "ajax/halfnerd_helper.php?task=single_value&process=add",
+			url: '/ajax/halfnerd_helper.php?task=single_value&process=add',
 			data: $( "#single_val_form" ).serialize( true ),
 			success: function( reply ){
 				showMessage( "Value Added", 1 );
@@ -68,7 +68,7 @@ action functions
 	{
 		$.ajax({
 			type: 'post',
-			url: "ajax/halfnerd_helper.php?task=single_value&process=modify&single_val_id=" + single_val_id,
+			url: '/ajax/halfnerd_helper.php?task=single_value&process=modify&single_val_id=' + single_val_id,
 			data: $( "#single_val_form" ).serialize( true ),
 			success: function( reply ){
 				reloadPage( 0 );
@@ -81,7 +81,7 @@ action functions
 	{
 		$.ajax({
 			type: 'post',
-			url: "ajax/halfnerd_helper.php?task=single_value&process=modify&single_val_id=" + single_val_id,
+			url: '/ajax/halfnerd_helper.php?task=single_value&process=modify&single_val_id=' + single_val_id,
 			data: $( "#single_val_form" ).serialize( true ),
 			success: function( reply ){
 				reloadPage( 0 );
@@ -98,7 +98,7 @@ action functions
 	{
 		$.ajax({
 			type: 'post',
-			url: "ajax/halfnerd_helper.php?task=single_value&process=validate",
+			url: '/ajax/halfnerd_helper.php?task=single_value&process=validate',
 			data: $( "#single_val_form" ).serialize( true ),
 			success: function( reply ) {
 				

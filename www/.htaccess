@@ -1,1 +1,12 @@
-php_value include_path ".:/usr/local/lib/php:/usr/local/www/halfnerdcms/classes:/usr/local/www/halfnerdcms/classes/extensions
+Options +FollowSymLinks
+
+RewriteEngine on
+RewriteRule ^_([a-z]+)/([^/]+)/([^/]+)/([^/]+) ?v=$1&sub=$2&id1=$3&id2=$4 [NC]
+RewriteRule ^_([a-z]+)/([^/]+)/([^/]+) ?v=$1&sub=$2&id1=$3 [NC]
+RewriteRule ^_([a-z]+)/([^/]+) ?v=$1&sub=$2 [NC]
+RewriteRule ^_([a-z]+) ?v=$1 [NC]
+
+ErrorDocument 404	/index.php
+
+php_value include_path "./:/usr/local/lib/php:/usr/local/www/halfnerdcms/classes:/usr/local/www/halfnerdcms/classes/extensions"
+php_flag register_globals off

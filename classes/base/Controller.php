@@ -101,7 +101,6 @@ abstract class Controller{
 	public function setUser( $user_id )
 	{
 		$this->m_user = new User( $user_id, TRUE );
-		
 	}//setUser()
 	
 	public function hasValidAuthLogin()

@@ -39,11 +39,17 @@ $(document).ready(function(){
     		//cancel hover
     		event.preventDefault();
     		
-			$( this ).removeClass( "border_color_white" ).addClass( "no_hover border_color_orange" );
+    		if( hasAttr( $( this ), "active" ) == false )
+    		{
+    			$( this ).removeClass( "border_color_white" ).addClass( "no_hover border_color_orange" );
+    		}
     	})
     	
     	.live( "mouseleave", function(){
-    		$( this ).removeClass( "no_hover border_color_orange" ).addClass( "border_color_white" );
+    		if( hasAttr( $( this ), "active" ) == false )
+    		{
+    			$( this ).removeClass( "no_hover border_color_orange" ).addClass( "border_color_white" );
+    		}
     	});
     	
     $( ".button" )
@@ -100,6 +106,18 @@ $(document).ready(function(){
 	    		auth = new Authentication( 0 );
 	    		auth.validateLoginAttempt();
 	    	}
+    	})
+    	
+    	.live( "focus", function(){
+    		
+    		//clear error div
+    		$( "#result_login_attempt" ).html( "" );
+    	})
+    	
+    	.live( "click", function(){
+    		
+    		//clear error div
+    		$( "#result_login_attempt" ).html( "" );
     	});
 });
 	
@@ -154,38 +172,27 @@ function closeColorbox( reload )
 form functions
 **********************************************************************************************************************************/
 
-function showMessage( message, message_status, process, pk_id )
+function showMessage( message, message_status, callback )
 {
-	var id = "#result_" + process + "_" + pk_id;
-
-	if( message_status == 1 )
+	//hide message
+	if( $( "#form_result_message" ).length > 0 )
 	{
-		$( id ).removeClass( "result_failure" ).addClass( "color_accent" ).html( message );
-	}
-	else
-	{
-		$( id ).removeClass( "color_orange" ).addClass( "result_failure" ).html( message );
+		$( "#form_result_message" ).remove();
 	}
 	
-}//showMessage()
-
-function showGlobalMessage( message, status, callback )
-{
-	//determine callback
 	callback = ( typeof( callback ) == "undefined" ) ? function(){} : callback;
+	var bg_color = ( message_status == 1 ) ? "bg_color_accent" : "bg_color_red";
 	
-	//show message
-	$( 'body' ).append( '<div class="global_message rounded_corners border_dark_grey bg_color_orange center header font_color_white" id="global_message">' + message + '</div>' );
+	$( 'body' ).append( '<div class="form_result_message ' + bg_color + ' center header font_color_white" id="form_result_message">' + message + '</div>' );
 	
-	//hide message + run callback function
-	$( "#global_message" ).delay( 1500 ).fadeOut( "slow", function(){
-	
+	$( "#form_result_message" ).delay( 1500 ).fadeOut( "slow", function(){
+		
 		$( this ).remove();
 		
 		callback();
 	});
 	
-}//showGlobalMessage()
+}//showMessage()
 
 function trimLastCharFromString( string )
 {
@@ -250,6 +257,35 @@ function listToString( list_array, delim_char )
 
 }//listToString();
 
+function validateImageFile( el_id )
+{
+	//set vars
+	var return_value = false;
+	var valid_extensions = [ "png", "gif", "jpg", "jpeg" ];
+	var file = $( el_id ).val();
+	
+	//check strlen
+	if( file.length == 0 )
+	{
+		return_value = "You must select a file.";
+	}
+	
+	if( return_value == false )
+	{
+		var val_split = file.split( "." );
+		var last_element = val_split.length - 1;
+		var extension = val_split[last_element];
+		
+		if( $.inArray( extension.toLowerCase(), valid_extensions ) == -1 )
+		{
+			return_value = "File must be an image.";
+		}
+	}
+	
+	return return_value;
+	
+}//validateFileUploadForm()
+
 /**********************************************************************************************************************************
 other functions
 **********************************************************************************************************************************/
@@ -264,7 +300,7 @@ function showLoader( element, style )
 
 function hasAttr( el, attr_name )
 {
-	return ( typeof( el.attr( attr_name ) ) !== undefined ) ? true : false;
+	return ( typeof( el.attr( attr_name ) ) !== "undefined" ) ? true : false;
 }//hasAttr
 
 function reloadPage( delay )

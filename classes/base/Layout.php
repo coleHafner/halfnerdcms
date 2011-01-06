@@ -168,7 +168,7 @@ class Layout
 		<div class="main_section">
 			
 			<!--main content container-->
-			<div class="container_12 main_container">
+			<div class="container_12">
 				';
 				
 		return $return;
@@ -190,7 +190,6 @@ class Layout
 		</div>
 		<!--/main content section-->
 		
-		<!--
 		<div class="footer_section bg_color_white">
 		
 			<div class="container_12">
@@ -205,7 +204,6 @@ class Layout
 				
 			</div> 
 		</div>
-		-->
 		
 		<iframe class="input text_input" style="height:200px;width:300px;display:none;" id="hidden_frame" name="hidden_frame" ></iframe>
 		';

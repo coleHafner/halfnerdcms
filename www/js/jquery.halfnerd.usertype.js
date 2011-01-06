@@ -68,7 +68,7 @@ $( document ).ready( function(){
 					break;
 					
 				default:
-					$.colorbox({ href:"ajax/halfnerd_helper.php?task=user_type&process=" + process + "&user_type_id=" + user_type.user_type_id });
+					$.colorbox({ href:'/ajax/halfnerd_helper.php?task=user_type&process=' + process + '&user_type_id=' + user_type.user_type_id });
 					break;
 			}//end switch
 		});
@@ -87,7 +87,7 @@ action functions
 		//add or modify article
 		$.ajax({
 			type: 'post',
-			url: "ajax/halfnerd_helper.php?task=user_type&process=add&user_type_id=0",
+			url: '/ajax/halfnerd_helper.php?task=user_type&process=add&user_type_id=0',
 			data: $( form_name ).serialize( true ),
 			success: function( user_type_id ){	
 			
@@ -106,7 +106,7 @@ action functions
 		//add or modify article
 		$.ajax({
 			type: 'post',
-			url: "ajax/halfnerd_helper.php?task=user_type&process=modify&user_type_id=" + this.user_type_id,
+			url: '/ajax/halfnerd_helper.php?task=user_type&process=modify&user_type_id=' + this.user_type_id,
 			data: $( form_name ).serialize( true ),
 			success: function( user_type_id ){		
 			
@@ -124,7 +124,7 @@ action functions
 	{
 		$.ajax({
 			type:'post',
-			url: "ajax/halfnerd_helper.php?task=user_type&process=delete&user_type_id=" + this.user_type_id,
+			url: '/ajax/halfnerd_helper.php?task=user_type&process=delete&user_type_id=' + this.user_type_id,
 			data: "",
 			success: function( user_type_id ){
 				
@@ -147,7 +147,7 @@ validation functions
 		
 		$.ajax({
 			type: 'post',
-			url: "ajax/halfnerd_helper.php?task=user_type&process=validate",
+			url: '/ajax/halfnerd_helper.php?task=user_type&process=validate',
 			data: $( form_name ).serialize( true ),
 			success: function( reply ) {		
 				
@@ -268,7 +268,7 @@ Ui functions
 	{
 		$.ajax({
 			type: 'post',
-			url: 'ajax/halfnerd_helper.php?task=user_type&process=get-type-list&user_type_id=0',
+			url: '/ajax/halfnerd_helper.php?task=user_type&process=get-type-list&user_type_id=0',
 			data: {},
 			success: function( section_list ){
 				$( "#user_type_items_container" ).html( section_list );

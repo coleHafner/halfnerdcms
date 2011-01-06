@@ -13,7 +13,7 @@ require_once( "base/User.php" );
 require_once( "base/UserType.php" );
 
 $common = new Common();
-$user = new User( Authentication::getUserId() );
+$active_user = new User( Authentication::getLoginUserId() );
 
 $task = strtolower( trim( $_GET['task'] ) );
 $process = strtolower( trim( $_GET['process'] ) );
@@ -31,6 +31,7 @@ switch( $task )
 				break;
 				
 			case "validate_login":
+				
 				$auth = new Authentication( 0 );
 				$form_result = $auth->checkLoginForm( $_POST );
 				
@@ -364,6 +365,10 @@ switch( $task )
 				
 			case "delete":
 				echo $u->delete( TRUE );
+				break;
+				
+			case "update_photo":
+				$u->updatePhoto( $_POST, $_FILES );
 				break;
 				
 			case "refresh_user_type_selector":

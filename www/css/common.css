@@ -68,6 +68,7 @@ Inputs and forms
 }
 
 .text_extra_long {
+	position:relative;
 	width:100%;
 }
 
@@ -109,6 +110,10 @@ Alignment and spacing
 	padding:5px;
 }
 
+.padder_left {
+	padding-left:5px;
+}
+
 .padder_10 {
 	padding:10px;
 }
@@ -117,12 +122,32 @@ Alignment and spacing
 	padding-left:10px;
 }
 
-.padder_20_left {
-	padding-left:20px;
+.padder_10_bottom {
+	padding-bottom:10px;
+}
+
+.padder_10_top {
+	padding-top:10px;
 }
 
 .padder_15 {
 	padding:15px;
+}
+
+.padder_15_right {
+	padding-right:15px;
+}
+
+.padder_20_left {
+	padding-left:20px;
+}
+
+.padder_20_bottom {
+	padding-bottom:20px;
+}
+
+.padder_20_top {
+	padding-top:20px;
 }
 
 .padder_no_top {
@@ -133,8 +158,12 @@ Alignment and spacing
 	padding-bottom:0px;
 }
 
-.padder_20_bottom {
-	padding-bottom:20px;
+.margin_20_bottom {
+	margin-bottom:20px;
+}
+
+.margin_20_top {
+	margin-top:20px;
 }
 
 .float_left {
@@ -289,8 +318,20 @@ Colors
 	border:1px solid #999;
 }
 
+.border_bottom_dotted {
+	border-width:1px;
+	border-top-style:hidden;
+	border-right-style:hidden;
+	border-bottom-style:dotted;
+	border-left-style:hidden;
+}
+
 .bg_color_orange {
 	background-color:#FF6103;
+}
+
+.bg_color_red {
+	background-color:#FF0000;
 }
 
 .bg_color_accent {
@@ -353,10 +394,15 @@ a.admin_button {
 	margin-left:10px;
 }
 
-a.title_bar_button {
-	
+a.square_button {
+	position:relative;
+	display:block;
+	border-style:solid;
+	border-width:2px;
+	width:30px;
+	height:30px;
+	font-weight:bold;
 }
-
 
 .result {
 	position:relative;
@@ -373,6 +419,15 @@ a.title_bar_button {
 	width:250px;
 	z-index:1000;
 	padding:25px;
+}
+
+.form_result_message {
+	position:fixed;
+	top:0px;
+	left:0px;
+	width:100%;
+	padding:15px;
+	z-index:1000;
 }
 
 .select_list {
@@ -496,13 +551,15 @@ Sections
 
 .main_section {
 	position:relative;
+	margin-bottom:50px;
+	margin-top:20px;
+	min-height:700px;
 }
 
 .footer_section {
 	position:relative;
 	border-top:1px solid #999;
 	padding:3px;
-	margin-top:200px;
 }
 
 /******************************************************************************************************************************************
@@ -519,6 +576,12 @@ Containers
 .main_container {
 	height:700px;
 	padding-top:15px;
+}
+
+.width_80_middle {
+	position:relative;
+	margin:auto;
+	width:80%;
 }
 
 

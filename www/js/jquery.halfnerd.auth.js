@@ -41,7 +41,7 @@ $( document ).ready( function(){
 				
 			default:
 				//show colorbox
-				$.colorbox({ href:"ajax/halfnerd_helper.php?task=authentication&process=" + process + "&auth_id=" + auth.auth_id });
+				$.colorbox({ href:'/ajax/halfnerd_helper.php?task=authentication&process=' + process + '&auth_id=' + auth.auth_id });
 				break;
 		}
 	});
@@ -61,7 +61,7 @@ action functions
 	{
 		$.ajax({
 			type:"POST",
-			url:"ajax/halfnerd_helper.php?task=authentication&process=change_password",
+			url:'/ajax/halfnerd_helper.php?task=authentication&process=change_password',
 			data: $( "#auth_password_form" ).serialize( true ),
 			success: function( reply ){
 			
@@ -98,7 +98,7 @@ session functions
 	{
 		$.ajax({
 			type: "POST",
-			url: "ajax/halfnerd_helper.php?task=session&process=kill_login",
+			url: '/ajax/halfnerd_helper.php?task=session&process=kill_login',
 			data: "",
 			success: function( reply ) {
 				reloadPage( delay );
@@ -111,7 +111,7 @@ session functions
 	{
 		$.ajax({
 			type:"POST",
-			url:"ajax/halfnerd_helper.php?task=session&process=store_login",
+			url:'/ajax/halfnerd_helper.php?task=session&process=store_login',
 			data: $( "#auth_login_form" ).serialize( true ),
 			success: function( reply ){
 				
@@ -125,7 +125,7 @@ session functions
 	{	
 		$.ajax({
 			type: "POST",
-			url: "ajax/halfnerd_helper.php?task=session&process=kill",
+			url: '/ajax/halfnerd_helper.php?task=session&process=kill',
 			data: "",
 			success: function( reply ){
 				reloadPage( 0 );
@@ -139,7 +139,7 @@ session functions
 		var return_value = 
 			$.ajax({
 				type:'post',
-				url: 'ajax/halfnerd_helper.php?task=session&process=get_var',
+				url: '/ajax/halfnerd_helper.php?task=session&process=get_var',
 				data: { key: key },
 				async:false,
 				dataType: "jsonp"
@@ -152,7 +152,7 @@ session functions
 	{
 		$.ajax({
 			type:'post',
-			url: 'ajax/halfnerd_helper.php?task=session&process=set_var',
+			url: '/ajax/halfnerd_helper.php?task=session&process=set_var',
 			data:{ key: key, value: value  }
 		});
 		
@@ -166,7 +166,7 @@ validation functions
 	{
 		$.ajax({
 			type:"POST",
-			url:"ajax/halfnerd_helper.php?task=session&process=validate_login",
+			url:'/ajax/halfnerd_helper.php?task=session&process=validate_login',
 			data: $( "#auth_login_form" ).serialize( true ),
 			success: function( reply ){
 				
@@ -193,7 +193,7 @@ validation functions
 	{
 		$.ajax({
 			type:"post",
-			url:"ajax/halfnerd_helper.php?task=authentication&process=validate_change_password",
+			url:'/ajax/halfnerd_helper.php?task=authentication&process=validate_change_password',
 			data: $( "#auth_password_form" ).serialize( true ),
 			success: function( reply ){
 				

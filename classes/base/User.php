@@ -9,7 +9,10 @@ require_once( "base/Common.php" );
 require_once( "base/Article.php" );
 require_once( "base/Session.php" );
 require_once( "base/UserType.php" );
+require_once( "base/FileHandler.php" );
 require_once( "base/FormHandler.php" );
+require_once( "base/Permission.php" );
+require_once( "base/Authentication.php" );
 
 class User
 {
@@ -113,7 +116,7 @@ class User
 	{
 		$this->m_common = new Common();
 		$this->m_form = new FormHandler( 1 );
-		$this->m_user_id = ( is_numeric( $user_id ) ) ? $user_id : 0;
+		$this->m_user_id = ( is_numeric( $user_id ) && self::userExists( $user_id ) ) ? $user_id : 0;
 		$this->setMemberVars( $objects );
 		
 	}//constructor
@@ -247,34 +250,29 @@ class User
 		if( !$this->m_form->m_error )
 		{
 			//optional params
-			$first_name = ( strlen( $input['first_name'] ) > 0 ) ? "'" . addslashes( $input['first_name'] ) . "'" : "NULL";
-			$last_name = ( strlen( $input['last_name'] ) > 0 ) ? "'" . addslashes( $input['last_name'] ) . "'" : "NULL";
-			$bio = ( strlen( $input['bio'] ) > 0 ) ? "'" . addslashes( $input['bio'] ) . "'" : "NULL";
-			$password_update = "";
-			
-			//password
-			if( strlen( $input['password'] ) > 0 )
-			{
-				$password_update = "
-				password = '" .  $this->passwordEncrypt( $this->passwordSalt(), $input['password'] ) . "',";
-			}
+			$bio = ( array_key_exists( "bio", $input ) && strlen( $input['bio'] ) > 0 ) ? "'" . addslashes( $input['bio'] ) . "'" : "NULL";
+			$last_name = ( array_key_exists( "last_name", $input ) && strlen( $input['last_name'] ) > 0 ) ? "'" . addslashes( $input['last_name'] ) . "'" : "NULL";
+			$first_name = ( array_key_exists( "first_name", $input ) && strlen( $input['first_name'] ) > 0 ) ? "'" . addslashes( $input['first_name'] ) . "'" : "NULL";
+			$passwd = ( array_key_exists( "first_name", $input ) && strlen( $input['password'] ) > 0 ) ?  "password = '" .  $this->passwordEncrypt( $this->passwordSalt(), $input['password'] ) . "'," : "";
 			
 			$sql = "
-			UPDATE common_Users
-			SET user_type_id = " . $input['user_type_id'] . ",
+			UPDATE 
+				common_Users
+			SET " . $passwd . "
+				user_type_id = " . $input['user_type_id'] . ",
 				username = '" . $input['username'] . "',
 				email = '" . $input['email'] . "',
-				" . $password_update . "
 				first_name = " . $first_name . ",
 				last_name = " . $last_name . ",
 				bio = " . $bio . "
-			WHERE user_id = " . $this->m_user_id;
-
+			WHERE 
+				user_id = " . $this->m_user_id;
+			
 			$this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
 			$return = $this->m_user_id;
 			
 			//update permissions
-			$this->permissionsUpdate( $input, $from_add );
+			$this->permissionsUpdate( $input );
 		}
 		else
 		{
@@ -335,9 +333,78 @@ class User
 		
 	}//delete()
 	
-	public function permissionsUpdate( $input, $from_add )
+	function updatePhoto( $post, $files )
 	{
-		if( !$from_add )
+		if( count( $files ) == 0 )
+		{
+			$use_gravatar = ( array_key_exists( "use_gravatar", $post ) ) ? "1" : "0";
+			
+			$sql ="
+			UPDATE common_Users
+			SET use_gravatar = " . $use_gravatar . "
+			WHERE user_id = " . $this->m_user_id;
+
+			$result = $this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
+		}
+		else
+		{
+			//upload file
+			$file = new FileHandler( $files );
+			
+		}
+		
+		return TRUE;
+	}//updatePhoto()
+	
+	/**
+	 * Collects array of permissions for this user.
+	 * Returns array of permission aliases.
+	 * @return	array
+	 * @since	20101020, hafner
+	 */
+	public function permissionsGet()
+	{
+		$return = FALSE;
+		
+		$sql = "
+		SELECT 
+			p.alias AS alias
+		FROM 
+			common_UserToPermission a2p
+		JOIN common_Permissions p ON
+			p.permission_id = a2p.permission_id  
+		WHERE 
+			a2p.user_id = " . $this->m_user_id;
+		
+		$result = $this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
+		
+		if( $this->m_common->m_db->numRows( $result ) > 0 )
+		{
+			$return = array();
+			while( $row = $this->m_common->m_db->fetchAssoc( $result ) )
+			{
+				$return[] = strtolower( $row['alias'] );
+			}
+		}
+		
+		return $return;
+		
+	}//permissionsGet()
+	
+	public function permissionsUpdate( $input )
+	{
+		$permission_update_attempted = FALSE;
+		
+		//determine if permission update was attempted
+		foreach( $input as $k => $v )
+		{
+			if( strpos( $k, "permission_" ) !== FALSE )
+			{
+				$permission_update_attempted = TRUE;
+			}
+		}
+		
+		if( $permission_update_attempted )
 		{
 			//delete all permissions for this user
 			$sql = "
@@ -345,14 +412,14 @@ class User
 			FROM common_UserToPermission
 			WHERE user_id = " . $this->m_user_id;			
 			$this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
-		}
-			
-		//add permissions
-		foreach( $input as $k => $v )
-		{
-			if( strpos( $k, "permission_" ) !== FALSE )
+				
+			//add permissions
+			foreach( $input as $k => $v )
 			{
-				$this->permissionAdd( $input[$k] );
+				if( strpos( $k, "permission_" ) !== FALSE )
+				{
+					$this->permissionAdd( $input[$k] );
+				}
 			}
 		}
 		
@@ -376,6 +443,33 @@ class User
 		return TRUE;
 		
 	}//permissionAdd()
+	
+	public function permissionsUserHasAny( $permissions )
+	{
+		$return = FALSE; 
+		
+		if( in_array( "spr", $this->m_permissions ) )
+		{
+			$return = TRUE;
+		}
+		else
+		{
+			if( is_array( $permissions ) )
+			{
+				foreach( $permissions as $permissions )
+				{
+					if( in_array( strtolower( $permission ), $this->m_permissions  ) )
+					{
+						$return = TRUE;
+						break;
+					}
+				}
+			}
+		}
+		
+		return $return;
+		
+	}//permissionUserHasAny()
 	
 	/**
 	 * Validates the form input for creating/modifying a new File record.
@@ -521,6 +615,47 @@ class User
 		
 	}//setLinkedObjects()
 	
+	public function getDefaultFormVars( &$u )
+	{
+		
+		if( $u->m_user_id > 0 )
+		{
+			$process = "modify";
+			$username = $u->m_username;
+			$email = $u->m_email;
+			
+			$first_name = $u->m_first_name;
+			$last_name = $u->m_last_name;
+			$bio = $u->m_bio;
+			
+			$password_label = "Change Password:";
+			
+		}
+		else
+		{
+			$process = "add";
+			$username = "";
+			$email = "";
+			
+			$first_name = "";
+			$last_name = "";
+			$bio = "";
+			
+			$password_label = "Password:";
+		}
+		
+		return array(
+			'process' => $process,
+			'username' => $username,
+			'email' => $email,
+			'first_name' => $first_name,
+			'last_name' => $last_name,
+			'bio' => $bio,
+			'password_label' => $password_label
+		);
+		
+	}//getDefaultFormVars()
+	
 	/**
 	* Returns HTML
 	* @author	20100908, Hafner
@@ -584,28 +719,77 @@ class User
 				$return = array( 'body' => $body );
 				break;
 				
-			case "get-view-form":
+			case "get-view-form-full":
 			
 				$u = $vars['active_record'];
 				$ut = new UserType( $u->m_user_type_id );
 				$user_type_title = ( strlen( $ut->m_title ) > 0 ) ? $ut->m_title : "User";
+				$img_src_html = self::getHtml( "get-user-image-url", array( 'active_record' => &$u ) );
+				$img_src = $img_src_html['html'];
 				
-				//get user image
-				if( !$u->m_use_gravatar )
-				{
-					$thumb_id = ( $c->m_thumb_id > 0 ) ? $c->m_thumb_id : $common->m_db->getIdFromTitle( "default.jpg", array( 
-						'pk_name' => "file_id", 
-						'title_field' => "file_name", 
-						'table' => "common_Files" ) 
-					);
+				$html = '
+				<div style="position:relative;width:70%;float:left;">
+					<div class="padder">
+						<table>
+							<tr>
+								<td>
+									<div class="thumb_holder bg_color_white padder border_dark_grey">
+										<img src="' . $img_src . '" />
+									</div>
+								</td>
+								<td valign="top">
+									<div class="header_mega color_orange padder_10_top">
+										' . ucfirst( $u->m_first_name ) . ' ' . ucfirst( $u->m_last_name ) . '
+									</div>
+									
+									<div class="header_sub color_terciary padder_left">
+										' . $user_type_title . '
+									</div>
+								</td>
+							</tr>
+						</table>
+						
+						<div class="padder_20_top">
+							<div class="bg_color_tan color_black rounded_corners" style="min-height:250px;">
+								<div class="padder_10">
+									' . $u->m_bio . '
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				<div style="position:relative;width:30%;float:left;">
+					<div class="padder">
+						<div class="border_bottom_dotted border_color_orange">
+							<div class="padder_10_left color_accent">
+								User Data 1
+							</div>
+						</div>
+						<div class="padder_10_left" style="min-height:150px;">
+							&nbsp;
+						</div>
+						
+						<div class="border_bottom_dotted border_color_orange">
+							<div class="padder_10_left color_accent">
+								User Data 2
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="clear"></div>
+				';
+				
+				$return = array( 'html' => $html );
+				break;
 					
-					$thumb = new File( $thumb_id );
-					$img_src = $thumb->m_relative_path . "/" . $thumb->m_file_name ; 
-				}
-				else
-				{
-					$img_src = "http://www.gravatar.com/avatar/" . md5( strtolower( trim( $u->m_email ) ) ) . '&s=80';
-				}
+			case "get-view-form-badge":
+			
+				$u = $vars['active_record'];
+				$ut = new UserType( $u->m_user_type_id );
+				$user_type_title = ( strlen( $ut->m_title ) > 0 ) ? $ut->m_title : "User";
+				$img_src_html = self::getHtml( "get-user-image-url", array( 'active_record' => &$u ) );
+				$img_src = $img_src_html['html']; 
 				
 				//shorten bio
 				$truncated_bio = ( strlen( $u->m_bio ) > 75 ) ? substr( $u->m_bio, 0, 73 ) . "..." : $u->m_bio;
@@ -620,7 +804,9 @@ class User
 					<div class="user_holder" style="width:50%;">
 						
 						<div class="header color_black user_name">
-							' . ucwords( $u->m_username ) . '
+							<a href="' . $common->makeLink( array( 'v' => "users", 'sub' => $u->m_username ) ) . '">
+								' . ucwords( $u->m_username ) . '
+							</a>
 						</div>
 						
 						<div class="header_sub color_terciary">
@@ -672,120 +858,246 @@ class User
 				//user for which to display details
 				$u = $vars['active_record'];
 				
-				//user object of the currently logged in user
-				$active_user = $vars['active_user'];
+				//user currently logged in
+				$active_user = new User( Authentication::getLoginUserId() );
 				
-				if( $u->m_user_id > 0 )
+				//get default vars
+				$form_vars = $u->getDefaultFormVars();
+				
+				//get login form
+				$login_form = self::getHtml( "get-login-form", array( 
+					'render_form_tag' => FALSE,
+					'active_record' => &$u ) 
+				);
+				
+				//get contact form
+				$contact_form = self::getHtml( "get-contact-form", array( 
+					'render_form_tag' => FALSE,
+					'active_record' => &$u ) 
+				);
+				
+				//get permissions form
+				$permission_form = self::getHtml( "get-permission-form", array( 
+					'render_form_tag' => FALSE,
+					'active_record' => &$u ) 
+				);
+				
+				//get submit buttons
+				$submit_buttons = self::getHtml( "get-user-submit-buttons", array( 
+					'active_record' => &$u ) 
+				);
+				
+				if( $u->m_user_id == 0 ||
+					$u->m_user_id == $active_user->m_user_id )
 				{
-					$process = "modify";
-					$username = $u->m_username;
-					$email = $u->m_email;
+					$html = '
+					<form id="user_add_mod_form_' . $u->m_user_id . '">
+						<div class="padder center header color_accent">
+							' . ucfirst( $form_vars['process'] ) . ' User
+						</div>
+						
+						<div class="padder center result" id="result_' . $form_vars['process'] . '_' . $u->m_user_id . '">
+						</div>
+						
+						<div class="header_sub color_terciary">
+							Login Info
+						</div>
+						
+						' . $login_form['html'] . '
+						
+						<div class="header_sub color_terciary padder_10_top">
+							Personal Info
+						</div>
+						
+						' . $contact_form['html'];
+						
+					if( $active_user->permissionsUserHasAny( array( 'usr' ) ) )
+					{
+						$html .= '
+						<div class="header_sub color_terciary padder_10_top">
+							User Access Info
+						</div>
+						
+						' . $permission_form['html'];
+					}
+					else
+					{
+						$reg_user_id = $common->m_db->getIdFromTitle( "regular user", array(
+							'table' => "common_UserTypes",
+							'pk_name' => "user_type_id",
+							'title_field' => "title" )
+						);
+						
+						$html .= '
+						<input type="hidden" name="user_type_id" value="' . $reg_user_id . '" />
+						';
+					}
 					
-					$first_name = $u->m_first_name;
-					$last_name = $u->m_last_name;
-					$bio = $u->m_bio;
-					
-					$password_label = "Change Password:";
-					
+					$html .= '	
+						' . $submit_buttons['html'] . '
+					</form>
+					';
 				}
 				else
 				{
-					$process = "add";
-					$username = "";
-					$email = "";
-					
-					$first_name = "";
-					$last_name = "";
-					$bio = "";
-					
-					$password_label = "Password:";
+					$html = '
+					<div class="padder_10 center font_no">
+						You are not authorized to edit this user.
+					</div>
+					';	
+				}
+						
+				$return = array( 'html' => $html );
+				break;
+				
+			case "get-login-form":
+				
+				//set user
+				$u = $vars['active_record'];
+				
+				//get default vars
+				$form_vars = $u->getDefaultFormVars( &$u );
+				
+				//form tags
+				if( array_key_exists( "render_form_tag", $vars ) &&
+					$vars['render_form_tag'] === TRUE )
+				{
+					$form = self::getHtml( "get-form-open-close", array(
+						'active_record' => &$u,
+						'title' => "My Login Info",
+						'hidden_fields' => '
+						<input type="hidden" name="user_type_id" value="' . $u->m_user_type_id . '" />
+						<input type="hidden" name="first_name" value="' . $u->m_first_name . '" />
+						<input type="hidden" name="last_name" value="' . $u->m_last_name . '" />
+						<input type="hidden" name="bio" value="' . $u->m_bio . '" />' ) 
+					);
 				}
 				
-				$html = '
-				<form id="user_add_mod_form_' . $u->m_user_id . '">
+				$html = 
+				$form['form_open'] . '
+					<div class="selector_module_basic">
+						<div class="padder">
+							<span class="title_span">
+								Username:
+							</span>
+							<input name="username" type="text" class="text_input text_extra_long" value="' . $form_vars['username'] . '" />
+						</div>
+												
+						<div class="padder">
+							<span class="title_span">
+								Email:
+							</span>
+							<input name="email" type="text" class="text_input text_extra_long" value="' . $form_vars['email'] . '" />
+						</div>
+					</div>
+					
+					<div class="selector_module_basic" style="width:4%;">
+						&nbsp;
+					</div>
+					
+					<div class="selector_module_basic">
+						<div class="padder">
+							<span class="title_span">
+								' . $form_vars['password_label'] . '
+							</span>
+							<input name="password" type="password" class="text_input text_extra_long" value="" />
+						</div>
+												
+						<div class="padder">
+							<span class="title_span">
+								Re-type Password:
+							</span>
+							<input name="password_copy" type="password" class="text_input text_extra_long" value="" />
+						</div>
+					</div>
+					
+					<div class="clear"></div>
+				' . 
+				$form['form_close'];
 				
-					<div class="padder center header color_accent">
-						' . ucfirst( $process ) . ' User
+				$return = array( 'html' => $html );
+				break;
+				
+			case "get-contact-form":
+				
+				//set user
+				$u = $vars['active_record'];
+				
+				//get default vars
+				$form_vars = $u->getDefaultFormVars( &$u );
+				
+				//form tags
+				if( array_key_exists( "render_form_tag", $vars ) &&
+					$vars['render_form_tag'] === TRUE )
+				{
+					$form = self::getHtml( "get-form-open-close", array(
+						'active_record' => &$u,
+						'title' => "My Contact Info",
+						'hidden_fields' => '
+							<input type="hidden" name="username" value="' . $u->m_username . '" />
+							<input type="hidden" name="email" value="' . $u->m_email . '" />
+							<input type="hidden" name="user_type_id" value="' . $u->m_user_type_id . '" />' ) 
+					);
+				}
+				
+				$html = 
+				$form['form_open'] . '
+					<div class="padder">
+						<span class="title_span">
+							First Name:
+						</span>
+						
+						<input name="first_name" type="text" class="text_input text_extra_long" value="' . $form_vars['first_name'] . '" />
 					</div>
 					
-					<div class="padder center result" id="result_add_0">
+					<div class="padder">
+						
+						<span class="title_span">
+							Last Name:
+						</span>
+						
+						<input name="last_name" type="text" class="text_input text_extra_long" value="' . $form_vars['last_name'] . '" />
 					</div>
 					
-					<div class="header_sub color_terciary">
-						Login Info
-					</div>
-					
-					<div class="padder_10_left">
-						<div class="selector_module_basic">
-							<div class="padder">
-								<span class="title_span">
-									Username:
-								</span>
-								<input name="username" type="text" class="text_input text_extra_long" value="' . $username . '" />
-							</div>
-													
-							<div class="padder">
-								<span class="title_span">
-									Email:
-								</span>
-								<input name="email" type="text" class="text_input text_extra_long" value="' . $email . '" />
-							</div>
-						</div>
+					<div class="padder">
+						<span class="title_span">
+							About:
+						</span>
 						
-						<div class="selector_module_basic" style="width:15px;">
-							&nbsp;
+						<div class="padder_10_right">
+							<textarea name="bio" class="text_input text_extra_long text_area">' . $form_vars['bio'] . '</textarea>
 						</div>
-						
-						<div class="selector_module_basic">
-							<div class="padder">
-								<span class="title_span">
-									' . $password_label . '
-								</span>
-								<input name="password" type="password" class="text_input text_extra_long" value="" />
-							</div>
-													
-							<div class="padder">
-								<span class="title_span">
-									Re-type Password:
-								</span>
-								<input name="password_copy" type="password" class="text_input text_extra_long" value="" />
-							</div>
-						</div>
-						
-						<div class="clear"></div>
-					</div>
-	
-					<div class="header_sub color_terciary padder_10_top">
-						Personal Info
-					</div>
+					</div>' . 
+				$form['form_close'];
+				
+				$return = array( 'html' => $html );
+				break;
 
-					<div class="padder_10_left">
-						<div class="padder">
-							<span class="title_span">
-								First Name:
-							</span>
-							<input name="first_name" type="text" class="text_input text_extra_long" value="' . $first_name . '" />
-						</div>
-						
-						<div class="padder">
-							
-							<span class="title_span">
-								Last Name:
-							</span>
-							<input name="last_name" type="text" class="text_input text_extra_long" value="' . $last_name . '" />
-						</div>
-						
-						<div class="padder">
-							<span class="title_span">
-								About:
-							</span>
-							<textarea name="bio" class="text_input text_extra_long text_area">' . $bio . '</textarea>
-						</div>
-						
-					</div>
-					';
-					
-				if( in_array( 'SPR', $active_user->m_permissions ) )
+			case "get-permission-form":
+				
+				//set user
+				$u = $vars['active_record'];
+				
+				//user currently logged in
+				$active_user = new User( Authentication::getLoginUserId() );
+				
+				//form tags
+				if( array_key_exists( "render_form_tag", $vars ) &&
+					$vars['render_form_tag'] === TRUE )
+				{
+					$form = self::getHtml( "get-form-open-close", array(
+						'active_record' => &$u,
+						'title' => "My Permissions Info",
+						'hidden_fields' => '
+							<input type="hidden" name="username" value="' . $u->m_username . '" />
+							<input type="hidden" name="email" value="' . $u->m_email . '" />
+							<input type="hidden" name="first_name" value="' . $u->m_first_name . '" />
+							<input type="hidden" name="last_name" value="' . $u->m_last_name . '" />
+							<input type="hidden" name="bio" value="' . $u->m_bio . '" />' ) 
+					);
+				}
+				
+				if( $active_user->permissionsUserHasAny( array( 'usr' ) ) )
 				{
 					//user permission html
 					$user_permissions = Permission::getHtml( 'get-permissions-list-readonly', array( 
@@ -797,13 +1109,9 @@ class User
 						'active_record' => new UserType( $u->m_user_type_id ),
 						'active_user' => $u )
 					);
-	
-					$html .= '
-					<div class="header_sub color_terciary padder_10_top">
-						User Access Info
-					</div>
-					
-					<div class="padder_10_left">
+				
+					$html = 
+					$form['form_open'] . '
 						<div class="padder padder_10_top">
 							' . Common::getHtml( "selector-module", array( 
 								'title' => "User Title", 
@@ -820,47 +1128,183 @@ class User
 								'content_class' => "",
 								'container_style' => 'style="height:auto;"',
 								'content_style' => 'style="text-align:left;"' ) ) . '
-								
 							<div class="clear"></div>
-							
-						</div>
+						</div>' .
+					$form['form_close'];
+				}
+				else 
+				{
+					$html = '
+					<div class="padder_10 font_no center">
+						You are not authorized to edit permissions for this user.
 					</div>
 					';
 				}
-			
-				$html .= '
-					<div class="padder">
-						
-						' . Common::getHtml( "get-form-buttons", array( 
-						
+				
+				$return = array( 'html' => $html );
+				break;
+				
+			case "get-photo-form":
+				
+				//set user
+				$u = $vars['active_record'];
+				
+				$img_src = self::getHtml( "get-user-image-url", array( 'active_record' => &$u ) );
+				$checked = ( $u->m_use_gravatar === TRUE ) ? 'checked="checked"' : "";
+				
+				$html = '
+				<div class="padder padder_10_top">
+				
+					<div class="padder center header color_accent">
+						Update My Photo
+					</div>
+					
+					<table style="position:relative;">
+						<tr>
+							<td>
+								<div class="thumb_holder bg_color_white user_holder padder border_dark_grey">
+									<img src="' . $img_src['html'] . '" />
+								</div>
+							</td>
+							<td>
+								<form 	id="user_image_upload_' . $u->m_user_id . '" 
+										enctype="multipart/form-data" 
+										method="post" 
+										action="/ajax/halfnerd_helper.php?task=user&process=update_photo&user_id=' . $u->m_user_id . '">
+									
+									<div class="padder_10">
+										<input id="user_photo_file" class="user_toggle_photo_options" active_option="file" type="file" name="user_image" />
+									</div>
+									
+									<div class="padder" style="padding-left:50px;" >
+										---- OR ----
+									</div>
+									
+									<div class="padder">
+										<input id="user_photo_gravatar" class="user_toggle_photo_options" active_option="gravatar" type="checkbox" ' . $checked . ' name="use_gravatar" /> Use Gravatar For Image
+									</div>
+										
+								</form>	
+							</td>
+						</tr>
+					</table>
+					
+					<div class="padder_10">' . 
+						Common::getHtml( "get-form-buttons", array( 
+							
 							'left' => array( 
 								'pk_name' => "user_id",
 								'pk_value' => $u->m_user_id,
-								'process' => $process,
+								'process' => "submit_image_form",
 								'id' => "user",
-								'button_value' => ucwords( $process ),
+								'button_value' => "Save",
 								'extra_style' => 'style="width:41px;"' ),
 								
 							'right' => array(
-								'pk_name' => "user_id",
-								'pk_value' => $u->m_user_id,
-								'process' => "cancel_" . $process,
-								'id' => "user",
+								'href' => $common->makeLink( array(
+									'v' => "users",
+									'sub' => $u->m_username ) ),
 								'button_value' => "Cancel",
-								'extra_style' => 'style="width:41px;"' ) 
-							) 
+								'extra_style' => 'style="width:41px;"' ),
+							 
+							'table_style' => 'style="position:relative;margin:auto auto auto 95px;"' ) 
 						) . '
-							
 					</div>
-
-				</form>
+					
+				</div>
 				';
-						
 				$return = array( 'html' => $html );
 				break;
-								
+				
 			case "get-delete-form":
 				$return = array( 'html' => "" );
+				break;
+				
+			case "get-user-submit-buttons":
+				
+				//set user
+				$u = $vars['active_record'];
+				
+				//get default vars
+				$form_vars = $u->getDefaultFormVars( &$u );
+				
+				$html = '
+				<div class="padder_10_top"> ' .
+					Common::getHtml( "get-form-buttons", array( 
+						
+						'left' => array( 
+							'pk_name' => "user_id",
+							'pk_value' => $u->m_user_id,
+							'process' => $form_vars['process'],
+							'id' => "user",
+							'button_value' => "Save",
+							'extra_style' => 'style="width:41px;"' ),
+							
+						'right' => array(
+							'href' => $common->makeLink( array(
+								'v' => "users",
+								'sub' => $u->m_username ) ),
+							'button_value' => "Cancel",
+							'extra_style' => 'style="width:41px;"' ) 
+						)
+						 
+					) . '
+				</div>
+				';
+					
+				$return = array( 'html' => $html );
+				break;
+				
+			case "get-form-open-close":
+				
+				//active user
+				$u = $vars['active_record'];
+				
+				//determine hidden fields
+				$hidden_fields = ( array_key_exists( "hidden_fields", $vars )  ) ? $vars['hidden_fields'] : "";
+				
+				//get form submit buttons
+				$submit_buttons_html = self::getHtml( "get-user-submit-buttons", array(
+					'active_record' => &$u ) 
+				);
+					
+				$form_open = '
+				<form id="user_add_mod_form_' . $u->m_user_id . '">
+					<div class="padder center header color_accent">
+						' . $vars['title'] . '
+					</div>
+				';
+					$form_close = 
+					$submit_buttons_html['html'] . '
+					' . $hidden_fields . '
+				</form>
+				';
+					
+				$return = array( 'form_open' => $form_open, 'form_close' => $form_close );
+				break;
+				
+			case "get-user-image-url":
+				
+				$u = $vars['active_record'];
+				
+				//get user image
+				if( !$u->m_use_gravatar )
+				{
+					$thumb_id = ( $u->m_thumb_id > 0 ) ? $u->m_thumb_id : $common->m_db->getIdFromTitle( "default.jpg", array( 
+						'pk_name' => "file_id", 
+						'title_field' => "file_name", 
+						'table' => "common_Files" ) 
+					);
+					
+					$thumb = new File( $thumb_id );
+					$html = $thumb->m_relative_path . "/" . $thumb->m_file_name ; 
+				}
+				else
+				{
+					$html = "http://www.gravatar.com/avatar/" . md5( strtolower( trim( $u->m_email ) ) ) . '&s=80';
+				}
+				
+				$return = array( 'html' => $html );
 				break;
 				
 			default:
@@ -894,42 +1338,6 @@ class User
 		return $return;
 		
 	}//passwordValidate()
-	
-	/**
-	 * Collects array of permissions for this user.
-	 * Returns array of permission aliases.
-	 * @return	array
-	 * @since	20101020, hafner
-	 */
-	public function permissionsGet()
-	{
-		$return = FALSE;
-		//$user_id = ( ( $this->m_user_id ) > 0 ) ? $this->m_user_id : 0;
-		
-		$sql = "
-		SELECT 
-			p.alias AS alias
-		FROM 
-			common_UserToPermission a2p
-		JOIN common_Permissions p ON
-			p.permission_id = a2p.permission_id  
-		WHERE 
-			a2p.user_id = " . $this->m_user_id;
-			
-		$result = $this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
-		
-		if( $this->m_common->m_db->numRows( $result ) > 0 )
-		{
-			$return = array();
-			while( $row = $this->m_common->m_db->fetchAssoc( $result ) )
-			{
-				$return[] = $row['alias'];
-			}
-		}
-		
-		return $return;
-		
-	}//permissionsGet()
 	
 	public function passwordValidateChange( $post )
 	{
@@ -1034,6 +1442,51 @@ class User
 		return $return;
 		
 	}//getUsers()
+	
+	public static function userExists( $user_id )
+	{
+		$return = FALSE;
+		$common = new Common();
+		
+		//check user id exists
+		$sql = "
+		SELECT count(*)
+		FROM common_Users
+		WHERE user_id = " . $user_id;
+		
+		$result = $common->m_db->query( $sql, __FILE__, __LINE__ );
+		$row = $common->m_db->fetchRow( $result );
+		
+		if( $row[0] == 1 )
+		{
+			$return = TRUE;
+		}
+		
+		return $return;
+		
+	}//userExists()
+	
+	public static function usernameExists( $username )
+	{
+		$return = FALSE;
+		$common = new Common();
+		
+		$sql = "
+		SELECT count(*)
+		FROM common_Users
+		WHERE LOWER( TRIM( username ) ) = '" . strtolower( trim( $username ) ) . "'";
+		
+		$result = $common->m_db->query( $sql, __FILE__, __LINE__ );
+		$row = $common->m_db->fetchRow( $result );
+		
+		if( $row[0] == 1 )
+		{
+			$return = TRUE;
+		}
+		
+		return $return;
+		
+	}//usernameExists()
 	
    /**
 	* Get a member variable's value

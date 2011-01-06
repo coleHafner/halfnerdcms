@@ -365,23 +365,24 @@ class Article
 				!is_numeric( $input['user_id'] ) ||
 				$input['user_id'] == 0 )
 			{
-				$this->m_form->m_error = "You must provide an authentication id.";
+				$this->m_form->m_error = "You must provide a user id.";
 			}
 		}
 		
 		//check valid auth_id
 		if( !$this->m_form->m_error )
 		{
-			$vars = array( 
-				'table_name' => "common_Users", 
-				'check_values' => array( 'user_id' => $input['user_id'] ) 
-			);
-			
-			$error = $this->m_form->checkKeyExists( TRUE, $vars );
+			$sql = "
+			SELECT count(*)
+			FROM common_Users
+			WHERE user_id = " . $input['user_id'];
 
-			if( is_string( $error ) )
+			$result = $this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
+			$row = $this->m_common->m_db->fetchRow( $result );
+			
+			if( $row[0] == 0 )
 			{
-				$this->m_form->m_error = $error;
+				$this->m_form->m_error = "Error: Invalid User ID.";
 			}
 		}
 		
@@ -392,23 +393,24 @@ class Article
 				!is_numeric( $input['view_id'] ) ||
 				$input['view_id'] == 0 )
 			{
-				$this->m_form->m_error = "You must provide a view id.";
+				$this->m_form->m_error = "You must choose a view.";
 			}
 		}
 		
 		//check valid view_id
 		if( !$this->m_form->m_error )
 		{
-			$vars = array( 
-				'table_name' => "common_Views", 
-				'check_values' => array( 'view_id' => $input['view_id'] ) 
-			);
-			
-			$error = $this->m_form->checkKeyExists( TRUE, $vars );
+			$sql = "
+			SELECT count(*)
+			FROM common_Views
+			WHERE view_id = " . $input['view_id'];
 
-			if( is_string( $error ) )
+			$result = $this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
+			$row = $this->m_common->m_db->fetchRow( $result );
+			
+			if( $row[0] == 0 )
 			{
-				$this->m_form->m_error = $error;
+				$this->m_form->m_error = "Error: Invalid View ID.";
 			}
 		}
 		
@@ -419,23 +421,24 @@ class Article
 				!is_numeric( $input['section_id'] ) ||
 				$input['section_id'] == 0 )
 			{
-				$this->m_form->m_error = "You must provide a section id.";
+				$this->m_form->m_error = "You must choose a section.";
 			}
 		}
 		
 		//check valid section_id
 		if( !$this->m_form->m_error )
 		{
-			$vars = array( 
-				'table_name' => "common_Sections", 
-				'check_values' => array( 'section_id' => $input['section_id'] ) 
-			);
-			
-			$error = $this->m_form->checkKeyExists( TRUE, $vars );
+			$sql = "
+			SELECT count(*)
+			FROM common_Sections
+			WHERE section_id = " . $input['section_id'];
 
-			if( is_string( $error ) )
+			$result = $this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
+			$row = $this->m_common->m_db->fetchRow( $result );
+			
+			if( $row[0] == 0 )
 			{
-				$this->m_form->m_error = $error;
+				$this->m_form->m_error = "Error: Invalid Section ID.";
 			}
 		}
 		
@@ -752,7 +755,7 @@ class Article
 				}
 				else
 				{
-					$user_id = Authentication::getUserId();
+					$user_id = Authentication::getLoginUserId();
 					$process = "add";
 					$title = "";
 					$body = "";
