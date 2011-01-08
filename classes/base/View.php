@@ -632,6 +632,9 @@ class View
 					$file_exists = "No";
 					$file_class = "font_no";
 					
+					//require_once( "controllers/" . $file_name );
+					//class_exists( ucfirst( strtolower( $v->m_controller_name ) ) ) 
+					
 					if( $v->m_common->controllerFileExists( $file_name ) )
 					{
 						$file_exists = "Yes";

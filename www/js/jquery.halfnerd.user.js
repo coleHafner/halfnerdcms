@@ -20,6 +20,17 @@ $( document ).ready( function(){
 				$( "#user_photo_gravatar" ).attr( "checked", false );
 			}
 		});
+	
+	$( ".user_auto_search" )
+		.live( "keypress", function( event ){
+
+    		//search on enter
+    		if( event.keyCode == 13 )
+    		{
+	    		user = new User( 0 );
+	    		user.doSearch();
+	    	}
+    	});
     
 	$( "#user" )
     	.live( "click", function( event ){
@@ -71,6 +82,10 @@ $( document ).ready( function(){
 			
 			case "submit_image_form":
 				user.updatePhoto();
+				break;
+				
+			case "search":
+				user.doSearch();
 				break;
 				
 			default:
@@ -152,7 +167,7 @@ action functions
 				data: $( "#user_image_upload_" + user_id ).serialize( true ),
 				success: function( reply ){
 					
-					showMessage( "Photo Updated", 1, function(){ reloadPage() } );
+					showMessage( "Photo Updated", 1, function(){ reloadPage(); } );
 				}
 			});
 		}
@@ -172,6 +187,13 @@ action functions
 			}
 		}
 	}//updatePhoto()
+	
+	this.doSearch = function()
+	{
+		var location = "http://" + $( "#user_base_url" ).val() + "/_users/search/" + $( "#user_search_term" ).val();
+		window.location = location; 
+		
+	}//doSearch()
 	
 /**********************************************************************************************************************************
 validation functions

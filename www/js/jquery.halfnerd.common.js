@@ -92,33 +92,6 @@ $(document).ready(function(){
 	    	}
     	});
     	
-    $( ".section_title" )
-    	.live( "click", function(){
-    		$( "#result_section_0" ).html( "" );
-    	});
-    	
-    $( "#auto_login" )
-    	.live( "keypress", function( event ){
-
-    		//login on enter
-    		if( event.keyCode == 13 )
-    		{
-	    		auth = new Authentication( 0 );
-	    		auth.validateLoginAttempt();
-	    	}
-    	})
-    	
-    	.live( "focus", function(){
-    		
-    		//clear error div
-    		$( "#result_login_attempt" ).html( "" );
-    	})
-    	
-    	.live( "click", function(){
-    		
-    		//clear error div
-    		$( "#result_login_attempt" ).html( "" );
-    	});
 });
 	
 /**********************************************************************************************************************************

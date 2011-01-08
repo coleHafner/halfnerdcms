@@ -4,7 +4,6 @@
  * @since	20100425, halfNerd
  */
 
-
 require_once( "base/View.php" );
 require_once( "base/User.php" );
 require_once( "base/Article.php" );
@@ -27,13 +26,19 @@ class Admin extends Controller{
 	/**
 	 * @see classes/base/Controller#setContent()
 	 */
-	public function setContent() {
-	
-		$valid_subs = array( "manage-articles", "manage-views", "manage-users", "manage-account", "manage-sections" );
-		$sub_option = ( in_array( $this->m_controller_vars['sub'], $valid_subs ) ) ? $this->m_controller_vars['sub'] : "greeting";
+	public function setContent() 
+	{
+		$valid_subs = array( 
+			"manage-posts", 
+			"manage-pages", 
+			"manage-users", 
+			"manage-sections",
+			"manage-permissions" 
+		);
 		
+		$this->m_controller_vars['sub'] = ( in_array( $this->m_controller_vars['sub'], $valid_subs ) ) ? $this->m_controller_vars['sub'] : "greeting";
+		$content = $this->getHtml( $this->m_controller_vars['sub'] );
 		$nav = $this->getHtml( "main-nav" );
-		$content = $this->getHtml( $sub_option );
 		
 		$this->m_content = '
 		
@@ -95,9 +100,10 @@ class Admin extends Controller{
 				$title_button = '';
 				
 				$basic_options = array( 
-					'manage-articles' => "Manage Articles", 
-					'manage-users' => "Manage Users",
-					'manage-views' => "Manage Views"
+					'manage-posts' => "Posts", 
+					'manage-users' => "Users",
+					'manage-pages' => "Pages",
+					'manage-permissions' => "Permissions"
 				);
 				
 				$html = '
@@ -135,9 +141,9 @@ class Admin extends Controller{
 				$return = array( 'title' => $title, 'title_button' => $title_button, 'html' => $html );
 				break;
 				
-			case "manage-articles":
+			case "manage-posts":
 			
-				$title = 'Add, Modify, and Delete Articles';
+				$title = 'Manage Posts';
 				
 				$title_button = '
 				<div class="title_button_container">
@@ -266,8 +272,8 @@ class Admin extends Controller{
 				$return = array( 'html' => $html );
 				break;
 				
-			case "manage-views":
-				$title = 'Add or Subtract Pages';
+			case "manage-pages":
+				$title = 'Manage Pages';
 				
 				$title_button = '
 				<div class="title_button_container">
@@ -296,7 +302,7 @@ class Admin extends Controller{
 				';
 				
 				$views = View::getViews( "active", "1" );
-				$view_list = $this->getHtml( 'get-view-list', array( 'records' => $views, 'hover_enabled' => TRUE, 'list_type' => "normal" ) );
+				$view_list = $this->getHtml( 'get-page-list', array( 'records' => $views, 'hover_enabled' => TRUE, 'list_type' => "normal" ) );
 				
 				$html = '
 				<div class="item_list_container" id="view_list_container">			
@@ -307,7 +313,7 @@ class Admin extends Controller{
 				$return = array( 'title' => $title, 'title_button' => $title_button, 'html' => $html );
 				break;
 				
-			case "get-view-list":
+			case "get-page-list":
 							
 				$views = $vars['records'];
 				$reorder_form = View::getHtml( "get-reorder-form", array() );
@@ -427,7 +433,7 @@ class Admin extends Controller{
 				break;
 											
 			case "manage-users":
-				$title = "Manage Site Users";
+				$title = "Manage Users";
 				
 				$title_button = '
 				<div class="title_button_container" style="width:auto;">
@@ -451,28 +457,13 @@ class Admin extends Controller{
 						'inner_div_style' => 'style="padding-top:4px;padding-left:1px;font-size:10px;"',
 						'link_style' => 'style="float:right;width:90px;"') 
 					) . '
-					
-					' . Common::getHtml( "get-button-round", array(
-						'id' => "permission",
-						'process' => "show_manager",
-						'pk_name' => "permission_id",
-						'pk_value' => "0",
-						'button_value' => "Manage Permissions",
-						'inner_div_style' => 'style="padding-top:4px;padding-left:1px;font-size:10px;"',
-						'link_style' => 'style="float:right;width:120px;"') 
-					) . '
 				 
 				 </div>
 				';
 				
-				$users = User::getUsers( "active", "1" );
-				$user_list = $this->getHtml( "get-user-list", array( 'records' => $users ) );
 				$user_type_manager = UserType::getHtml( "get-manager", array() );
-				
-				$add_form = User::getHtml( "get-edit-form", array( 
-					'active_record' => new User( 0 ),
-					'active_user' => $this->m_user ) 
-				);
+				$user_list = $this->getHtml( "get-user-list", array( 'records' => User::getUsers( "active", "1" ) ) );
+				$add_form = User::getHtml( "get-edit-form", array( 'active_record' => new User( 0 ) ) );
 				
 				$html = '
 				<div class="item_list_container">
@@ -500,205 +491,66 @@ class Admin extends Controller{
 				break;
 				
 			case "get-user-list":
-			
-				$users = $vars['records'];
-				
-				$items_per_row = 2;
-				$num_items = count( $users );
-				$num_rows = ceil( $num_items / $items_per_row );
-				
-				$html .= '
-				<table class="user_grid">
-					';
-				
-				if( $num_items > 0 )
-				{
-				
-					for( $i = 0; $i < $num_rows; $i++ )
-					{
-						$html .= '
-					<tr>			
-								';
-							
-						for( $j = 1; $j <= $items_per_row; $j++ )
-						{
-						
-							$key = $j + ( $items_per_row * $i );
-							
-							if( $key > $num_items )
-							{
-								//add empty cell
-								$html .= '
-						<td>
-							&nbsp;
-						</td>
-						';
-								break;
-							}
-							
-							$item = $users[$key];
-							$view_form = User::getHtml( "get-view-form-badge", array( 
-								'active_record' => $item,
-								'active_user' => $this->m_user ) 
-							);
-							
-							$html .= '
-						<td>
-							<div id="user_info_' . $item->m_user_id . '" class="item_container bg_color_light_tan border_dark_grey" hover_enabled="1" style="margin-top:0px;">
-								
-								' . $view_form['html'] . '
-								
-								<div class="title_button_container" id="item_control" style="display:none;width:100px;height:40px;">
-									' . Common::getHtml( "get-button-round", array(
-										'href' => $this->m_common->makeLink( array(
-											'v' => "users",
-											'sub' => $item->m_username, 
-											'id1' => "update-profile" ) ),
-										'button_value' => "m",
-										'inner_div_style' => 'style="padding-top:2px;padding-left:1px;"',
-										'link_style' => 'style="float:right;"') 
-									) . '
-									' . Common::getHtml( "get-button-round", array(
-										'id' => "user",
-										'process' => "show_delete",
-										'pk_name' => "user_id",
-										'pk_value' => $item->m_user_id,
-										'button_value' => "x",
-										'inner_div_style' => 'style="padding-top:2px;padding-left:1px;"',
-										'link_style' => 'style="float:right;"') 
-									) . '
-								</div>
-								
-							</div>
-						</td>
-						';
-						
-						}
-						
-						$html .= '
-					</tr>
-					';	
-								
-					}		
-				}
-				else
-				{
-					$html .= '
-					<tr>
-						<td class="center" colspan="2">
-							There are 0 users... how are you logged in?
-						</td>
-					</tr>
-					';
-				}
-				
-				$html .= '
-				</table>
-				';
-									
-				$return = array( 'html' => $html );
+				$return = User::getHtml( "get-user-grid", array(
+					'records' => $vars['records'], 
+					'container_class' => "item_container",
+					'container_style' => 'style="margin-top:0px;"',
+					'show_controls' => TRUE,
+					'hover_enabled' => "1" ) 
+				);
 				break;
 				
-			case "manage-account":
-				$title = "Manage Your Account Info.";
-				$title_button = "";
+			case "manage-permissions":
+				$title = "Manage User Permissions";
+				
+				$title_button = '
+				<div class="title_button_container" style="width:auto;">
+				
+				' . Common::getHtml( "get-button-round", array(
+						'id' => "permission",
+						'process' => "show_add",
+						'pk_name' => "permission_id",
+						'pk_value' => "0",
+						'button_value' => "+",
+						'inner_div_style' => 'style="padding-top:2px;padding-left:1px;"',
+						'link_style' => 'style="float:right;"') 
+					) . '
+				 
+				 </div>
+				';
+				
+				
+				$permission_list = $this->getHtml( "get-permission-list", array( 'records' => User::getUsers( "active", "1" ) ) );
+				$add_form = Permission::getHtml( "get-edit-form", array( 'active_record' => new Permission( 0 ) ) );
+				
 				$html = '
-				<div>
-				</div>';
+				<div class="item_list_container">
+					
+					<div id="permission_canvas_add" class="item_container padder_10 rounded_corners bg_color_light_tan" style="display:none;" hover_enabled="0">
+						' . $add_form['html'] . '
+					</div>
+	
+					<div class="rounded_corners border_dark_grey user_container" id="user_list_container">
+						' . $permission_list['html'] . '
+					</div>
+				</div>
+				';
 				
 				$return = array( 'title' => $title, 'title_button' => $title_button, 'html' => $html );
+				break;
+				
+			case "get-permission-list":
+				break;
+			
+			default:
+				throw new Exception( "Error: HTML command '" . $cmd . "' is invalid." );
 				break;
 				
 		}//end switch
 		
 		return $return;
 		
-	}//getNav()
-	
-	public function getSubNavOptions( $view_title )
-	{
-		switch( strtolower( $view_title ) )
-		{
-			case "index":
-				$links = array(
-					"Edit Tagline",
-					"Edit Home Article",
-					"Edit Features"
-				);
-				break;
-				
-			case "productions":
-				$links = array(
-					"Manage Videos",
-					"Manage Movie Reviews"
-				);
-				break;
-				
-			case "news":
-				$links = array(
-					"Manage News Articles"
-				);
-				break;
-				
-			case "jobs":
-				$links = array(
-					"Review Submissions",
-					"Manage Casting Calls"
-				);
-				break;
-				
-			case "contacts":
-				$links = array(
-					"Edit Contact Address",
-					"Edit Contact Email",
-					"Manage Crew",
-					"Manage Job Titles"
-				);
-				break;
-				
-			default:
-				throw new Exception( "Error: View '" . $view_title . "' is invalid." );
-				break;
-		}
-		
-		$return = '
-							<ul style="position:relative;top:-5px;">
-		';
-		
-		foreach( $links as $title )
-		{
-			$url_action = $this->m_common->convertViewAlias( $title, "url" );
-			
-			if( $url_action != $this->m_controller_vars['id1'] )
-			{
-				//make link
-				$link = array( 
-					'v' => $this->m_controller_vars['v'], 
-					'sub' => strtolower( $view_title ),
-					'id1' => $url_action 
-				);
-				
-				$url = $this->m_common->makeLink( $link );
-				$option = '<a href="' . $url . '" class="menu_link">' . $title . '</a>';
-			}
-			else 
-			{
-				$option = '<span class="active_sub_nav_option">' . $title . ' > ></span>';
-			}
-			
-			$return .= '
-								<li style="margin-left:-1.5em;padding-bottom:5px;">
-									' . $option . '
-								</li>';
-		}
-		
-		$return .= '
-							</ul>
-							';
-		
-		return $return;
-		
-	}//getSubNavOptions()
+	}//getHtml()
 	
 	/**
 	 * @see classes/base/Controller#getContent()

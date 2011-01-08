@@ -230,13 +230,13 @@ class Database {
 	public function checkDuplicate( $dup_check )
 	{
 		$return = FALSE;
-		$common = new Common(); 
+		$common = new Common();
 		
 		$sql = "
 		SELECT " . $dup_check['pk_name'] . "
 		FROM " . $dup_check['table_name'] .
 		$common->compileSqlConstraints( $dup_check['check_values'] ) . "
-		AND active = 1";
+		AND ( active = 1 OR active = 0 )";
 		
 		$result = $this->query( $sql, __FILE__, __LINE__ );
 		

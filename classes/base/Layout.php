@@ -205,7 +205,7 @@ class Layout
 			</div> 
 		</div>
 		
-		<iframe class="input text_input" style="height:200px;width:300px;display:none;" id="hidden_frame" name="hidden_frame" ></iframe>
+		<iframe class="input text_input" style="height:200px;width:600px;margin:20px auto 20px auto;display:block;" id="hidden_frame" name="hidden_frame" ></iframe>
 		';
 		
 		return $return;

@@ -63,6 +63,10 @@ Inputs and forms
 	background-color:#FFF;
 }
 
+.text_med {
+	width:150px;
+}
+
 .text_long {
 	width:200px;
 }
@@ -74,6 +78,10 @@ Inputs and forms
 
 .text_input {
 	height:30px;
+}
+
+.text_input_button_height {
+	height:20px;
 }
 
 .result_failure {
@@ -110,6 +118,10 @@ Alignment and spacing
 	padding:5px;
 }
 
+.padder_top {
+	padding-top:5px;
+}
+
 .padder_left {
 	padding-left:5px;
 }
@@ -136,6 +148,10 @@ Alignment and spacing
 
 .padder_15_right {
 	padding-right:15px;
+}
+
+.padder_20 {
+	padding:20px;
 }
 
 .padder_20_left {
@@ -185,6 +201,12 @@ Alignment and spacing
 
 .padder_10_bottom {
 	padding-bottom:10px;
+}
+
+.corner_upper_right {
+	position:absolute;
+	top:10px;
+	right:10px;
 }
 	
 
@@ -323,6 +345,14 @@ Colors
 	border-top-style:hidden;
 	border-right-style:hidden;
 	border-bottom-style:dotted;
+	border-left-style:hidden;
+}
+
+.border_bottom_solid {
+	border-width:1px;
+	border-top-style:hidden;
+	border-right-style:hidden;
+	border-bottom-style:solid;
 	border-left-style:hidden;
 }
 
@@ -638,6 +668,11 @@ Users
 .user_name {
 	position:relative;
 	margin-bottom:5px;
+}
+
+.user_badge {
+	position:relative;
+	min-height:80px;
 }
 
 /******************************************************************************************************************************************

@@ -6,6 +6,9 @@
  */
 
 require_once( "base/Database.php" );
+require_once( "base/File.php" );
+require_once( "base/FileType.php" );
+require_once( "base/FileHandler.php" );
 
 class Common {
 	
@@ -61,9 +64,6 @@ class Common {
 			}
 		}//loop through controller vars
 		
-		$paths = $this->getPathInfo();
-		$return = ( strtolower( trim( $this->m_env ) ) == "live" ) ? str_replace( "/?", "/" . $paths[$this->m_env]['web'] . "?", $return ) : $return;
-				
 		return $return;
 		 	
 	}//makeLink()
@@ -578,6 +578,30 @@ class Common {
 				';
 				break;
 				
+			case "get-side-bar":
+				$html = '
+				<div class="center rounded_corners color_accent border_dark_grey" style="height:200px;">
+					<div class="padder">
+						thing 1
+					</div>
+				</div>
+				
+				<div class="center rounded_corners color_accent border_dark_grey margin_20_top" style="height:200px;">
+					<div class="padder">
+						thing 2
+					</div>
+				</div>
+				
+				<div class="center rounded_corners color_accent border_dark_grey margin_20_top" style="height:200px;">
+					<div class="padder">
+						thing 3
+					</div>
+				</div>
+				';
+				
+				$return = array( 'html' => $html );
+				break;
+				
 			default:
 				throw new exception( "Error: Invalid HTML command." );
 				break;
@@ -606,6 +630,37 @@ class Common {
 		return $env_paths['absolute'] . $env_paths['classes'] . "/controllers/";
 		
 	}//compileControllerLocationBasePath()
+	
+	function uploadFile( $post, $files )
+	{
+		$return = 0;
+		$file_handler = new FileHandler( $files['file_to_upload'] );
+		$file_type = new FileType( $post['file_type_id'] );
+		
+		$paths = $this->getPathInfo();
+		$file_path = $paths[$this->m_env]['absolute'] . "/" . $paths[$this->m_env]['web'] . $file_type->m_directory;
+		$file_name = File::getUniqueFileName( $file_handler->m_file_name );
+		
+		$upload_result = $file_handler->uploadFile( $file_path, $file_name );
+		
+		if( $upload_result )
+		{
+			//make new file
+			$input = array(
+				'file_name' => $file_name,
+				'relative_path' => $file_type->m_directory,
+				'upload_timestamp' => strtotime( "now" ),
+				'file_type_id' => $file_type->m_file_type_id
+			);
+			
+			$file = new File( 0 );
+			$file_add_result = $file->add( $input );
+			$return = $file->m_file_id;
+		}
+		
+		return $return;
+		
+	}//uploadFile()
 	
 	/**
 	 * Allows access to this classes member variables.

@@ -7,7 +7,18 @@
 
 $( document ).ready( function(){
 	
-    $( "#authentication" )
+	$( "#auth_auto_login" )
+		.live( "keypress", function( event ){
+	
+			//login on enter
+			if( event.keyCode == 13 )
+			{
+	    		auth = new Authentication( 0 );
+	    		auth.validateLoginAttempt();
+	    	}
+		});
+	
+	$( "#authentication" )
     	.live( "click", function( event ){
     	
     	//cancel event
@@ -182,7 +193,7 @@ validation functions
 				}
 				else
 				{
-					showMessage( message, 0, "login", "attempt" );
+					showMessage( message, 0, function(){} );
 				}
 			}
 		});

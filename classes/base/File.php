@@ -630,41 +630,38 @@ class File
 		
 	}//doFileUpload()
 	
-	public function linkFile( $file_id, $post )
+	public static function getUniqueFileName( $file_name )
 	{
-		$return = FALSE;
+		//vars
+		$is_unique = FALSE;
+		$common = new Common();
+		$extension = self::extractFileExtension( $file_name );
 		
-		switch( strtolower( $post['link_to'] ) )
+		//get unique name
+		while( !$is_unique )
 		{
-			case "casting_call":
-				
-				$e = new Event( $post['active_id'] );
-				$return = $e->addFile( $file_id );
-				break;
-				
-			case "contact_thumb":
-				$c = new Contact( $post['active_id'] );
-				$c->addThumb( $file_id );
-				break;
-				
-			case "contact_full_img":
-				$c = new Contact( $post['active_id'] );
-				$c->addFullImg( $file_id );
-				break;
-				
-			case "article":
-				$a = new Article( $_POST['active_id'] );
-				$a->updateFile( $file_id );
-				break;
-				
-			default:
-				throw new exception( "Error: File link_to '" . $post['link_to'] . "' is invalid." );
-				break;
+			$return = substr( md5( strrev( microtime() ) ), 0, 10 ) . "." . $extension;
+			
+			$sql = "
+			SELECT count(*)
+			FROM common_Files
+			WHERE LOWER( file_name ) = '" . $return . "'";
+			
+			$result = $common->m_db->query( $sql, __FILE__, __LINE__ );
+			$row = $common->m_db->fetchRow( $result );
+			$is_unique = ( $row[0] == 0 ) ? TRUE : FALSE;
 		}
 		
 		return $return;
-			
-	}//linkFile()
+		
+	}//getUniqueFileName()
+	
+	public static function extractFileExtension( $file_name ) 
+	{
+		$name_split = explode( ".", $file_name );
+		$index = count( $name_split ) - 1;
+		return $name_split[$index];
+	}//extractFileExtension()
 	
 	/**
 	* Get a member variable's value

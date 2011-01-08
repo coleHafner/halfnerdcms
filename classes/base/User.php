@@ -134,6 +134,7 @@ class User
 		SELECT 
 			user_id,
 			user_type_id,
+			thumb_id,
 			username,
 			email,
 			password,
@@ -153,6 +154,7 @@ class User
 		//set member vars
 		$this->m_user_id = $row['user_id'];
 		$this->m_user_type_id = $row['user_type_id'];
+		$this->m_thumb_id = $row['thumb_id'];
 		$this->m_username = $row['username'];
 		$this->m_email = $row['email'];
 		$this->m_password = $row['password'];
@@ -335,7 +337,8 @@ class User
 	
 	function updatePhoto( $post, $files )
 	{
-		if( count( $files ) == 0 )
+		if( !array_key_exists( "file_to_upload", $files ) || 
+			count( $files['file_to_upload'] ) == 0 )
 		{
 			$use_gravatar = ( array_key_exists( "use_gravatar", $post ) ) ? "1" : "0";
 			
@@ -343,14 +346,27 @@ class User
 			UPDATE common_Users
 			SET use_gravatar = " . $use_gravatar . "
 			WHERE user_id = " . $this->m_user_id;
-
-			$result = $this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
+			$this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
 		}
 		else
 		{
 			//upload file
-			$file = new FileHandler( $files );
+			$file_id = $this->m_common->uploadFile( $post, $files );
 			
+			if( $file_id > 0 )
+			{
+				$sql = "
+				UPDATE common_Users
+				SET thumb_id = " . $file_id . ",
+					use_gravatar = 0
+				WHERE user_id = " . $this->m_user_id;
+				
+				$this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
+				
+				//reload page
+				header( "location: http://" . $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI'] );
+				
+			}
 		}
 		
 		return TRUE;
@@ -444,7 +460,7 @@ class User
 		
 	}//permissionAdd()
 	
-	public function permissionsUserHasAny( $permissions )
+	public function permissionUserHasAny( $permissions )
 	{
 		$return = FALSE; 
 		
@@ -724,8 +740,31 @@ class User
 				$u = $vars['active_record'];
 				$ut = new UserType( $u->m_user_type_id );
 				$user_type_title = ( strlen( $ut->m_title ) > 0 ) ? $ut->m_title : "User";
+				
 				$img_src_html = self::getHtml( "get-user-image-url", array( 'active_record' => &$u ) );
 				$img_src = $img_src_html['html'];
+				
+				if( strlen( $u->m_first_name ) > 0 ||
+					strlen( $u->m_last_name ) > 0 )
+				{
+					$title = '
+					<span class="header_mega color_orange">
+						' . ucfirst( $u->m_first_name ) . ' ' . ucfirst( $u->m_last_name ) . '
+					</span>
+					
+					<span class="header color_accent">
+						' . $u->m_username . '
+					</span>
+					';
+				}
+				else
+				{
+					$title = '
+					<span class="header_mega color_orange">
+						' . $u->m_username . '
+					</span>
+					';	
+				}
 				
 				$html = '
 				<div style="position:relative;width:70%;float:left;">
@@ -738,8 +777,8 @@ class User
 									</div>
 								</td>
 								<td valign="top">
-									<div class="header_mega color_orange padder_10_top">
-										' . ucfirst( $u->m_first_name ) . ' ' . ucfirst( $u->m_last_name ) . '
+									<div class=" padder_10_top">
+										' . $title . '
 									</div>
 									
 									<div class="header_sub color_terciary padder_left">
@@ -750,7 +789,7 @@ class User
 						</table>
 						
 						<div class="padder_20_top">
-							<div class="bg_color_tan color_black rounded_corners" style="min-height:250px;">
+							<div class="bg_color_white color_black rounded_corners border_dark_grey" style="min-height:250px;">
 								<div class="padder_10">
 									' . $u->m_bio . '
 								</div>
@@ -784,12 +823,13 @@ class User
 				break;
 					
 			case "get-view-form-badge":
-			
+				
 				$u = $vars['active_record'];
 				$ut = new UserType( $u->m_user_type_id );
 				$user_type_title = ( strlen( $ut->m_title ) > 0 ) ? $ut->m_title : "User";
-				$img_src_html = self::getHtml( "get-user-image-url", array( 'active_record' => &$u ) );
-				$img_src = $img_src_html['html']; 
+				
+				$img_src = self::getHtml( "get-user-image-url", array( 'active_record' => &$u ) );
+				$show_controls = ( array_key_exists( "show_controls", $vars ) && !$vars['show_controls'] ) ? FALSE : TRUE;
 				
 				//shorten bio
 				$truncated_bio = ( strlen( $u->m_bio ) > 75 ) ? substr( $u->m_bio, 0, 73 ) . "..." : $u->m_bio;
@@ -798,7 +838,7 @@ class User
 				<div class="padder">
 					
 					<div class="thumb_holder bg_color_white user_holder padder border_dark_grey">
-						<img src="' . $img_src . '" />
+						<img src="' . $img_src['html'] . '" />
 					</div>
 					
 					<div class="user_holder" style="width:50%;">
@@ -816,7 +856,11 @@ class User
 						<div id="user_bio_' . $u->m_user_id . '" class="padder_10_top color_black">
 							' . $truncated_bio . '
 						</div>
-						
+						';
+				
+					if( $show_controls )
+					{
+						$html .= '
 						<div id="user_delete_controls_' . $u->m_user_id . '" class="padder_10_top" style="display:none;">
 							' . Common::getHtml( "get-form-buttons", array( 
 			
@@ -842,8 +886,10 @@ class User
 								 
 							) . '								
 						</div>
+						';
+					}
 
-						
+					$html .= '	
 					</div>
 						
 					<div class="clear"></div>
@@ -882,11 +928,6 @@ class User
 					'active_record' => &$u ) 
 				);
 				
-				//get submit buttons
-				$submit_buttons = self::getHtml( "get-user-submit-buttons", array( 
-					'active_record' => &$u ) 
-				);
-				
 				if( $u->m_user_id == 0 ||
 					$u->m_user_id == $active_user->m_user_id )
 				{
@@ -911,7 +952,7 @@ class User
 						
 						' . $contact_form['html'];
 						
-					if( $active_user->permissionsUserHasAny( array( 'usr' ) ) )
+					if( $active_user->permissionUserHasAny( array( 'usr' ) ) )
 					{
 						$html .= '
 						<div class="header_sub color_terciary padder_10_top">
@@ -934,7 +975,28 @@ class User
 					}
 					
 					$html .= '	
-						' . $submit_buttons['html'] . '
+						<div class="padder_10_top"> ' .
+							Common::getHtml( "get-form-buttons", array( 
+								
+								'left' => array( 
+									'pk_name' => "user_id",
+									'pk_value' => $u->m_user_id,
+									'process' => $form_vars['process'],
+									'id' => "user",
+									'button_value' => "Save",
+									'extra_style' => 'style="width:41px;"' ),
+									
+								'right' => array(
+									'pk_name' => "user_id",
+									'pk_value' => $u->m_user_id,
+									'process' => "cancel_" . $form_vars['process'],
+									'id' => "user",
+									'button_value' => "Cancel",
+									'extra_style' => 'style="width:41px;"' ), 
+								)
+								 
+							) . '
+						</div>
 					</form>
 					';
 				}
@@ -960,7 +1022,7 @@ class User
 				
 				//form tags
 				if( array_key_exists( "render_form_tag", $vars ) &&
-					$vars['render_form_tag'] === TRUE )
+					$vars['render_form_tag'] )
 				{
 					$form = self::getHtml( "get-form-open-close", array(
 						'active_record' => &$u,
@@ -1028,7 +1090,7 @@ class User
 				
 				//form tags
 				if( array_key_exists( "render_form_tag", $vars ) &&
-					$vars['render_form_tag'] === TRUE )
+					$vars['render_form_tag'] )
 				{
 					$form = self::getHtml( "get-form-open-close", array(
 						'active_record' => &$u,
@@ -1083,7 +1145,7 @@ class User
 				
 				//form tags
 				if( array_key_exists( "render_form_tag", $vars ) &&
-					$vars['render_form_tag'] === TRUE )
+					$vars['render_form_tag'] )
 				{
 					$form = self::getHtml( "get-form-open-close", array(
 						'active_record' => &$u,
@@ -1097,7 +1159,8 @@ class User
 					);
 				}
 				
-				if( $active_user->permissionsUserHasAny( array( 'usr' ) ) )
+				if( $active_user->permissionUserHasAny( array( 'usr' ) ) &&
+					$u->m_user_id != $active_user->m_user_id )
 				{
 					//user permission html
 					$user_permissions = Permission::getHtml( 'get-permissions-list-readonly', array( 
@@ -1149,70 +1212,75 @@ class User
 				//set user
 				$u = $vars['active_record'];
 				
+				$checked = ( $u->m_use_gravatar ) ? 'checked="checked"' : "";
 				$img_src = self::getHtml( "get-user-image-url", array( 'active_record' => &$u ) );
-				$checked = ( $u->m_use_gravatar === TRUE ) ? 'checked="checked"' : "";
+				
+				$file_type_id = $common->m_db->getIdFromTitle( "user image", array(
+					'table' => "common_FileTypes",
+					'pk_name' => "file_type_id",
+					'title_field' => "title" )
+				);
 				
 				$html = '
-				<div class="padder padder_10_top">
+				<div class="padder center header color_accent">
+					Update My Photo
+				</div>
 				
-					<div class="padder center header color_accent">
-						Update My Photo
-					</div>
-					
-					<table style="position:relative;">
-						<tr>
-							<td>
-								<div class="thumb_holder bg_color_white user_holder padder border_dark_grey">
-									<img src="' . $img_src['html'] . '" />
-								</div>
-							</td>
-							<td>
-								<form 	id="user_image_upload_' . $u->m_user_id . '" 
-										enctype="multipart/form-data" 
-										method="post" 
-										action="/ajax/halfnerd_helper.php?task=user&process=update_photo&user_id=' . $u->m_user_id . '">
-									
-									<div class="padder_10">
-										<input id="user_photo_file" class="user_toggle_photo_options" active_option="file" type="file" name="user_image" />
-									</div>
-									
-									<div class="padder" style="padding-left:50px;" >
-										---- OR ----
-									</div>
-									
-									<div class="padder">
-										<input id="user_photo_gravatar" class="user_toggle_photo_options" active_option="gravatar" type="checkbox" ' . $checked . ' name="use_gravatar" /> Use Gravatar For Image
-									</div>
-										
-								</form>	
-							</td>
-						</tr>
-					</table>
-					
-					<div class="padder_10">' . 
-						Common::getHtml( "get-form-buttons", array( 
-							
-							'left' => array( 
-								'pk_name' => "user_id",
-								'pk_value' => $u->m_user_id,
-								'process' => "submit_image_form",
-								'id' => "user",
-								'button_value' => "Save",
-								'extra_style' => 'style="width:41px;"' ),
+				<table style="position:relative;">
+					<tr>
+						<td>
+							<div class="thumb_holder bg_color_white user_holder padder border_dark_grey">
+								<img src="' . $img_src['html'] . '" />
+							</div>
+						</td>
+						<td>
+							<form 	method="post" 
+									target="hidden_frame"
+									enctype="multipart/form-data"
+									id="user_image_upload_' . $u->m_user_id . '" 
+									action="/ajax/halfnerd_helper.php?task=user&process=update_photo&user_id=' . $u->m_user_id . '">
 								
-							'right' => array(
-								'href' => $common->makeLink( array(
-									'v' => "users",
-									'sub' => $u->m_username ) ),
-								'button_value' => "Cancel",
-								'extra_style' => 'style="width:41px;"' ),
-							 
-							'table_style' => 'style="position:relative;margin:auto auto auto 95px;"' ) 
-						) . '
-					</div>
-					
+								<div class="padder_10">
+									<input id="user_photo_file" class="user_toggle_photo_options" active_option="file" type="file" name="file_to_upload" />
+								</div>
+								
+								<div class="padder" style="padding-left:50px;" >
+									---- OR ----
+								</div>
+								
+								<div class="padder">
+									<input id="user_photo_gravatar" class="user_toggle_photo_options" active_option="gravatar" type="checkbox" ' . $checked . ' name="use_gravatar" /> Use Gravatar For Image
+								</div>
+								
+								<input type="hidden" name="file_type_id" value="' . $file_type_id . '" />	
+							</form>	
+						</td>
+					</tr>
+				</table>
+				
+				<div class="padder_10">' . 
+					Common::getHtml( "get-form-buttons", array( 
+						
+						'left' => array( 
+							'pk_name' => "user_id",
+							'pk_value' => $u->m_user_id,
+							'process' => "submit_image_form",
+							'id' => "user",
+							'button_value' => "Save",
+							'extra_style' => 'style="width:41px;"' ),
+							
+						'right' => array(
+							'href' => $common->makeLink( array(
+								'v' => "users",
+								'sub' => $u->m_username ) ),
+							'button_value' => "Cancel",
+							'extra_style' => 'style="width:41px;"' ),
+						 
+						'table_style' => 'style="position:relative;margin:auto auto auto 95px;"' ) 
+					) . '
 				</div>
 				';
+					
 				$return = array( 'html' => $html );
 				break;
 				
@@ -1290,19 +1358,137 @@ class User
 				//get user image
 				if( !$u->m_use_gravatar )
 				{
-					$thumb_id = ( $u->m_thumb_id > 0 ) ? $u->m_thumb_id : $common->m_db->getIdFromTitle( "default.jpg", array( 
-						'pk_name' => "file_id", 
-						'title_field' => "file_name", 
-						'table' => "common_Files" ) 
-					);
+					if( $u->m_thumb_id > 0 )
+					{
+						$thumb_id = $u->m_thumb_id;	
+					}
+					else 
+					{
+						$thumb_id = $common->m_db->getIdFromTitle( "default.jpg", array( 
+							'pk_name' => "file_id", 
+							'title_field' => "file_name", 
+							'table' => "common_Files" ) 
+						);
+					}
 					
 					$thumb = new File( $thumb_id );
-					$html = $thumb->m_relative_path . "/" . $thumb->m_file_name ; 
+					$html = $thumb->m_relative_path . "/" . $thumb->m_file_name ;
+					 
 				}
 				else
 				{
 					$html = "http://www.gravatar.com/avatar/" . md5( strtolower( trim( $u->m_email ) ) ) . '&s=80';
 				}
+				
+				$return = array( 'html' => $html );
+				break;
+				
+			case "get-user-grid":
+				
+				$users = $vars['records'];
+				$items_per_row = 2;
+				$num_items = count( $users );
+				
+				$num_rows = ceil( $num_items / $items_per_row );
+				$active_user = new User( Authentication::getLoginUserId() );
+				$container_style = ( array_key_exists( "container_style", $vars ) ) ? $vars['container_style'] : "";
+				
+				$empty_message = ( array_key_exists( "empty_message" , $vars ) ) ? $vars['empty_message'] : "There are 0 users... how are you logged in?";
+				
+				$html = '
+				<table class="user_grid">
+				';
+				
+				if( $num_items > 0 )
+				{
+				
+					for( $i = 0; $i < $num_rows; $i++ )
+					{
+						$html .= '
+					<tr>			
+								';
+							
+						for( $j = 1; $j <= $items_per_row; $j++ )
+						{
+						
+							$key = $j + ( $items_per_row * $i );
+							
+							if( $key > $num_items )
+							{
+								//add empty cell
+								$html .= '
+						<td>
+							&nbsp;
+						</td>
+						';
+								break;
+							}
+							
+							$item = $users[$key];
+							$view_form = User::getHtml( "get-view-form-badge", array( 
+								'active_record' => $item,
+								'active_user' => $active_user,
+								'show_controls' => $vars['show_controls'] ) 
+							);
+							
+							$html .= '
+						<td valign="top">
+							<div id="user_info_' . $item->m_user_id . '" class="' . $vars['container_class'] . ' bg_color_light_tan border_dark_grey" ' . $container_style . ' hover_enabled="' . $vars['hover_enabled'] . '">
+								' . $view_form['html'];
+							
+							if( $vars['show_controls'] )
+							{
+								$html .= '
+								<div class="title_button_container" id="item_control" style="display:none;width:100px;height:40px;">
+									' . Common::getHtml( "get-button-round", array(
+										'href' => $common->makeLink( array(
+											'v' => "account",
+											'sub' => $item->m_username, 
+											'id1' => "update-contact" ) ),
+										'button_value' => "m",
+										'inner_div_style' => 'style="padding-top:2px;padding-left:1px;"',
+										'link_style' => 'style="float:right;"') 
+									) . '
+									' . Common::getHtml( "get-button-round", array(
+										'id' => "user",
+										'process' => "show_delete",
+										'pk_name' => "user_id",
+										'pk_value' => $item->m_user_id,
+										'button_value' => "x",
+										'inner_div_style' => 'style="padding-top:2px;padding-left:1px;"',
+										'link_style' => 'style="float:right;"') 
+									) . '
+								</div>
+								';
+							}
+							
+							$html .= '
+							</div>
+						</td>
+						';
+						
+						}
+						
+						$html .= '
+					</tr>
+					';	
+								
+					}		
+				}
+				else
+				{
+					$html .= '
+					<tr>
+						<td class="center" colspan="2">
+							' . $empty_message . '
+						</td>
+					</tr>
+					';
+				}
+				
+				$html .= '
+				</table>
+				';
 				
 				$return = array( 'html' => $html );
 				break;
@@ -1350,7 +1536,7 @@ class User
 			$return = "You must fill in all fields.";	
 		}
 		
-		if( $return === FALSE )
+		if( !$return )
 		{
 			if( !$this->passwordCompare( $post['cur_pass'], $this->m_password ) )
 			{
@@ -1358,7 +1544,7 @@ class User
 			}
 		}
 		
-		if( $return === FALSE )
+		if( !$return )
 		{
 			if( $post['new_pass'] != $post['new_pass_copy'] )
 			{
@@ -1366,7 +1552,7 @@ class User
 			}
 		}
 		
-		if( $return === FALSE )
+		if( !$return )
 		{
 			if( strlen( $post['new_pass'] ) < 7 )
 			{
@@ -1374,7 +1560,7 @@ class User
 			}
 		}
 		
-		if( $return === FALSE )
+		if( !$return )
 		{
 			if( !$this->passwordValidate( $post['new_pass'] ) )
 			{
@@ -1443,6 +1629,36 @@ class User
 		
 	}//getUsers()
 	
+	public static function getUserSearchResults( $search_term )
+	{
+		$i = 1;
+		$return = array();
+		$common = new Common();
+		
+		$sql = "
+		SELECT 
+			user_id
+		FROM 
+			common_Users
+		WHERE 
+			user_id > 0 AND
+			active = 1 AND
+			LOWER( username ) LIKE '%" . strtolower( trim( $search_term ) ) . "%'
+		ORDER BY 
+			username ASC";
+		
+		$result = $common->m_db->query( $sql, __FILE__, __LINE__ );
+		
+		while( $row = $common->m_db->fetchRow( $result ) )
+		{
+			$return[$i] = new User( $row[0], FALSE );
+			$i++;
+		}
+		
+		return $return;
+		
+	}//getUserSearchResults()
+	
 	public static function userExists( $user_id )
 	{
 		$return = FALSE;
@@ -1471,17 +1687,21 @@ class User
 		$return = FALSE;
 		$common = new Common();
 		
-		$sql = "
-		SELECT count(*)
-		FROM common_Users
-		WHERE LOWER( TRIM( username ) ) = '" . strtolower( trim( $username ) ) . "'";
-		
-		$result = $common->m_db->query( $sql, __FILE__, __LINE__ );
-		$row = $common->m_db->fetchRow( $result );
-		
-		if( $row[0] == 1 )
+		if( strlen( $username ) > 0 )
 		{
-			$return = TRUE;
+			$sql = "
+			SELECT count(*)
+			FROM common_Users
+			WHERE LOWER( TRIM( username ) ) = '" . strtolower( trim( $username ) ) . "' AND
+			active = 1";
+			
+			$result = $common->m_db->query( $sql, __FILE__, __LINE__ );
+			$row = $common->m_db->fetchRow( $result );
+			
+			if( $row[0] == 1 )
+			{
+				$return = TRUE;
+			}
 		}
 		
 		return $return;

@@ -349,7 +349,8 @@ class Permission
 				$return = array( 'html' => $html );
 				break;
 				
-				
+			case "get-edit-form":
+				break;
 				
 			default:
 				throw new Exception( "Error: Invalid HTML command." );

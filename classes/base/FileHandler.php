@@ -79,12 +79,13 @@ class FileHandler
 	* @since 	Version 20100928, Hafner
 	* @return	boolean
 	* @param	string			$to_file		The name of the file
-	* @param	string			$file_path		Path to file ( set @ File->doFileUpload() ) 
+	* @param	string			$file_path		Path to file 
+	* @param	string			$file_name		Unique file name ( determined @ File::getUniqueFileName() )
 	*/
-	public function uploadFile( $file_path )
+	public function uploadFile( $file_path, $file_name )
 	{
 		$return = FALSE; 
-		$to_file = $file_path . "/" . $this->m_file_name;
+		$to_file = $file_path . "/" . $file_name;
 		
 		$cmd = "cp " . $this->m_file_tmp_name . " '" . $to_file . "'";
 		
@@ -94,8 +95,8 @@ class FileHandler
 		//change permissions
 		exec( "chmod 755 " . $to_file );
 		
-		//verify file made it there
-		if( file_exists( $file_path . "/" . $this->m_file_name ) )
+		//verify file exists
+		if( file_exists( $file_path . "/" . $file_name ) )
 		{
 			$return = TRUE;
 		}

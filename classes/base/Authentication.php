@@ -120,11 +120,11 @@ class Authentication
 							<div id="result_login_attempt" class="result"></div>
 							
 							<div class="center bottom_spacer">
-								<input type="text" class="input text_input text_long font_normal input_clear" name="username" value="Username or Email" clear_if="Username or Email" id="auto_login"/>
+								<input id="auth_auto_login" type="text" class="input text_input text_long font_normal input_clear" name="username" value="Username or Email" clear_if="Username or Email" />
 							</div>
 							
 							<div class="center bottom_spacer">
-								<input type="password" class="input text_input text_long font_normal input_clear" name="password" value="passwd" clear_if="passwd" id="auto_login" />
+								<input id="auth_auto_login" type="password" class="input text_input text_long font_normal input_clear" name="password" value="passwd" clear_if="passwd" />
 							</div>
 							
 							<div class="center">
