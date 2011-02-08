@@ -55,12 +55,17 @@ class Common {
 			
 			if( in_array( $field, $valid_fields ) )
 			{
-				
-				//$delim = ( $counter == 0 ) ? "/?" : "&"; 
-				//$return .= $delim . $field . "=" . strtolower( $val );
-				//$counter++;
-				$val = ( strtolower( $field ) == "v" ) ? "_" . $val : $val;
-				$return .= "/" . strtolower( $val );
+				if( $this->m_env == "local" )
+				{
+					$val = ( strtolower( $field ) == "v" ) ? "_" . $val : $val;
+					$return .= "/" . strtolower( $val );
+				}
+				else
+				{
+					$delim = ( $counter == 0 ) ? "/?" : "&"; 
+					$return .= $delim . $field . "=" . strtolower( $val );
+					$counter++;		
+				}
 			}
 		}//loop through controller vars
 		
@@ -86,17 +91,18 @@ class Common {
 				'user_images' => "/images/users",
 				'js' => "/js",
 				'js_ex' => "/js/extensions",
+				'js_nerd' => "/js/halfnerd",
 				'classes' => "/classes",
 				'classes_ex' => "/classes/ex",
 				'db_host' => "localhost",
 				'db_name' => "cms",
 				'db_user' => "cms_user",
-				'db_pass' => "passwd1000!",
+				'db_pass' => "passwd1000!"
 			),
 			
 			//dev server
 			'dev' => array(
-				'absolute' => "/home/users/web/b937/moo.halfnerdcom/cms",
+				'absolute' => "/usr/local/www/halfnerdcms",
 				'web' => "www",
 				'css' => "/css",
 				'css_ex' => "/css/extensions",
@@ -105,18 +111,19 @@ class Common {
 				'user_images' => "/images/users",
 				'js' => "/js",
 				'js_ex' => "/js/extensions",
+				'js_nerd' => "/js/halfnerd",
 				'classes' => "/classes",
 				'classes_ex' => "/classes/ex",
-				'db_host' => "halfnerdcom.fatcowmysql.com",
-				'db_name' => "halfnerd_cms",
+				'db_host' => "localhost",
+				'db_name' => "cms",
 				'db_user' => "cms_user",
-				'db_pass' => "passwd1000!"
+				'db_pass' => "passwd1000!",
 			),
 			
 			//live server
 			'live' => array(
-				'absolute' => "",
-				'web' => "pbr/www",
+				'absolute' => "/usr/local/www/halfnerdcms",
+				'web' => "www",
 				'css' => "/css",
 				'css_ex' => "/css/extensions",
 				'images' => "/images",
@@ -124,12 +131,13 @@ class Common {
 				'user_images' => "/images/users",
 				'js' => "/js",
 				'js_ex' => "/js/extensions",
+				'js_nerd' => "/js/halfnerd",
 				'classes' => "/classes",
 				'classes_ex' => "/classes/ex",
-				'db_host' => "",
-				'db_name' => "",
-				'db_user' => "",
-				'db_pass' => ""
+				'db_host' => "localhost",
+				'db_name' => "cms",
+				'db_user' => "cms_user",
+				'db_pass' => "passwd1000!",
 			)
 		);
 		
@@ -264,9 +272,9 @@ class Common {
 		
 	}//formatText()
 	
-	public function convertLinks( $str )
+	public function convertLinks( $str, $style = "" )
 	{
-		return ereg_replace("[[:alpha:]]+://[^<>[:space:]]+[[:alnum:]/]","<a target='_blank' href=\"\\0\">\\0</a>", $str );
+		return ereg_replace("[[:alpha:]]+://[^<>[:space:]]+[[:alnum:]/]","<a target='_blank' ' . $style . ' href=\"\\0\">\\0</a>", $str );
 		
 	}//convertLinks()
 	
@@ -423,9 +431,10 @@ class Common {
 			case "get-form-buttons":
 			
 				$table_style = ( array_key_exists( "table_style", $vars ) ) ? $vars['table_style'] : 'style="postion:relative;margin:auto;"';
+				$container_id = ( array_key_exists( "container_id", $vars ) ) ? 'id="' . $vars['container_id'] . '"' : '';
 			
 				$return = '
-				 <table ' . $table_style . '>
+				 <table ' . $table_style . ' ' . $container_id . '>
 					<tr>
 						<td class="center">
 							' . self::getHtml( "get-button", $vars['left'] ) . '
@@ -444,10 +453,12 @@ class Common {
 			case "get-button":
 			
 				$style = ( array_key_exists( "extra_style", $vars ) ) ? $vars['extra_style'] : "";
+				$extra_classes = ( array_key_exists( "extra_classes", $vars ) ) ? $vars['extra_classes'] : "";
 				
 				if( !array_key_exists( "href", $vars) )
 				{
-					$link_guts = 'id="' . $vars['id'] . '" process="' . $vars['process'] . '" ' . $vars['pk_name'] . '="' . $vars['pk_value'] . '"';
+					$additional_attributes = ( array_key_exists( "additional_attributes", $vars ) ) ? $vars['additional_attributes'] : "";
+					$link_guts = 'id="' . $vars['id'] . '" process="' . $vars['process'] . '" ' . $vars['pk_name'] . '="' . $vars['pk_value'] . '"' . $additional_attributes;
 				}
 				else
 				{
@@ -455,7 +466,19 @@ class Common {
 				}
 				
 				$return = '
-				<a ' . $link_guts . ' class="button rounded_corners color_accent center no_hover bg_color_white" ' . $style . '>
+				<a ' . $link_guts . ' class="button rounded_corners color_accent center no_hover bg_color_white ' . $extra_classes . '" ' . $style . '>
+					' . $vars['button_value'] . '
+				</a>
+				';
+				break;
+				
+			case "get-button-mega":
+				
+				$style = ( array_key_exists( "extra_style", $vars ) ) ? $vars['extra_style'] : "";
+				$extra_classes = ( array_key_exists( "extra_classes", $vars ) ) ? $vars['extra_classes'] : "";
+				
+				$return = '
+				<a href="' . $vars['href'] . '" class="button rounded_corners center no_hover bg_color_orange ' . $extra_classes . '" ' . $style . ' ignore_hover="1" target="_blank" >
 					' . $vars['button_value'] . '
 				</a>
 				';
@@ -467,6 +490,7 @@ class Common {
 				$border_class = 'border_color_white';
 				$link_style = $style = ( array_key_exists( "link_style", $vars ) ) ? $vars['link_style'] : "";
 				$inner_div_style = ( array_key_exists( "inner_div_style", $vars ) ) ? $vars['inner_div_style'] : "";
+				$additional_attributes = ( array_key_exists( "additional_attributes", $vars ) ) ? $vars['additional_attributes'] : "";
 				
 				//determine selected
 				if( array_key_exists( "selected", $vars ) &&
@@ -479,7 +503,7 @@ class Common {
 				//determine link guts
 				if( !array_key_exists( "href", $vars) )
 				{
-					$link_guts = 'href="#" id="' . $vars['id'] . '" process="' . $vars['process'] . '" ' . $vars['pk_name'] . '="' . $vars['pk_value'] . '"';
+					$link_guts = 'href="#" id="' . $vars['id'] . '" process="' . $vars['process'] . '" ' . $vars['pk_name'] . '="' . $vars['pk_value'] . '"' . $additional_attributes;
 				}
 				else
 				{
@@ -569,11 +593,15 @@ class Common {
 				break;
 				
 			case "get-reorder-tab":
+				
+				$extra_container_style = ( array_key_exists(  'extra_container_style', $vars ) ) ? $vars['extra_container_style'] : '' ;
+				$extra_content_style = ( array_key_exists(  'extra_content_style', $vars ) ) ? $vars['extra_content_style'] : '' ;
+				
 				$return = '
-				<div class="item_reorder_container">
-					<div class="item_reorder_bar bg_color_accent"></div>
-					<div class="item_reorder_bar bg_color_accent"></div>
-					<div class="item_reorder_bar bg_color_accent"></div>
+				<div class="item_reorder_container" ' . $extra_container_style . '>
+					<div class="item_reorder_bar bg_color_accent border_dark_grey"  ' . $extra_content_style . '></div>
+					<div class="item_reorder_bar bg_color_accent border_dark_grey"  ' . $extra_content_style . '></div>
+					<div class="item_reorder_bar bg_color_accent border_dark_grey" ' . $extra_content_style . '></div>
 				</div>
 				';
 				break;
@@ -661,6 +689,30 @@ class Common {
 		return $return;
 		
 	}//uploadFile()
+	
+	/**
+	 * Validates the current view.
+	 * Returns the name of the view.
+	 * @since	20100323, hafner
+	 * @return	string
+	 * @param	string		$view		view from the url
+	 */
+	public static function validateView( $get )
+	{
+		$common = new Common();	
+	
+		$sql = "
+		SELECT count(*)
+		FROM common_Views
+		WHERE LOWER( TRIM( controller_name ) ) = '" . strtolower( trim( $get['v'] ) ) . "'
+		AND parent_view_id = 0";
+		
+		$result = $common->m_db->query( $sql, __FILE__, __LINE__ );
+		$row = $common->m_db->fetchRow( $result );
+		
+		return ( $row[0] == 1 ) ? ucfirst( strtolower( $get['v'] ) ) : "Index";
+		
+	}//validateView()
 	
 	/**
 	 * Allows access to this classes member variables.

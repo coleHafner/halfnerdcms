@@ -51,10 +51,10 @@ abstract class Controller{
 	 * @return	boolean
 	 * @param 	array		$controller_vars	array of variables for the current controller
 	 */
-	public function setControllerVars( $controller_vars, $objects = TRUE ) 
+	public function setControllerVars( $get, $objects = TRUE ) 
 	{
 		$this->m_common = new Common();
-		$this->m_controller_vars = ( is_array( $controller_vars ) ) ? $controller_vars : array();
+		$this->m_controller_vars = $get;
 		$this->m_view_id = $this->setViewId();
 		$this->m_linked_objects = ( $objects ) ? $this->setLinkedObjects() : array();
 		$this->m_user = FALSE;
@@ -84,12 +84,10 @@ abstract class Controller{
 	
 	public function setViewId()
 	{
-		$v = array_key_exists( "v", $this->m_controller_vars ) ? $this->m_controller_vars['v'] : "";
-		
 		$sql = "
 		SELECT view_id
 		FROM common_Views
-		WHERE LOWER( controller_name ) = '" . strtolower( trim ( $v ) ) . "'";
+		WHERE LOWER( TRIM( controller_name ) ) = '" . strtolower( trim ( $this->m_controller_vars['v'] ) ) . "'";
 		
 		$result = $this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
 		$row = $this->m_common->m_db->fetchRow( $result );

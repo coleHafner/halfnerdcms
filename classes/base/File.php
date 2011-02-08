@@ -266,12 +266,6 @@ class File
 			$this->m_form->m_error = "You must select a file type.";
 		}
 		
-		//check blank relative_path
-		if( !$this->m_form->m_error )
-		{
-			$this->m_form->checkBlank( $input['relative_path'], "File Path" );
-		}
-		
 		//check blank file_name
 		if( !$this->m_form->m_error )
 		{
@@ -568,53 +562,44 @@ class File
 	 * @param	array			$post		$_POST array
 	 * @param	array			$files		$_FILES array
 	 */
-	public function doFileUpload( $post, $file_info )
+	public function doFileUpload( $post, $files )
 	{
-		//get file type
-		$ft_vars = array( 
-			'table' => "common_FileTypes", 
-			'pk_name' => "file_type_id", 
-			'title_field' => "title" 
-		);
-		
-		$file_type_id = $this->m_common->m_db->getIdFromTitle( str_replace( "_", " ", $post['file_type'] ), $ft_vars );
-		$file_type = new FileType( $file_type_id );
-		
-		$fh = new FileHandler( $file_info );
+		$return = 0;
+		$fh = new FileHandler( $files['file_to_upload'] );
+		$file_type = new FileType( $post['file_type_id'] );
 		
 		if( $fh->m_file_error == 0 &&
 			$fh->m_file_size > 0 )
 		{
 			$paths = $this->m_common->getPathInfo();
 			$upload_path = $paths[$this->m_common->m_env]['absolute'] . "/" . $paths[$this->m_common->m_env]['web'] . "/" . $file_type->m_directory;
+			$file_name = ( array_key_exists( "unique_file_name", $post ) ) ? $post['unique_file_name'] : self::getUniqueFileName(); 
+			$file_name .= "." . self::extractFileExtension( $file_handler->m_file_name );
 			
 			//do upload
-			$file_upload_result = $fh->uploadFile( $upload_path );
+			$file_upload_result = $fh->uploadFile( $upload_path, $file_name );
 			
 			if( $file_upload_result )
 			{
-				//add file record
+				//make new file
 				$input = array(
-					'file_type_id' => $file_type->m_file_type_id,
-					'relative_path' => $file_type->m_directory,
-					'file_name' => $fh->m_file_name
+					'file_name' => $file_name,
+					'upload_timestamp' => strtotime( "now" ),
+					'file_type_id' => $file_type->m_file_type_id
 				);
 				
-				$file_id = $this->add( $input );
+				$file = new File( 0 );
+				$file_add_result = $file->add( $input );
 				
 				//link file to slideshow
-				if( is_numeric( $file_id ) ) 
+				if( is_numeric( $file_add_result ) ) 
 				{
-					if( array_key_exists( "link_to", $post ) )
-					{
-						$this->linkFile( $file_id, $post );
-					}
+					$return = $file->m_file_id;
 				}
 				else
 				{
-					throw new Exception( "Error: File add error. File class said '" . $file_id . "'" );
+					throw new Exception( "Error: File add error. File class said '" . $file_add_result . "'" );
 				}
-				
 			}
 			else 
 			{
@@ -623,29 +608,28 @@ class File
 		}
 		else 
 		{
-			$return = FALSE;	
+			throw new exception( "File upload error. PHP said: " . $fh->m_file_error );
 		}
 		
 		return $return;
 		
 	}//doFileUpload()
 	
-	public static function getUniqueFileName( $file_name )
+	public static function getUniqueFileName()
 	{
 		//vars
 		$is_unique = FALSE;
 		$common = new Common();
-		$extension = self::extractFileExtension( $file_name );
 		
 		//get unique name
 		while( !$is_unique )
 		{
-			$return = substr( md5( strrev( microtime() ) ), 0, 10 ) . "." . $extension;
+			$return = strtolower( substr( md5( strrev( microtime() ) ), 0, 10 ) );
 			
 			$sql = "
 			SELECT count(*)
 			FROM common_Files
-			WHERE LOWER( file_name ) = '" . $return . "'";
+			WHERE LOWER( file_name ) LIKE '" . $return . "%'";
 			
 			$result = $common->m_db->query( $sql, __FILE__, __LINE__ );
 			$row = $common->m_db->fetchRow( $result );

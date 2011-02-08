@@ -7,25 +7,28 @@ require_once( "base/Common.php" );
 require_once( 'base/Layout.php' );
 require_once( 'base/Authentication.php' );
 
-//setup layout class
+//guarantee vars
+$_GET['session'] = $_SESSION;
+$_GET['v'] = Common::validateView( $_GET );
+
+//setup objects
 $layout = new Layout( $_GET );
 $auth = new Authentication( 0 );
-
-//setup controller view
-$_GET['session'] = $_SESSION;
+$common = $auth->m_common;
 
 //compile controller name
-$requested_controller = $layout->m_active_view . ".php";
-
-//include styles and scripts
-echo $layout->getHtmlHeadSection();
+$requested_controller = $layout->m_active_controller_name . ".php";
 
 //make sure controller file exists
-if( !$auth->m_common->controllerFileExists( $requested_controller ) )
+if( !$common->controllerFileExists( $requested_controller ) )
 {
+	//include styles and scripts
+	echo $layout->getHtmlHeadSection();
+	
+	//show error message
 	echo Common::getHtml( "show-missing-controller-message", array( 
 		'requested_controller' => $requested_controller, 
-		'controller_path' => $auth->m_common->compileControllerLocationBasePath() ) 
+		'controller_path' => $common->compileControllerLocationBasePath() ) 
 	);
 	exit;
 }
@@ -34,7 +37,7 @@ if( !$auth->m_common->controllerFileExists( $requested_controller ) )
 require_once( "controllers/" . $requested_controller );
 
 $login_string = '';
-$controller = new $layout->m_active_view( $_GET, TRUE );
+$controller = new $layout->m_active_controller_name( $_GET, TRUE );
 
 //set content
 $content = $auth->controlPageAccess( $controller );
@@ -46,7 +49,8 @@ if( $controller->hasValidAuthLogin() )
 	$login_string = $html['html'];
 }
 
-//show rest of page
+//render page
+echo $layout->getHtmlHeadSection();
 echo $layout->getHtmlBodySection( $login_string );
 echo $content;
 echo $layout->getHtmlFooterSection();

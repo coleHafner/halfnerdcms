@@ -163,7 +163,7 @@ class Authentication
 				$user = $vars['user'];
 				
 				$html = '
-				<div class="login_string_container bg_color_white font_small">
+				<div class="login_string_container bg_color_white font_small border_dark_grey">
 					<div>
 						Howdy, ' . ucwords( $user->m_username ) . '
 						&nbsp;|&nbsp
@@ -395,7 +395,7 @@ class Authentication
 	*/
 	public function __set( $var_name, $var_value )
 	{
-		$exclusions = array( 'm_article_id' );
+		$exclusions = array( 'm_authentication_id' );
 
 		if( !in_array( $var_name, $exclusions ) )
 		{

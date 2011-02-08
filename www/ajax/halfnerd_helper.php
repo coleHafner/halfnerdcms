@@ -307,7 +307,7 @@ switch( $task )
 				break;
 				
 			case "delete":
-				echo $view->delete( FALSE );
+				echo $view->delete( TRUE );
 				break;
 				
 			case "reorder":
@@ -318,7 +318,7 @@ switch( $task )
 				
 				$admin = new Admin( array() );
 				
-				$view_html = $admin->getHtml( "get-view-list", array( 
+				$view_html = $admin->getHtml( "get-page-list", array( 
 					'records' => View::getNavViews(), 
 					'hover_enabled' => FALSE,
 					'list_type' => "reorder" ) 
@@ -330,7 +330,7 @@ switch( $task )
 				
 				$admin = new Admin( array() );
 				
-				$view_html = $admin->getHtml( "get-view-list", array( 
+				$view_html = $admin->getHtml( "get-page-list", array( 
 					'records' => View::getViews( "active", "1" ), 
 					'hover_enabled' => TRUE,
 					'list_type' => "normal" ) 
@@ -386,6 +386,40 @@ switch( $task )
 				echo $user_list_html['html'];
 				break;
 		}
+		break;
+		
+	case "permission":
+		
+		$p = new Permission( $_GET['permission_id'] );
+		
+		switch( $process )
+		{
+			case "validate":
+				$form_result = $p->checkInput( $_POST, $p->m_common->m_db->fixBoolean( $_POST['from_add'] ) );
+				
+				$result = ( !$form_result ) ? 1:0;
+				$message =   ( !$form_result ) ? "Permission Saved" : $form_result;
+				
+				echo $result . "^" . $message; 
+				break;
+				
+			case "add":
+				echo $p->add( $_POST );
+				break;
+				
+			case "modify":
+				echo trim( $p->modify( $_POST, FALSE ) );
+				break;
+				
+			case "delete":
+				echo $p->delete( TRUE );
+				break;
+				
+			case "show_permission_list":
+				$records = Permission::getPermissions( "active", "1" );
+				$list = Permission::getHtml( 'get-permission-list', array( 'records' => $records ) );
+				echo $list['html'];
+		}		break;
 		break;
 		
 	case "file":
@@ -451,29 +485,43 @@ switch( $task )
 				';
 				break;
 				
-			case "check-dup-file-name":
+			case "confirm-upload":
+				$sql = "
+				SELECT count(*)
+				FROM common_Files
+				WHERE LOWER( file_name ) LIKE '" . strtolower( $_POST['file_name'] ) . "%'";
+				
+				$result = $common->m_db->query( $sql, __FILE__, __LINE__ );
+				$row = $common->m_db->fetchRow( $result );
+				$return = ( $row[0] > 0 ) ? "1" : "0";
+				echo $return;
 				break;
 		}
 		break;
 		
-	case "single_value":
+	case "setting":
+		
+		$s = new Setting( $_GET['setting_id'] );
+		$is_addition = ( $s->m_setting_id > 0 ) ? TRUE : FALSE;
 		
 		switch( $process )
 		{
 			case "validate":
-				//set vars
-				$env_var = new EnvVar( 0 );
-				$form_result = $env_var->checkInput( $_POST, $env_var->m_common->m_db->fixBoolean( $_GET['from_add'] ) );
-				
+				$form_result = $s->checkInput( $_POST, $is_addition );
 				$result = ( !$form_result ) ? 1:0;
-				$message =   ( !$form_result ) ? "Value Saved" : $form_result;
-				
+				$message =   ( !$form_result ) ? "Setting Saved" : $form_result;
 				echo $result . "^" . $message; 
 				break;
 				
+			case "add":
+				echo trim( $s->add( $_POST ) );
+				break;
+				
 			case "modify":
-				$env_var = new EnvVar( $_GET['env_var_id'] );
-				$env_var->modify( $_POST, FALSE );
+				echo trim( $s->modify( $_POST, FALSE ) );
+				break;
+				
+			case "delete":
 				break;
 		}
 		break;

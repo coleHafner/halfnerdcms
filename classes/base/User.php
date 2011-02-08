@@ -351,7 +351,8 @@ class User
 		else
 		{
 			//upload file
-			$file_id = $this->m_common->uploadFile( $post, $files );
+			$file = new File( 0 );
+			$file_id = $file->doFileUpload( $post, $files );
 			
 			if( $file_id > 0 )
 			{
@@ -362,14 +363,11 @@ class User
 				WHERE user_id = " . $this->m_user_id;
 				
 				$this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
-				
-				//reload page
-				header( "location: http://" . $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI'] );
-				
 			}
 		}
 		
 		return TRUE;
+		
 	}//updatePhoto()
 	
 	/**
@@ -1211,7 +1209,7 @@ class User
 				
 				//set user
 				$u = $vars['active_record'];
-				
+				$unique_file_name = File::getUniqueFileName();
 				$checked = ( $u->m_use_gravatar ) ? 'checked="checked"' : "";
 				$img_src = self::getHtml( "get-user-image-url", array( 'active_record' => &$u ) );
 				
@@ -1237,7 +1235,7 @@ class User
 							<form 	method="post" 
 									target="hidden_frame"
 									enctype="multipart/form-data"
-									id="user_image_upload_' . $u->m_user_id . '" 
+									id="user_image_upload_form" 
 									action="/ajax/halfnerd_helper.php?task=user&process=update_photo&user_id=' . $u->m_user_id . '">
 								
 								<div class="padder_10">
@@ -1252,19 +1250,21 @@ class User
 									<input id="user_photo_gravatar" class="user_toggle_photo_options" active_option="gravatar" type="checkbox" ' . $checked . ' name="use_gravatar" /> Use Gravatar For Image
 								</div>
 								
-								<input type="hidden" name="file_type_id" value="' . $file_type_id . '" />	
+								<input type="hidden" name="file_type_id" id="file_type_id" value="' . $file_type_id . '" />
+								<input type="hidden" name="unique_file_name" id="unique_file_name" value="' . $unique_file_name . '" />	
+								
 							</form>	
 						</td>
 					</tr>
 				</table>
 				
-				<div class="padder_10">' . 
+				<div class="padder_10">' .	
 					Common::getHtml( "get-form-buttons", array( 
 						
 						'left' => array( 
 							'pk_name' => "user_id",
 							'pk_value' => $u->m_user_id,
-							'process' => "submit_image_form",
+							'process' => "update_photo",
 							'id' => "user",
 							'button_value' => "Save",
 							'extra_style' => 'style="width:41px;"' ),
@@ -1279,6 +1279,7 @@ class User
 						'table_style' => 'style="position:relative;margin:auto auto auto 95px;"' ) 
 					) . '
 				</div>
+				<div class="bg_color_light_tan loader_div loading" id="file_loader"></div>
 				';
 					
 				$return = array( 'html' => $html );

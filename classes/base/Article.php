@@ -779,7 +779,7 @@ class Article
 				$html = '
 				<div class="padder_10">
 					' . Common::getHtml( "title-bar", array( 
-						'title' => ucWords( $process ) . " Article", 
+						'title' => ucWords( $process ) . " Post", 
 						'classes' => '' ) 
 					) . '
 					

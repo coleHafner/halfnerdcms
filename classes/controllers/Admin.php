@@ -31,14 +31,15 @@ class Admin extends Controller{
 		$valid_subs = array( 
 			"manage-posts", 
 			"manage-pages", 
-			"manage-users", 
+			"manage-users",
+			"manage-settings",
 			"manage-sections",
 			"manage-permissions" 
 		);
 		
 		$this->m_controller_vars['sub'] = ( in_array( $this->m_controller_vars['sub'], $valid_subs ) ) ? $this->m_controller_vars['sub'] : "greeting";
 		$content = $this->getHtml( $this->m_controller_vars['sub'] );
-		$nav = $this->getHtml( "main-nav" );
+		$nav = $this->getHtml( "admin-nav" );
 		
 		$this->m_content = '
 		
@@ -94,16 +95,17 @@ class Admin extends Controller{
 				$return = array( 'title' => $title, 'title_button' => $title_button, 'html' => $html );
 				break;
 				
-			case "main-nav":
+			case "admin-nav":
 			
 				$title = "";
 				$title_button = '';
 				
 				$basic_options = array( 
-					'manage-posts' => "Posts", 
-					'manage-users' => "Users",
 					'manage-pages' => "Pages",
-					'manage-permissions' => "Permissions"
+					'manage-permissions' => "Permissions",
+					'manage-posts' => "Posts",
+					'manage-settings' => "Settings",
+					'manage-users' => "Users"
 				);
 				
 				$html = '
@@ -171,7 +173,7 @@ class Admin extends Controller{
 				';
 				
 				$articles = Article::getArticles( "active", "1" );
-				$article_list = $this->getHtml( "get-article-list", array( 'records' => $articles ) );
+				$article_list = $this->getHtml( "get-post-list", array( 'records' => $articles ) );
 				
 				$html = '
 				<div class="item_list_container" id="article_list_container">
@@ -182,7 +184,7 @@ class Admin extends Controller{
 				$return = array( 'title' => $title, 'title_button' => $title_button, 'html' => $html );
 				break;
 				
-			case "get-article-list":
+			case "get-post-list":
 			
 				$articles = $vars['records'];
 				$add_form = Article::getHtml( "get-edit-form", array( 'active_record' => new Article( 0 ) ) );
@@ -520,7 +522,7 @@ class Admin extends Controller{
 				';
 				
 				
-				$permission_list = $this->getHtml( "get-permission-list", array( 'records' => User::getUsers( "active", "1" ) ) );
+				$permission_list = $this->getHtml( "get-permission-list", array( 'records' => Permission::getPermissions( "active", "1" ) ) );
 				$add_form = Permission::getHtml( "get-edit-form", array( 'active_record' => new Permission( 0 ) ) );
 				
 				$html = '
@@ -530,9 +532,10 @@ class Admin extends Controller{
 						' . $add_form['html'] . '
 					</div>
 	
-					<div class="rounded_corners border_dark_grey user_container" id="user_list_container">
+					<div class="user_container" id="permission_list_container">
 						' . $permission_list['html'] . '
 					</div>
+					
 				</div>
 				';
 				
@@ -540,6 +543,136 @@ class Admin extends Controller{
 				break;
 				
 			case "get-permission-list":
+				
+				$records = $vars['records'];
+				
+				$html = '
+				<ul id="permission_list">
+				';
+				
+				if( count( $records ) > 0 )
+				{
+					foreach( $records as $i => $p )
+					{
+						$view_form = Permission::getHtml( "get-view-form", array( 'active_record' => &$p ) );
+						$mod_form = Permission::getHtml( "get-edit-form", array( 'active_record' => &$p ) );
+						$delete_form = Permission::getHtml( "get-delete-form", array( 'active_record' => &$p ) );
+						
+						$html .= '
+						<li id="item_' . $p->m_permission_id . '">
+							<div class="item_container padder_10 rounded_corners bg_color_light_tan" hover_enabled="1">
+							
+								<div id="permission_info_' . $p->m_permission_id . '">						
+									' . $view_form['html'] . '
+								</div>
+													
+								<div id="permission_canvas_mod_' . $p->m_permission_id . '" style="display:none;">
+									' . $mod_form['html'] . '
+								</div>
+								
+								<div id="permission_canvas_delete_' . $p->m_permission_id . '" style="display:none;">
+									' . $delete_form['html'] . '
+								</div>
+								
+								<div class="title_button_container" id="item_control" style="display:none;">
+								';
+										
+								if( strtolower( $p->m_alias ) != "spr" )
+								{
+									$html .= '
+									' . Common::getHtml( "get-button-round", array(
+										'id' => "permission",
+										'process' => "show_mod",
+										'pk_name' => "permission_id",
+										'pk_value' => $p->m_permission_id,
+										'button_value' => "m",
+										'inner_div_style' => 'style="padding-top:2px;padding-left:1px;"',
+										'link_style' => 'style="float:right;"' ) ) . '
+
+									' . Common::getHtml( "get-button-round", array(
+										'id' => "permission",
+										'process' => "show_delete",
+										'pk_name' => "permission_id",
+										'pk_value' => $p->m_permission_id,
+										'button_value' => "x",
+										'inner_div_style' => 'style="padding-top:2px;padding-left:1px;"',
+										'link_style' => 'style="float:right;"' ) ) . '
+									';
+								}
+								else 
+								{
+									$html .= '
+									<div class="font_no padder" style="float:right;">
+										Cannot Edit
+									</div>
+									';
+								}
+								
+								$html .= '
+										<div class="clear"></div>
+									
+								</div>
+								
+							</div>
+						</li>
+						';
+					
+					}//end loop through views
+					
+				}//if there are any views
+				else
+				{
+					$html .= '
+						<li id="view_item_0">
+							<div class="article_container center" style="border-style:hidden;">
+								There are 0 Views, sucka!!!
+							</div>
+						</li>
+					';
+				}
+				
+				$html .= '
+					</ul>
+					';
+				
+				$return = array( 'html' => $html );
+				break;
+				
+			case "manage-settings":
+				$title = 'Manage Settings';
+				
+				$title_button = '
+				<div class="title_button_container">
+					' . Common::getHtml( "get-button-round", array(
+						'id' => "setting",
+						'process' => "show_add",
+						'pk_name' => "setting_id",
+						'pk_value' => "0",
+						'button_value' => "+",
+						'inner_div_style' => 'style="padding-top:2px;padding-left:1px;"',
+						'link_style' => 'style="float:right;"'
+					 ) ) . '
+				</div>
+				';
+				
+				$views = View::getViews( "active", "1" );
+				$view_list = $this->getHtml( 'get-setting-list', array( 
+					'records' => $views, 
+					'hover_enabled' => TRUE, 
+					'list_type' => "normal" ) 
+				);
+				
+				$html = '
+				<div class="item_list_container" id="setting_list_container">			
+					' . $view_list['html'] . '
+				</div>
+				';
+				
+				$return = array( 'title' => $title, 'title_button' => $title_button, 'html' => $html );
+				break;
+				
+			case "get-setting-list":
+				$return = array( 'html' => "" );
 				break;
 			
 			default:

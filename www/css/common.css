@@ -50,8 +50,54 @@ ul li {
 
 textarea {
 	position:relative;
-	margin-top:10px;
 	line-height:1.66em;
+}
+
+/******************************************************************************************************************************************
+Sections
+******************************************************************************************************************************************/
+
+.nav_section {
+	position:relative;
+	height:80px;
+	border-bottom:1px solid #999;
+	-moz-box-shadow:0px 5px 15px #888;
+	-webkit-box-shadow:0px 5px 15px #888;
+	box-shadow:0px 5px 15px #888;
+}
+
+.main_section {
+	position:relative;
+	margin-bottom:50px;
+	margin-top:20px;
+	min-height:700px;
+}
+
+.footer_section {
+	position:relative;
+	border-top:1px solid #999;
+}
+
+/******************************************************************************************************************************************
+Containers
+******************************************************************************************************************************************/
+.main_container, .footer_container {
+	background-color:#FFF;
+}
+
+.nav_container {
+	height:100px;
+}
+
+.main_container {
+	height:700px;
+	padding-top:15px;
+}
+
+.width_80_middle {
+	position:relative;
+	margin:auto;
+	width:80%;
 }
 
 
@@ -182,13 +228,18 @@ Alignment and spacing
 	margin-top:20px;
 }
 
-.float_left {
-	float:left;
-}
-
 .left_floater {
 	position:relative;
 	float:left;
+}
+
+.float_left, .float_left_spacing {
+	position:relative;
+	float:left;
+}
+
+.float_left_spacing {
+	margin-right:10px;
 }
 
 .padder_5_right {
@@ -201,6 +252,10 @@ Alignment and spacing
 
 .padder_10_bottom {
 	padding-bottom:10px;
+}
+
+.padder_10_right {
+	padding-right:10px;	
 }
 
 .corner_upper_right {
@@ -397,9 +452,20 @@ Colors
 buttons
 ******************************************************************************************************************************************/
 .loading {
-	background-image: url( '/images/loader_small.gif' );
+	background-image: url( '/images/loader_small_light_tan.gif' );
 	background-position:center center;
 	background-repeat:no-repeat;
+}
+
+.loader_div {
+	position:absolute;
+	top:0px;
+	left:0px;
+	width:100%;
+	height:100%;
+	display:none;
+	opacity:.8;
+	z-index:1000000;
 }
 
 a.button {
@@ -566,61 +632,6 @@ Page
 
 .home_bg {
 	background-color:#000;
-}
-
-
-/******************************************************************************************************************************************
-Sections
-******************************************************************************************************************************************/
-
-.nav_section {
-	position:relative;
-	box-shadow:rgba( 0, 0, 0, .8 ) 10px 10px ;
-	height:80px;
-}
-
-.main_section {
-	position:relative;
-	margin-bottom:50px;
-	margin-top:20px;
-	min-height:700px;
-}
-
-.footer_section {
-	position:relative;
-	border-top:1px solid #999;
-	padding:3px;
-}
-
-/******************************************************************************************************************************************
-Containers
-******************************************************************************************************************************************/
-.main_container, .footer_container {
-	background-color:#FFF;
-}
-
-.nav_container {
-	height:100px;
-}
-
-.main_container {
-	height:700px;
-	padding-top:15px;
-}
-
-.width_80_middle {
-	position:relative;
-	margin:auto;
-	width:80%;
-}
-
-
-/******************************************************************************************************************************************
-Main Content
-******************************************************************************************************************************************/
-.main_content_container {
-	position:relative;
-	background-color:#FFF;
 }
 
 /******************************************************************************************************************************************

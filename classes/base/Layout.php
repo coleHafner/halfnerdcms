@@ -6,7 +6,6 @@
 
 require_once( 'base/Common.php' );
 require_once( 'base/View.php' );
-require_once( "services/PicasaAlbum.php" );
 
 class Layout
 {
@@ -20,19 +19,7 @@ class Layout
 	 * Name of the current view.
 	 * @var	int
 	 */
-	protected $m_active_view;
-	
-	/**
-	 * Array of possible views.
-	 * @var	array
-	 */
-	protected $m_views;
-	
-	/**
-	 * Details of the current page. Includes title and other details.
-	 * @var	string
-	 */
-	protected $m_page_details;
+	protected $m_active_controller_name;
 	
 	/**
 	 * Constructs the Layout object.
@@ -43,12 +30,8 @@ class Layout
 	 */
 	public function __construct( $get )
 	{
-		$v = ( array_key_exists( "v", $get ) ) ? $get['v'] : "";
-		$view = ucfirst( $v );
-		
 		$this->m_common = new Common();
-		$this->m_active_view = $this->validateView( $view );
-		$this->m_page_details = $this->getPageDetails();
+		$this->m_active_controller_name = ucfirst( strtolower( $get['v'] ) );
 		
 	}//Layout()
 	
@@ -61,7 +44,6 @@ class Layout
 	public function getPageDetails()
 	{
 		$v = new View(0);
-		
 		return $v->getAllRecords( FALSE );
 		
 	}//getPageDetails()
@@ -77,43 +59,41 @@ class Layout
 		$paths = $this->m_common->getPathInfo();
 		$file_paths = $paths[$this->m_common->m_env];
 		
+		$sql = "
+		SELECT alias
+		FROM common_Views
+		WHERE LOWER( controller_name ) = '" . strtolower( $this->m_active_controller_name ) . "'";
+		
+		$result = $this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
+		$row = $this->m_common->m_db->fetchRow( $result );
+		$alias = $row[0];
+		
 		return '
 		<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 		<html xmlns="http://www.w3.org/1999/xhtml" >
 		
 		<head>
 		
-			<title>' . $this->m_page_details[$this->m_active_view]->m_alias . '</title>
+			<title>' . $alias . '</title>
 
 			<link rel="stylesheet" href="' . $file_paths['css_ex'] . '/960_grid.css" type="text/css" />
 			<link rel="stylesheet" href="' . $file_paths['css_ex'] . '/jquery-ui-1.8.1.custom.css" type="text/css" />
-			<link rel="stylesheet" href="' . $file_paths['css_ex'] . '/colorbox.css" type="text/css" />
-			<link rel="stylesheet" href="' . $file_paths['css_ex'] . '/imgbox.css" type="text/css" /> 
-			<link rel="stylesheet" href="' . $file_paths['css_ex'] . '/nivo-slider.css" type="text/css" />
-			<link rel="stylesheet" href="' . $file_paths['css_ex'] . '/timepicker.css" type="text/css" />
 			<link rel="stylesheet" href="' . $file_paths['css'] . '/common.css" type="text/css" />
 			
 			<script type="text/javascript" src="' . $file_paths['js_ex'] . '/jquery-1.4.2.js"></script>
 			<script type="text/javascript" src="' . $file_paths['js_ex'] . '/jquery-ui-1.8.1.custom.min.js"></script>
-			<script type="text/javascript" src="' . $file_paths['js_ex'] . '/jquery.colorbox.js"></script>
-			<script type="text/javascript" src="' . $file_paths['js_ex'] . '/jquery.imgbox.js"></script>
-			<script type="text/javascript" src="' . $file_paths['js_ex'] . '/jquery.nivo.slider.js"></script>
-			<script type="text/javascript" src="' . $file_paths['js_ex'] . '/jquery.timepicker.js"></script>
-			<script type="text/javascript" src="' . $file_paths['js_ex'] . '/jquery.tools.min.js"></script>
-			<script type="text/javascript" src="' . $file_paths['js'] . '/jquery.halfnerd.common.js"></script>
-			<script type="text/javascript" src="' . $file_paths['js'] . '/jquery.halfnerd.auth.js"></script>
-			<script type="text/javascript" src="' . $file_paths['js'] . '/jquery.halfnerd.article.js"></script>
-			<script type="text/javascript" src="' . $file_paths['js'] . '/jquery.halfnerd.file.js"></script>
-			<script type="text/javascript" src="' . $file_paths['js'] . '/jquery.halfnerd.mail.js"></script>
-			<script type="text/javascript" src="' . $file_paths['js'] . '/jquery.halfnerd.section.js"></script>
-			<script type="text/javascript" src="' . $file_paths['js'] . '/jquery.halfnerd.user.js"></script>
-			<script type="text/javascript" src="' . $file_paths['js'] . '/jquery.halfnerd.usertype.js"></script>
-			<script type="text/javascript" src="' . $file_paths['js'] . '/jquery.halfnerd.view.js"></script>
+			<script type="text/javascript" src="' . $file_paths['js_nerd'] . '/jquery.halfnerd.common.js"></script>
+			<script type="text/javascript" src="' . $file_paths['js_nerd'] . '/jquery.halfnerd.auth.js"></script>
+			<script type="text/javascript" src="' . $file_paths['js_nerd'] . '/jquery.halfnerd.article.js"></script>
+			<script type="text/javascript" src="' . $file_paths['js_nerd'] . '/jquery.halfnerd.file.js"></script>
+			<script type="text/javascript" src="' . $file_paths['js_nerd'] . '/jquery.halfnerd.mail.js"></script>
+			<script type="text/javascript" src="' . $file_paths['js_nerd'] . '/jquery.halfnerd.permission.js"></script>
+			<script type="text/javascript" src="' . $file_paths['js_nerd'] . '/jquery.halfnerd.section.js"></script>
+			<script type="text/javascript" src="' . $file_paths['js_nerd'] . '/jquery.halfnerd.setting.js"></script>
+			<script type="text/javascript" src="' . $file_paths['js_nerd'] . '/jquery.halfnerd.user.js"></script>
+			<script type="text/javascript" src="' . $file_paths['js_nerd'] . '/jquery.halfnerd.usertype.js"></script>
+			<script type="text/javascript" src="' . $file_paths['js_nerd'] . '/jquery.halfnerd.view.js"></script>
 			
-			<!--
-			<script type="text/javascript" src="' . $file_paths['js'] . '/jquery.halfnerd.values.js"></script>
-			-->
-						
 		</head>
 		';
 		
@@ -190,17 +170,21 @@ class Layout
 		</div>
 		<!--/main content section-->
 		
-		<div class="footer_section bg_color_white">
+		<div class="footer_section bg_color_tan">
 		
 			<div class="container_12">
 				
-				<div class="grid_12 center font_small">
-					&copy; [Year] Client Name 
-					<span style="color:#FF0000;">|</span> 
-					Designed by HalfNerd 
-					<span style="color:#FF0000;">|</span>
-					<a href="' . $this->m_common->makeLink( array( 'v' => "admin" ) ) . '">CMS Login</a>
+				<div class="grid_12">
+					<div class="padder_10 center font_small">
+						&copy; [Year] Client Name 
+						<span style="color:#FF0000;">|</span> 
+						Designed by HalfNerd 
+						<span style="color:#FF0000;">|</span>
+						<a href="' . $this->m_common->makeLink( array( 'v' => "admin" ) ) . '">CMS Login</a>
+					</div>
 				</div>
+				
+				<div class="clear"></div>
 				
 			</div> 
 		</div>
@@ -229,6 +213,8 @@ class Layout
 	 */
 	public function getHtmlNav()
 	{
+		$views = array();
+		
 		$return ='
 		<div class="nav_item social_icons">
 			<a href="http://photos.google.com/photonorthwest" target="_blank">
@@ -243,7 +229,7 @@ class Layout
 		</div>
 		';
 		
-		foreach( $this->m_page_details as $c_name => $view ) 
+		foreach( $views as $c_name => $view ) 
 		{
 			
 			if( $view->m_show_in_nav )
@@ -252,7 +238,7 @@ class Layout
 				$sub = "";
 				$link = ( strlen( $view->m_external_link ) > 0 ) ? $view->m_external_link : $this->m_common->makeLink( array( 'v' => $c_name ) );
 				$link_style = ( strlen( $view->m_external_link ) > 0 ) ? 'target="_blank"' : "";
-				$selected = ( $c_name == $this->m_active_view ) ? 'class="selected"': "";
+				$selected = ( $c_name == $this->m_active_controller_name ) ? 'class="selected"': "";
 				
 				//compile html
 				$return .= '
@@ -315,28 +301,6 @@ class Layout
 		return $return;
 		 
 	}//getTableGrid()
-	
-	/**
-	 * Validates the current view.
-	 * Returns the name of the view.
-	 * @since	20100323, hafner
-	 * @return	string
-	 * @param	string		$view		view from the url
-	 */
-	public function validateView( $view )
-	{
-		$sql = "
-		SELECT count(*)
-		FROM common_Views
-		WHERE LOWER( TRIM( controller_name ) ) = '" . strtolower( trim( $view ) ) . "'
-		AND parent_view_id = 0";
-		
-		$result = $this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
-		$row = $this->m_common->m_db->fetchRow( $result );
-		
-		return ( $row[0] == 1 ) ? ucfirst( strtolower( $view ) ) : "Index";
-		
-	}//validateView()
 	
 	/**
 	* Get a member variable's value
