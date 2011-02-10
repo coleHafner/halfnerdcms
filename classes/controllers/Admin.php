@@ -8,8 +8,10 @@ require_once( "base/View.php" );
 require_once( "base/User.php" );
 require_once( "base/Article.php" );
 require_once( "base/Section.php" );
+require_once( "base/Setting.php" );
 require_once( "base/Controller.php" );
 require_once( "base/Permission.php" );
+require_once( "base/Authentication.php" );
 
 class Admin extends Controller{
 	
@@ -639,6 +641,7 @@ class Admin extends Controller{
 				break;
 				
 			case "manage-settings":
+				
 				$title = 'Manage Settings';
 				
 				$title_button = '
@@ -655,16 +658,11 @@ class Admin extends Controller{
 				</div>
 				';
 				
-				$views = View::getViews( "active", "1" );
-				$view_list = $this->getHtml( 'get-setting-list', array( 
-					'records' => $views, 
-					'hover_enabled' => TRUE, 
-					'list_type' => "normal" ) 
-				);
+				$setting_list = $this->getHtml( 'get-setting-list', array( 'records' => Setting::getSettings( "active", "1" ) ) );
 				
 				$html = '
 				<div class="item_list_container" id="setting_list_container">			
-					' . $view_list['html'] . '
+					' . $setting_list['html'] . '
 				</div>
 				';
 				
@@ -672,7 +670,109 @@ class Admin extends Controller{
 				break;
 				
 			case "get-setting-list":
-				$return = array( 'html' => "" );
+				
+				$records = $vars['records'];
+				$items_per_row = 2;
+				$num_items = count( $records );
+				
+				$num_rows = ceil( $num_items / $items_per_row );
+				$active_user = new User( Authentication::getLoginUserId() );
+				$container_style = ( array_key_exists( "container_style", $vars ) ) ? $vars['container_style'] : "";
+				
+				if( $num_items > 0 )
+				{
+					$html = '
+				<table class="settings_grid">
+				';
+				
+					for( $i = 0; $i < $num_rows; $i++ )
+					{
+						$html .= '
+					<tr>			
+								';
+							
+						for( $j = 1; $j <= $items_per_row; $j++ )
+						{
+						
+							$key = $j + ( $items_per_row * $i );
+							
+							if( $key > $num_items )
+							{
+								//add empty cell
+								$html .= '
+						<td>
+							&nbsp;
+						</td>
+						';
+								break;
+							}
+							
+							$item = $records[$key];
+							$view_form = Setting::getHtml( "get-view-form", array( 
+								'active_record' => $item,
+								'active_user' => $active_user,
+								'show_controls' => $vars['show_controls'] ) 
+							);
+							
+							$html .= '
+						<td valign="top">
+							<div id="user_info_' . $item->m_user_id . '" class="' . $vars['container_class'] . ' bg_color_light_tan border_dark_grey" ' . $container_style . ' hover_enabled="' . $vars['hover_enabled'] . '">
+								' . $view_form['html'];
+							
+							if( $vars['show_controls'] )
+							{
+								$html .= '
+								<div class="title_button_container" id="item_control" style="display:none;width:100px;height:40px;">
+									' . Common::getHtml( "get-button-round", array(
+										'href' => $common->makeLink( array(
+											'v' => "account",
+											'sub' => $item->m_username, 
+											'id1' => "update-contact" ) ),
+										'button_value' => "m",
+										'inner_div_style' => 'style="padding-top:2px;padding-left:1px;"',
+										'link_style' => 'style="float:right;"') 
+									) . '
+									' . Common::getHtml( "get-button-round", array(
+										'id' => "user",
+										'process' => "show_delete",
+										'pk_name' => "user_id",
+										'pk_value' => $item->m_user_id,
+										'button_value' => "x",
+										'inner_div_style' => 'style="padding-top:2px;padding-left:1px;"',
+										'link_style' => 'style="float:right;"') 
+									) . '
+								</div>
+								';
+							}
+							
+							$html .= '
+							</div>
+						</td>
+						';
+						
+						}
+						
+						$html .= '
+					</tr>
+					';	
+								
+					}
+
+					$html .= '
+				</table>
+				';
+					
+				}
+				else
+				{
+					$html = '
+					<div class="center padder_10">
+						There are 0 settings...
+					</div>
+					';
+				}
+				
+				$return = array( 'html' => $html );
 				break;
 			
 			default:

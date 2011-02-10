@@ -5,14 +5,16 @@ session_start();
 //include files
 require_once( "base/Common.php" );
 require_once( 'base/Layout.php' );
+require_once( 'base/LayoutAdmin.php' );
 require_once( 'base/Authentication.php' );
 
 //guarantee vars
 $_GET['session'] = $_SESSION;
 $_GET['v'] = Common::validateView( $_GET );
+$admin_controllers = array( "admin", "posts", "users", "account" );
 
 //setup objects
-$layout = new Layout( $_GET );
+$layout = ( in_array( strtolower( $_GET['v'] ), $admin_controllers ) ) ? new LayoutAdmin( $_GET ) : new Layout( $_GET );
 $auth = new Authentication( 0 );
 $common = $auth->m_common;
 

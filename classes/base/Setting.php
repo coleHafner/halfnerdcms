@@ -284,6 +284,29 @@ class Setting
 		
 	}//setLinkedObjects()
 	
+	public static function getSettings( $field, $value )
+	{
+		$return = array();
+		$common = new Common();
+		
+		$sql = "
+		SELECT setting_id
+		FROM common_Settings
+		WHERE setting_id > 0 AND
+		" . $field . " = " . $value . "
+		ORDER BY title ASC";
+		
+		$result = $common->m_db->query( $sql, __FILE__, __LINE__ );
+		
+		while( $row = $common->m_db->fetchRow( $result ) )
+		{
+			$return[] = new Setting( $row[0], FALSE );
+		}
+		
+		return $return;
+		
+	}//getSettings()
+	
 	/**
 	 * Gets all views.
 	 * Returns an array of view objects.
@@ -298,16 +321,11 @@ class Setting
 		$return = FALSE;
 		
 		$sql = "
-		SELECT 
-			setting_id AS setting_id
-		FROM 
-			common_Settings
-		WHERE
-			active = 1 AND
-			setting_id != 0
-			" . $constraint . "
-		ORDER BY 
-			nav_priority ASC";
+		SELECT setting_id
+		FROM common_Settings
+		WHERE setting_id != 0 AND
+		active = 1
+		ORDER BY title ASC";
 		
 		$records = $this->m_common->m_db->doQuery( $sql );
 		

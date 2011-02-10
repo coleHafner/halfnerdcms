@@ -4,8 +4,8 @@
  * @since	20100425, hafner
  */
 
-require_once( 'sbc_base/Common.php' );
-require_once( 'sbc_base/View.php' );
+require_once( 'base/Common.php' );
+require_once( 'base/View.php' );
 
 class LayoutAdmin
 {
@@ -70,7 +70,6 @@ class LayoutAdmin
 			
 			<script type="text/javascript" src="' . $file_paths['js_ex'] . '/jquery-1.4.2.js"></script>
 			<script type="text/javascript" src="' . $file_paths['js_ex'] . '/jquery-ui-1.8.1.custom.min.js"></script>
-			<script type="text/javascript" src="' . $file_paths['js_ex'] . '/jquery.colorbox.js"></script>
 			
 			<script type="text/javascript" src="' . $file_paths['js_nerd'] . '/jquery.halfnerd.common.js"></script>
 			<script type="text/javascript" src="' . $file_paths['js_nerd'] . '/jquery.halfnerd.auth.js"></script>
@@ -83,15 +82,6 @@ class LayoutAdmin
 			<script type="text/javascript" src="' . $file_paths['js_nerd'] . '/jquery.halfnerd.user.js"></script>
 			<script type="text/javascript" src="' . $file_paths['js_nerd'] . '/jquery.halfnerd.usertype.js"></script>
 			<script type="text/javascript" src="' . $file_paths['js_nerd'] . '/jquery.halfnerd.view.js"></script>
-			
-			<script type="text/javascript" src="' . $file_paths['js'] . '/jquery.alert.js"></script>
-			<script type="text/javascript" src="' . $file_paths['js'] . '/jquery.slideshow.js"></script>
-			<script type="text/javascript" src="' . $file_paths['js'] . '/jquery.product.js"></script>
-			
-			<!--
-			<script type="text/javascript" src="' . $file_paths['js_nerd'] . '/jquery.halfnerd.values.js"></script>
-			<script type="text/javascript" src="' . $file_paths['js'] . '/jquery.common.js"></script>
-			-->
 						
 		</head>
 		';

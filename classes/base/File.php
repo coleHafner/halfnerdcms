@@ -574,7 +574,7 @@ class File
 			$paths = $this->m_common->getPathInfo();
 			$upload_path = $paths[$this->m_common->m_env]['absolute'] . "/" . $paths[$this->m_common->m_env]['web'] . "/" . $file_type->m_directory;
 			$file_name = ( array_key_exists( "unique_file_name", $post ) ) ? $post['unique_file_name'] : self::getUniqueFileName(); 
-			$file_name .= "." . self::extractFileExtension( $file_handler->m_file_name );
+			$file_name .= "." . self::extractFileExtension( $fh->m_file_name );
 			
 			//do upload
 			$file_upload_result = $fh->uploadFile( $upload_path, $file_name );

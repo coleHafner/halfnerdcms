@@ -109,30 +109,6 @@ validation functions
 		
 	}//validateFileUploadForm()
 	
-	this.checkDuplicateFile = function( file )
-	{
-		//check duplicate file name
-		$.ajax({
-			type:'post',
-			url: '/ajax/halfnerd_helper.php?task=file&process=check-dup-file-name',
-			data: { file_path_and_name: file },
-			success: function( reply ) {
-				reply = $.trim( reply );
-				
-				if( reply != "0" )
-				{
-					$( "#file_is_unique" ).val( "0" );
-				}
-				else
-				{
-					$( "#file_is_unique" ).val( "1" );
-				}
-				
-				return "hello world";
-			}
-		});
-	}//checkDuplicateFile()
-	
 /**********************************************************************************************************************************
 action functions
 **********************************************************************************************************************************/
