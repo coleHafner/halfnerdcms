@@ -46,6 +46,12 @@ abstract class Controller{
 	protected $m_user;
 	
 	/**
+	 * Collection of valid views for this controller.
+	 * @var	array
+	 */
+	protected $m_valid_views;
+	
+	/**
 	 * A function to set the member vars.
 	 * Always returns TRUE.
 	 * @return	boolean
@@ -119,6 +125,14 @@ abstract class Controller{
 	{
 		return $this->m_user;
 	}//getActiveUser()
+	
+	public function validateCurrentView()
+	{
+		reset( $this->m_valid_views );
+		$default = key( $this->m_valid_views );
+		return $this->m_controller_vars['sub'] = ( array_key_exists( "sub", $this->m_controller_vars ) && in_array( $this->m_controller_vars['sub'], array_keys( $this->m_valid_views ) ) ) ? $this->m_controller_vars['sub'] : $default;
+		
+	}//validateCurrentView()
 		
 	/**
 	 * Sets the content for the current controller

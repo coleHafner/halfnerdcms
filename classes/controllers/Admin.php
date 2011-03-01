@@ -23,6 +23,17 @@ class Admin extends Controller{
 	public function __construct( $controller_vars )
 	{
 		parent::setControllerVars( $controller_vars );
+		
+		$this->m_valid_views = array(
+			'greeting' => "", 
+			'manage-posts' => "", 
+			'manage-pages' => "", 
+			'manage-users' => "",
+			'manage-settings' => "",
+			'manage-sections' => "",
+			'manage-permissions' => "" 
+		);
+		
 	}//constructor
 	
 	/**
@@ -30,25 +41,20 @@ class Admin extends Controller{
 	 */
 	public function setContent() 
 	{
-		$valid_subs = array( 
-			"manage-posts", 
-			"manage-pages", 
-			"manage-users",
-			"manage-settings",
-			"manage-sections",
-			"manage-permissions" 
-		);
+		$this->m_controller_vars['sub'] = $this->validateCurrentView();
 		
-		$this->m_controller_vars['sub'] = ( in_array( $this->m_controller_vars['sub'], $valid_subs ) ) ? $this->m_controller_vars['sub'] : "greeting";
 		$content = $this->getHtml( $this->m_controller_vars['sub'] );
 		$nav = $this->getHtml( "admin-nav" );
 		
 		$this->m_content = '
 		
 		<div class="grid_3">
-			<div class="padder_15">
-				' . $nav['html'] . '
-			</div>
+			<div class="go_to_site_link">
+				<a href="' . $this->m_common->makeLink( array( 'v' => "index" ) ) . '">
+					&lt;&lt; Go To Site
+				</a>
+			</div>	
+			' . $nav['html'] . '
 		</div>
 		
 		<div class="grid_9">				
@@ -479,13 +485,12 @@ class Admin extends Controller{
 					<div id="permission_manager" class="item_container padder_10 rounded_corners bg_color_light_tan" style="display:none;" hover_enabled="0">
 						' . $user_type_manager['html'] . '
 					</div>
-
 					
 					<div id="user_canvas_add" class="item_container padder_10 rounded_corners bg_color_light_tan" style="display:none;" hover_enabled="0">
 						' . $add_form['html'] . '
 					</div>
 	
-					<div class="rounded_corners border_dark_grey user_container" id="user_list_container">
+					<div class="rounded_corners border_dark_grey margin_10_top" id="user_list_container">
 						' . $user_list['html'] . '
 					</div>
 				</div>
@@ -658,11 +663,20 @@ class Admin extends Controller{
 				</div>
 				';
 				
+				$add_html = Setting::getHtml( 'get-add-form', array( 'active_record' => new Setting( 0 ) ) );
 				$setting_list = $this->getHtml( 'get-setting-list', array( 'records' => Setting::getSettings( "active", "1" ) ) );
 				
 				$html = '
-				<div class="item_list_container" id="setting_list_container">			
-					' . $setting_list['html'] . '
+				<div id="setting_canvas_add" class="margin_10_top padder_10 rounded_corners bg_color_light_tan" style="display:none;">
+					' . $add_html['html'] . '
+				</div>
+					
+				<div class="item_list_container border_dark_grey rounded_corners margin_10_top" id="setting_list_container">
+				
+					<div id="setting_list_container">
+						' . $setting_list['html'] . '
+					</div>
+						
 				</div>
 				';
 				
@@ -671,18 +685,15 @@ class Admin extends Controller{
 				
 			case "get-setting-list":
 				
-				$records = $vars['records'];
 				$items_per_row = 2;
+				$records = $vars['records'];
 				$num_items = count( $records );
-				
 				$num_rows = ceil( $num_items / $items_per_row );
-				$active_user = new User( Authentication::getLoginUserId() );
-				$container_style = ( array_key_exists( "container_style", $vars ) ) ? $vars['container_style'] : "";
 				
 				if( $num_items > 0 )
 				{
 					$html = '
-				<table class="settings_grid">
+				<table class="user_grid">
 				';
 				
 					for( $i = 0; $i < $num_rows; $i++ )
@@ -708,44 +719,48 @@ class Admin extends Controller{
 							}
 							
 							$item = $records[$key];
-							$view_form = Setting::getHtml( "get-view-form", array( 
-								'active_record' => $item,
-								'active_user' => $active_user,
-								'show_controls' => $vars['show_controls'] ) 
-							);
+							$form_vars = array( 'active_record' => $item );
+							$view_form = Setting::getHtml( "get-view-form", $form_vars );
+							$edit_form = Setting::getHtml( "get-edit-form", $form_vars );
+							$delete_form = Setting::getHtml( "get-delete-form", $form_vars );
 							
 							$html .= '
 						<td valign="top">
-							<div id="user_info_' . $item->m_user_id . '" class="' . $vars['container_class'] . ' bg_color_light_tan border_dark_grey" ' . $container_style . ' hover_enabled="' . $vars['hover_enabled'] . '">
-								' . $view_form['html'];
+							<div class="item_container bg_color_light_tan border_dark_grey" style="margin-top:0px;" hover_enabled="1">
 							
-							if( $vars['show_controls'] )
-							{
-								$html .= '
+								<div id="setting_info_' . $item->m_setting_id . '">
+									' . $view_form['html'] . '
+								</div>
+								
+								<div id="setting_canvas_mod_' . $item->m_setting_id . '" style="display:none;">
+									' . $edit_form['html'] . '
+								</div>
+								
+								<div id="setting_canvas_delete_' . $item->m_setting_id . '" style="display:none;">
+									' . $delete_form['html'] . '
+								</div>
+								
 								<div class="title_button_container" id="item_control" style="display:none;width:100px;height:40px;">
 									' . Common::getHtml( "get-button-round", array(
-										'href' => $common->makeLink( array(
-											'v' => "account",
-											'sub' => $item->m_username, 
-											'id1' => "update-contact" ) ),
+										'id' => "setting",
+										'process' => "show_modify",
+										'pk_name' => "setting_id",
+										'pk_value' => $item->m_setting_id,
 										'button_value' => "m",
 										'inner_div_style' => 'style="padding-top:2px;padding-left:1px;"',
 										'link_style' => 'style="float:right;"') 
 									) . '
 									' . Common::getHtml( "get-button-round", array(
-										'id' => "user",
+										'id' => "setting",
 										'process' => "show_delete",
-										'pk_name' => "user_id",
-										'pk_value' => $item->m_user_id,
+										'pk_name' => "setting_id",
+										'pk_value' => $item->m_setting_id,
 										'button_value' => "x",
 										'inner_div_style' => 'style="padding-top:2px;padding-left:1px;"',
 										'link_style' => 'style="float:right;"') 
 									) . '
 								</div>
-								';
-							}
-							
-							$html .= '
+								
 							</div>
 						</td>
 						';

@@ -261,11 +261,15 @@ class Setting
 			}
 		}
 		
-		if( !array_key_exists( "value", $input ) ||
-			strlen( trim( $input['value'] ) ) == 0 ||
-			strtolower( trim( $input['value'] ) ) == "setting value" )
+		
+		if( !$this->m_form->m_error )
 		{
-			$this->m_form->m_error = "You must select a value for this setting.";
+			if( !array_key_exists( "value", $input ) ||
+				strlen( trim( $input['value'] ) ) == 0 ||
+				strtolower( trim( $input['value'] ) ) == "setting value" )
+			{
+				$this->m_form->m_error = "You must select a value.";
+			}
 		}
 		
 		return $this->m_form->m_error;
@@ -286,6 +290,7 @@ class Setting
 	
 	public static function getSettings( $field, $value )
 	{
+		$key = 1;
 		$return = array();
 		$common = new Common();
 		
@@ -300,7 +305,8 @@ class Setting
 		
 		while( $row = $common->m_db->fetchRow( $result ) )
 		{
-			$return[] = new Setting( $row[0], FALSE );
+			$return[$key] = new Setting( $row[0], FALSE );
+			$key++;
 		}
 		
 		return $return;
@@ -346,16 +352,75 @@ class Setting
 		switch( strtolower( trim( $cmd ) ) )
 		{
 			case "get-view-form":
-			
+				
 				$s = $vars['active_record'];
 				
 				$html = '
-				<div class="header color_accent">
-					' . $s->m_title . '
+				<div class="padder">
+					<div class="header color_accent">
+						' . $s->m_title . '
+					</div>
+					<div class="padder_10_top color_black" >
+						' . $s->m_value . '
+					</div>
 				</div>
+				';
 				
-				<div>
-				</div>
+				$return = array( 'html' => $html );
+				break;
+				
+			case "get-add-form":
+				
+				$s = $vars['active_record'];
+				
+				$html = '
+				
+				<span class="title_span header color_accent">
+					Add New Setting
+				</span>
+				<div class="padder_10_top">
+					<form id="setting_form_0">
+						<div style="position:relative;width:35%;float:left;">
+							<span class="title_span">
+								Setting Title:
+							</span>
+							<input type="text" name="title" class="text_input text_long" value="" />
+						</div>
+						
+						<div style="position:relative;width:35%;float:left;">
+							<span class="title_span">
+								Setting Value:
+							</span>
+							<input type="text" name="value" class="text_input text_long" value="" />
+						</div>
+						
+						<div style="position:relative;width:30%;float:left;">
+							' . Common::getHtml( "get-form-buttons", array( 
+									'left' => array( 
+										'pk_name' => "setting_id",
+										'pk_value' => 0,
+										'process' => "add",
+										'id' => "setting",
+										'button_value' => "Add",
+										'extra_style' => 'style="width:41px;"' ),
+										
+									'right' => array(
+										'pk_name' => "setting_id",
+										'pk_value' => $s->m_setting_id,
+										'process' => "cancel_add",
+										'id' => "setting",
+										'button_value' => "Cancel",
+										'extra_style' => 'style="width:41px;"' ),
+	
+									'table_style' => 'style="margin-top:18px;margin-left:15px;"'
+									
+									)
+								) . '
+						</div>
+					</div>
+					
+					<div class="clear"></div>
+				</form>
 				';
 				
 				$return = array( 'html' => $html );
@@ -367,15 +432,12 @@ class Setting
 				
 				if( $s->m_setting_id > 0 )
 				{
-					
 					$process = "modify";
 					$title = $s->m_title;
 					$value = $s->m_value;
 					$second_line_css = "";
-					
-					$formatted_title = ucwords( strtolower( str_replace( "-", " ", $s->m_title ) ) );
-					$second_line_title = "";
-					$main_title = "Edit " . $formatted_title;
+					$second_line_title = "Setting Value:";
+					$main_title = "Modify " . $s->m_title;
 					
 					$first_line_html = '
 					<input type="hidden" name="title" value="' . $s->m_title . '" />
@@ -388,31 +450,30 @@ class Setting
 					$value = "";
 					$second_line_css = "padder_no_top";
 					$second_line_title = "Setting Value:";
-					$main_title = ucWords( $process ) . " Setting";
-					
-					$first_line_html = '
-					<div class="padder_10">
-						<table style="margin:auto;">
-							<tr>
-								<td>
-									<span class="title_span">
-										Setting Title:
-									</span>
-									<input type="text" name="title" class="text_input text_long" value="' . $title . '" />
-								</td>
-							</tr>
-						</table>
-					</div>
-					';
+					$main_title = "Add Setting";
 				}
 				
 				$html = '
-				<div class="padder_10">
-					' . Common::getHtml( "title-bar", array( 'title' => $main_title, 'classes' => '' ) ) . '
+				<div class="padder">
+				
+					<div class="padder header color_accent" style="padding-left:12px;">
+						' . $main_title . '
+					</div>
 					
 					<form id="setting_form_' . $s->m_setting_id . '">
 					
-						' . $first_line_html . '
+						<div class="padder_10">
+							<table style="margin:auto;">
+								<tr>
+									<td>
+										<span class="title_span">
+											Setting Title:
+										</span>
+										<input type="text" name="title" class="text_input text_long" value="' . $title . '" />
+									</td>
+								</tr>
+							</table>
+						</div>
 						
 						<div class="padder_10 ' . $second_line_css . '">
 							
@@ -429,14 +490,26 @@ class Setting
 							</table>
 						</div>
 						
-						<div class="padder center">
-							' . Common::getHtml( "get-button", array( 
-								'pk_name' => "setting_id",
-								'pk_value' => $s->m_setting_id,
-								'process' => $process,
-								'id' => "setting",
-								'button_value' => ucwords( $process ),
-								'extra_style' => 'style="width:41px;"' )
+						<div class="padder">' . 
+							Common::getHtml( "get-form-buttons", array( 
+								'left' => array( 
+									'pk_name' => "setting_id",
+									'pk_value' => $s->m_setting_id,
+									'process' => "modify",
+									'id' => "setting",
+									'button_value' => "Modify",
+									'extra_style' => 'style="width:41px;"' ),
+									
+								'right' => array(
+									'pk_name' => "setting_id",
+									'pk_value' => $s->m_setting_id,
+									'process' => "cancel_modify",
+									'id' => "setting",
+									'button_value' => "Cancel",
+									'extra_style' => 'style="width:41px;"' ),
+		
+								'table_style' => 'style="position:relative;width:100px;padding-left:10px;"'
+								)
 							) . '
 						</div>
 					</form>
@@ -451,32 +524,36 @@ class Setting
 			
 				$s = $vars['active_record'];
 				
-				$return = array( 'html' => '
-					<div class="padder_10">
-						' . Common::getHtml( "title-bar", array( 'title' => "Really Delete Setting?", 'classes' => '' ) ) . '
-						
-						<div class="button_container">
-							' . Common::getHtml( "get-form-buttons", array( 
-						
-								'left' => array( 
-									'pk_name' => "setting_id",
-									'pk_value' => $s->m_setting_id,
-									'process' => "delete",
-									'id' => "setting",
-									'button_value' => "Delete" ),
-									
-								'right' => array(
-									'pk_name' => "setting_id",
-									'pk_value' => $s->m_setting_id,
-									'process' => "cancel_delete",
-									'id' => "setting",
-									'button_value' => "Cancel" ) 
-								) 
-							) . '
-						</div>
-					</div>
-					'
-				);
+				$html = '
+				<div class="padder_10 header color_accent">
+					Really delete this setting?
+				</div>
+				
+				<div> ' . 
+					Common::getHtml( "get-form-buttons", array( 
+						'left' => array( 
+							'pk_name' => "setting_id",
+							'pk_value' => $s->m_setting_id,
+							'process' => "delete",
+							'id' => "setting",
+							'button_value' => "Delete",
+							'extra_style' => 'style="width:41px;"' ),
+							
+						'right' => array(
+							'pk_name' => "setting_id",
+							'pk_value' => $s->m_setting_id,
+							'process' => "cancel_delete",
+							'id' => "setting",
+							'button_value' => "Cancel",
+							'extra_style' => 'style="width:41px;"' ),
+
+						'table_style' => 'style="position:relative;width:100px;padding-left:12px;"'
+						)
+					) . '
+				</div>
+				';
+
+				$return = array( 'html' => $html );
 				break;
 				
 			default:
