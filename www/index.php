@@ -11,7 +11,7 @@ require_once( 'base/Authentication.php' );
 //guarantee vars
 $_GET['session'] = $_SESSION;
 $_GET['v'] = Common::validateView( $_GET );
-$admin_controllers = array( "admin", "posts", "users", "account" );
+$admin_controllers = array( "admin", "posts", "users", "account", "setting" );
 
 //setup objects
 $layout = ( in_array( strtolower( $_GET['v'] ), $admin_controllers ) ) ? new LayoutAdmin( $_GET ) : new Layout( $_GET );

@@ -228,6 +228,11 @@ Alignment and spacing
 	margin-top:20px;
 }
 
+.margin_10_top {
+	margin-top:10px;
+}
+
+
 .left_floater {
 	position:relative;
 	float:left;
@@ -693,7 +698,7 @@ Admin
 	position:relative;
 }
 
-.item_container, .user_container {
+.item_container {
 	position:relative;
 	margin-top:10px;
 	min-height:80px;
@@ -764,7 +769,12 @@ Admin
 	position:relative;
 	width:170px;
 	margin:auto;
-	top:45px;
+}
+
+.go_to_site_link {
+	position:relative;
+	padding:20px 0px 20px 25px;
+	margin:auto;
 }
 
 .admin_options_bar {
