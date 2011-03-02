@@ -355,10 +355,10 @@ class Section
 						
 						<td class="center" style="width:34%">
 								' . Common::getHtml( "get-button", array( 
-								'pk_name' => "section_id",
+								'pk_name' => "manager_id",
 								'pk_value' => "0",
-								'process' => "hide_manager",
-								'id' => "section",
+								'process' => "hide",
+								'id' => "manager",
 								'button_value' => "Hide Manager",
 								'extra_style' => 'style="width:110px;"' ) 
 							) . '

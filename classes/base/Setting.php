@@ -243,6 +243,17 @@ class Setting
 			$this->m_form->m_error = "You must select a title.";
 		} 
 		
+		//check value
+		if( !$this->m_form->m_error )
+		{
+			if( !array_key_exists( "value", $input ) ||
+				strlen( trim( $input['value'] ) ) == 0 ||
+				strtolower( trim( $input['value'] ) ) == "setting value" )
+			{
+				$this->m_form->m_error = "You must select a value.";
+			}
+		}
+		
 		//check duplicate title
 		if( !$this->m_form->m_error )
 		{
@@ -258,17 +269,6 @@ class Setting
 				{
 					$this->m_form->m_error = "That title already exists.";
 				}
-			}
-		}
-		
-		
-		if( !$this->m_form->m_error )
-		{
-			if( !array_key_exists( "value", $input ) ||
-				strlen( trim( $input['value'] ) ) == 0 ||
-				strtolower( trim( $input['value'] ) ) == "setting value" )
-			{
-				$this->m_form->m_error = "You must select a value.";
 			}
 		}
 		
@@ -405,10 +405,10 @@ class Setting
 										'extra_style' => 'style="width:41px;"' ),
 										
 									'right' => array(
-										'pk_name' => "setting_id",
+										'pk_name' => "item_id",
 										'pk_value' => $s->m_setting_id,
-										'process' => "cancel_add",
-										'id' => "setting",
+										'process' => "view",
+										'id' => "list_item",
 										'button_value' => "Cancel",
 										'extra_style' => 'style="width:41px;"' ),
 	
@@ -501,10 +501,10 @@ class Setting
 									'extra_style' => 'style="width:41px;"' ),
 									
 								'right' => array(
-									'pk_name' => "setting_id",
+									'pk_name' => "item_id",
 									'pk_value' => $s->m_setting_id,
-									'process' => "cancel_modify",
-									'id' => "setting",
+									'process' => "view",
+									'id' => "list_item",
 									'button_value' => "Cancel",
 									'extra_style' => 'style="width:41px;"' ),
 		
@@ -540,10 +540,10 @@ class Setting
 							'extra_style' => 'style="width:41px;"' ),
 							
 						'right' => array(
-							'pk_name' => "setting_id",
+							'pk_name' => "item_id",
 							'pk_value' => $s->m_setting_id,
-							'process' => "cancel_delete",
-							'id' => "setting",
+							'process' => "view",
+							'id' => "list_item",
 							'button_value' => "Cancel",
 							'extra_style' => 'style="width:41px;"' ),
 
@@ -553,6 +553,39 @@ class Setting
 				</div>
 				';
 
+				$return = array( 'html' => $html );
+				break;
+				
+			case "get-admin-list-item":
+				
+				$item = $vars['active_record'];
+				$form_vars = array( 'active_record' => $item );
+				$view_form = Setting::getHtml( "get-view-form", $form_vars );
+				$edit_form = Setting::getHtml( "get-edit-form", $form_vars );
+				$delete_form = Setting::getHtml( "get-delete-form", $form_vars );
+				$item_classes = Common::getHtml( "get-admin-list-item-classes", array() );
+				$buttons = Common::getHtml( "get-admin-item-buttons", array( 'item_id' => $item->m_setting_id ) );
+				
+				$html = '
+				<div class="item_container bg_color_light_tan border_dark_tan" style="margin-top:0px;" hover_enabled="1">		
+					<div id="item_view_' . $item->m_setting_id . '">
+						' . $view_form['html'] . '
+					</div>
+					
+					<div id="item_mod_' . $item->m_setting_id . '" style="display:none;">
+						' . $edit_form['html'] . '
+					</div>
+					
+					<div id="item_delete_' . $item->m_setting_id . '" style="display:none;">
+						' . $delete_form['html'] . '
+					</div>
+					
+					<div class="title_button_container" id="item_control" style="display:none;width:100px;height:40px;">
+						' . $buttons['html'] . '
+					</div>
+				</div>
+				';
+				
 				$return = array( 'html' => $html );
 				break;
 				

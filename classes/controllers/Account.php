@@ -20,6 +20,14 @@ class Account extends Controller{
 	public function __construct( $controller_vars )
 	{
 		parent::setControllerVars( $controller_vars );
+		
+		$this->m_valid_views = array(
+			'update-contact' => "", 
+			'update-login' => "", 
+			'update-photo' => "", 
+			'update-permissions' => ""
+		);
+		
 	}//constructor
 	
 	/**
@@ -30,25 +38,24 @@ class Account extends Controller{
 	{
 		//validate sub-option
 		$user_edit_approved = FALSE;
-		$valid_subs = array( "update-contact", "update-login", "update-photo", "update-permissions" );
 		
 		//check if user edit has been requested
-		if( !in_array( $this->m_controller_vars['sub'], $valid_subs) )
+		if( !in_array( $this->m_controller_vars['sub'], array_keys( $this->m_valid_views ) ) )
 		{
-			if( !User::usernameExists( $this->m_controller_vars['sub'] ) )
-			{
-				$this->m_controller_vars['sub'] = "update-contact"; 
-			}
-			else if( !$this->m_user->permissionUserHasAny( array( "spr" ) ) )
+			if( !User::usernameExists( $this->m_controller_vars['sub'] ) ||
+				!$this->m_user->permissionUserHasAny( array( "spr" ) ) ||
+				strtolower( $this->m_controller_vars['sub'] ) == strtolower( $this->m_user->m_username ) )
 			{
 				//if user edit has been requested, 
-				//but current user has no permissions, 
+				//but current user has no permissions OR
+				//requested username does not exist, 
 				//default to current users profile
-				$this->m_controller_vars['sub'] = "update-contact";
+				$this->m_controller_vars['sub'] = $this->validateCurrentView();
 			}
 			else
 			{
 				$user_edit_approved = TRUE;
+				$this->m_controller_vars['id1'] = $this->validateControllerVar( $this->m_controller_vars['id1'] );
 			}
 		}
 		
@@ -144,8 +151,6 @@ class Account extends Controller{
 				break;
 				
 			case "update-contact":
-				//echo "cmd: " . $cmd;
-				//print_r( $vars );exit;
 				$user_html = User::getHtml( "get-contact-form", array( 
 					'active_record' => &$vars['active_user'],
 					'render_form_tag' => TRUE ) 
@@ -256,9 +261,6 @@ class Account extends Controller{
 				
 				//validate options
 				$requested_user = new User( $requested_user_id );
-				$valid_subs = array( "update-contact", "update-login", "update-photo", "update-permissions" );
-				$this->m_controller_vars['id1'] = ( !in_array( $this->m_controller_vars['id1'], $valid_subs ) ) ? "update-contact" : $this->m_controller_vars['id1'];
-				
 				$return = $this->getHtml( $this->m_controller_vars['id1'], array( 'active_user' => &$requested_user ) );
 				break;
 		}

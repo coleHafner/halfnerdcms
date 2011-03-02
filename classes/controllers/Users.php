@@ -19,6 +19,12 @@ class Users extends Controller{
 	public function __construct( $controller_vars )
 	{
 		parent::setControllerVars( $controller_vars );
+		
+		$this->m_valid_views = array(
+			'all' => "", 
+			'search' => "" 
+		);
+		
 	}//constructor
 	
 	/**
@@ -27,14 +33,13 @@ class Users extends Controller{
 	 */
 	public function setContent() 
 	{
-		//validate sub-option
-		$valid_subs = array( "all", "search" );
-		
-		if( !in_array( $this->m_controller_vars['sub'], $valid_subs) )
+		//check if user edit has been requested
+		if( !in_array( $this->m_controller_vars['sub'], array_keys( $this->m_valid_views ) ) )
 		{
 			if( !User::usernameExists( $this->m_controller_vars['sub'] ) )
 			{
-				$this->m_controller_vars['sub'] = "all"; 
+				//if no user with that name exists, default to default view
+				$this->m_controller_vars['sub'] = $this->validateCurrentView();
 			}
 		}
 		
@@ -74,6 +79,7 @@ class Users extends Controller{
 		{
 			case "all":
 				
+				$users = User::getUsers( "active", "1" );
 				$search_bar = self::getHtml( "get-search-bar" );
 				
 				$headline = self::getHtml( "get-headline", array(
@@ -81,12 +87,21 @@ class Users extends Controller{
 					'extra_content' => $search_bar['html'] ) 
 				);
 				
-				$grid_html = User::getHtml( "get-user-grid", array(
-					'records' => User::getUsers( "active", "1" ), 
-					'container_class' => "user_badge",
-					'show_controls' => FALSE,
-					'hover_enabled' => "0" ) 
+				
+				
+				$grid_vars = array(
+					'records' => $users,
+					'is_static' => TRUE,
+					'records_per_row' => 2,
+					'id' => 'id="user_grid"',
+					'extra_classes' => 'class="user_grid"',
+					'active_controller' => "User",
+					'html_cmd' => 'get-view-form-badge',
+					'html_vars' => array( 'show_controls' => FALSE, 'hover_enabled' => FALSE ),
+					'empty_message' => "There are 0 users ( how are you logged in? ). Click the '+' button to add one."
 				);
+				
+				$grid = Common::getHtml( "display-grid", $grid_vars );
 				
 				$html = 
 				$headline['html'] . '
@@ -94,7 +109,7 @@ class Users extends Controller{
 				<div class="border_dark_grey rounded_corners">
 				
 					<div class="padder">
-						' . $grid_html['html'] . '
+						' . $grid['html'] . '
 					</div>
 				</div>
 				';

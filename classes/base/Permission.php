@@ -433,11 +433,11 @@ class Permission
 								'extra_style' => 'style="width:41px;"' ),
 								
 							'right' => array(
-								'pk_name' => "permission_id",
+								'pk_name' => "item_id",
 								'pk_value' => $p->m_permission_id,
-								'process' => "cancel_" . $process,
-								'id' => "permission",
-								'button_value' => "Cancel" ) 
+								'process' => "view",
+								'id' => "list_item",
+								'button_value' => "Cancel" )
 							) 
 						) . '
 						</div> 
@@ -498,10 +498,10 @@ class Permission
 								'extra_style' => 'style="width:41px;"' ),
 								
 							'right' => array(
-								'pk_name' => "permission_id",
+								'pk_name' => "item_id",
 								'pk_value' => $p->m_permission_id,
-								'process' => "cancel_delete",
-								'id' => "permission",
+								'process' => "view",
+								'id' => "list_item",
 								'button_value' => "Cancel" ) 
 							) 
 						) . '
@@ -509,6 +509,58 @@ class Permission
 				</div>
 				';
 				
+				$return = array( 'html' => $html );
+				break;
+				
+			case "get-admin-list-item":
+				
+				$p = $vars['active_record'];
+				$view_form = Permission::getHtml( "get-view-form", array( 'active_record' => &$p ) );
+				$mod_form = Permission::getHtml( "get-edit-form", array( 'active_record' => &$p ) );
+				$delete_form = Permission::getHtml( "get-delete-form", array( 'active_record' => &$p ) );
+				$item_classes = Common::getHtml( "get-admin-list-item-classes", array() );
+				
+				$html = '
+				<div class="' . $item_classes['html'] . '" hover_enabled="1">
+					
+					<div id="item_view_' . $p->m_permission_id . '">						
+						' . $view_form['html'] . '
+					</div>
+										
+					<div id="item_mod_' . $p->m_permission_id . '" style="display:none;">
+						' . $mod_form['html'] . '
+					</div>
+					
+					<div id="item_delete_' . $p->m_permission_id . '" style="display:none;">
+						' . $delete_form['html'] . '
+					</div>
+					
+					<div class="title_button_container" id="item_control" style="display:none;">
+					';
+								
+					if( strtolower( $p->m_alias ) != "spr" )
+					{
+						$buttons = Common::getHtml( "get-admin-item-buttons", array( 'item_id' => $p->m_permission_id ) );
+						
+						$html .= '
+						' . $buttons['html'];
+					}
+					else 
+					{
+						$no_edit = Common::getHtml( 'get-item-no-edit' );
+						
+						$html .= '
+							' . $no_edit['html'];
+					}
+					
+					$html .= '
+						<div class="clear"></div>
+						
+					</div>
+					
+				</div>
+				';
+					
 				$return = array( 'html' => $html );
 				break;
 				

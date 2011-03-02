@@ -20,6 +20,11 @@ class Posts extends Controller{
 	public function __construct( $controller_vars )
 	{
 		parent::setControllerVars( $controller_vars );
+		
+		$this->m_valid_views = array(
+			'all' => ""
+		);
+		
 	}//constructor
 	
 	/**
@@ -29,8 +34,7 @@ class Posts extends Controller{
 	public function setContent() 
 	{
 		//validate sub-option
-		$valid_subs = array( "all" );
-		$this->m_controller_vars['sub'] = ( in_array( $this->m_controller_vars['sub'], $valid_subs ) ) ? $this->m_controller_vars['sub'] : "all";
+		$this->m_controller_vars['sub'] = $this->validateCurrentView();
 		
 		//grab html
 		$nav = $this->getHtml( "posts-nav-options" );

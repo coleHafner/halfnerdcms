@@ -130,9 +130,19 @@ abstract class Controller{
 	{
 		reset( $this->m_valid_views );
 		$default = key( $this->m_valid_views );
-		return $this->m_controller_vars['sub'] = ( array_key_exists( "sub", $this->m_controller_vars ) && in_array( $this->m_controller_vars['sub'], array_keys( $this->m_valid_views ) ) ) ? $this->m_controller_vars['sub'] : $default;
+		$return = ( array_key_exists( "sub", $this->m_controller_vars ) && in_array( $this->m_controller_vars['sub'], array_keys( $this->m_valid_views ) ) ) ? $this->m_controller_vars['sub'] : $default;
+		return $return;
 		
 	}//validateCurrentView()
+	
+	public function validateControllerVar( $val )
+	{
+		reset( $this->m_valid_views );
+		$default = key( $this->m_valid_views );
+		$return = ( in_array( $val, array_keys( $this->m_valid_views ) ) ) ? $val : $default;
+		return $return;
+		
+	}//validateControllerVar()
 		
 	/**
 	 * Sets the content for the current controller

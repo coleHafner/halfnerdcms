@@ -46,14 +46,18 @@ class LayoutAdmin
 		$paths = $this->m_common->getPathInfo();
 		$file_paths = $paths[$this->m_common->m_env];
 		
-		$sql = "
-		SELECT alias
-		FROM common_Views
-		WHERE LOWER( controller_name ) = '" . strtolower( $this->m_active_controller_name ) . "'";
+		$paths = $this->m_common->getPathInfo();
+		$file_paths = $paths[$this->m_common->m_env];
 		
+		$sql = "SELECT alias FROM common_Views WHERE LOWER( controller_name ) = '" . strtolower( $this->m_active_controller_name ) . "'";
 		$result = $this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
 		$row = $this->m_common->m_db->fetchRow( $result );
 		$alias = $row[0];
+		
+		$sql = "SELECT value FROM common_Settings WHERE LOWER( title ) = 'site-name'";
+		$result = $this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
+		$row = $this->m_common->m_db->fetchRow( $result );
+		$site = $row[0];
 		
 		return '
 		<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -61,7 +65,10 @@ class LayoutAdmin
 		
 		<head>
 		
-			<title>' . $alias . '</title>
+			<meta name="viewport" content="width=device-width; user-scalable=1;" >
+			<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" >
+			
+			<title>' . $alias . ' - ' . $site . '</title>
 
 			<link rel="stylesheet" href="' . $file_paths['css_ex'] . '/960_grid.css" type="text/css" />
 			<link rel="stylesheet" href="' . $file_paths['css_ex'] . '/jquery-ui-1.8.1.custom.css" type="text/css" />

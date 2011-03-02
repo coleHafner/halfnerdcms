@@ -827,39 +827,42 @@ class User
 				$user_type_title = ( strlen( $ut->m_title ) > 0 ) ? $ut->m_title : "User";
 				
 				$img_src = self::getHtml( "get-user-image-url", array( 'active_record' => &$u ) );
-				$show_controls = ( array_key_exists( "show_controls", $vars ) && !$vars['show_controls'] ) ? FALSE : TRUE;
+				$hover_enabled = ( array_key_exists( "hover_enabled", $vars['options'] ) && $vars['options']['hover_enabled'] === TRUE ) ? "1" : "0";
+				$show_controls = ( array_key_exists( "show_controls", $vars['options'] ) && $vars['options']['show_controls'] === FALSE ) ? FALSE : TRUE;
 				
 				//shorten bio
 				$truncated_bio = ( strlen( $u->m_bio ) > 75 ) ? substr( $u->m_bio, 0, 73 ) . "..." : $u->m_bio;
 				
 				$html = '
-				<div class="padder">
-					
-					<div class="thumb_holder bg_color_white user_holder padder border_dark_grey">
-						<img src="' . $img_src['html'] . '" />
-					</div>
-					
-					<div class="user_holder" style="width:50%;">
+				<div class="item_container bg_color_light_tan border_dark_tan" hover_enabled="' . $hover_enabled . '" style="margin-top:0px;">
+							
+					<div class="padder">
 						
-						<div class="header color_black user_name">
-							<a href="' . $common->makeLink( array( 'v' => "users", 'sub' => $u->m_username ) ) . '">
-								' . ucwords( $u->m_username ) . '
-							</a>
+						<div class="thumb_holder bg_color_white user_holder padder border_dark_grey">
+							<img src="' . $img_src['html'] . '" />
 						</div>
 						
-						<div class="header_sub color_terciary">
-							' . $user_type_title . '
-						</div>
-						
-						<div id="user_bio_' . $u->m_user_id . '" class="padder_10_top color_black">
-							' . $truncated_bio . '
-						</div>
-						';
+						<div class="user_holder" style="width:50%;">
+							
+							<div class="header color_black user_name">
+								<a href="' . $common->makeLink( array( 'v' => "users", 'sub' => $u->m_username ) ) . '">
+									' . ucwords( $u->m_username ) . '
+								</a>
+							</div>
+							
+							<div class="header_sub color_terciary">
+								' . $user_type_title . '
+							</div>
+							
+							<div id="item_view_' . $u->m_user_id . '" class="padder_10_top color_black">
+								' . $truncated_bio . '
+							</div>
+							';
 				
 					if( $show_controls )
 					{
 						$html .= '
-						<div id="user_delete_controls_' . $u->m_user_id . '" class="padder_10_top" style="display:none;">
+						<div id="item_delete_' . $u->m_user_id . '" class="padder_10_top" style="display:none;">
 							' . Common::getHtml( "get-form-buttons", array( 
 			
 								'left' => array( 
@@ -871,10 +874,10 @@ class User
 									'extra_style' => 'style="width:41px;"' ),
 									
 								'right' => array(
-									'pk_name' => "user_id",
+									'pk_name' => "item_id",
 									'pk_value' => $u->m_user_id,
-									'process' => "cancel_delete",
-									'id' => "user",
+									'process' => "view",
+									'id' => "list_item",
 									'button_value' => "Cancel",
 									'extra_style' => 'style="width:41px;"' ),
 								
@@ -891,6 +894,34 @@ class User
 					</div>
 						
 					<div class="clear"></div>
+					';
+				
+				if( $show_controls )
+				{
+					$common = new Common();
+					$buttons = Common::getHtml( "get-admin-item-buttons", array( 'item_id' => $u->m_user_id ) );
+					
+					$html .= '
+					<div class="title_button_container" id="item_control" style="display:none;">
+						' . Common::getHtml( "get-button-round", array(
+								'href' => $common->makeLink( array( 'v' => "account", 'sub' => $u->m_username ) ), 
+								'button_value' => "m",
+								'inner_div_style' => 'style="padding-top:2px;padding-left:1px;"',
+								'link_style' => 'style="float:right;"' ) ) . '
+							
+						' . Common::getHtml( "get-button-round", array(
+								'id' => "list_item",
+								'process' => "delete",
+								'pk_name' => "item_id",
+								'pk_value' => $u->m_user_id,
+								'button_value' => "x",
+								'inner_div_style' => 'style="padding-top:2px;padding-left:1px;"',
+								'link_style' => 'style="float:right;"' ) ) . '
+					</div>
+					';
+				}
+				
+				$html .= '
 				</div>
 				';
 				

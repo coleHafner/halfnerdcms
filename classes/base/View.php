@@ -884,10 +884,10 @@ class View
 									'extra_style' => 'style="width:41px;"' ),
 									
 								'right' => array(
-									'pk_name' => "view_id",
+									'pk_name' => "item_id",
 									'pk_value' => $v->m_view_id,
-									'process' => "cancel_" . $process,
-									'id' => "view",
+									'process' => "view",
+									'id' => "list_item",
 									'button_value' => "Cancel" ) 
 								) 
 							) . '
@@ -918,10 +918,10 @@ class View
 									'button_value' => "Delete" ),
 									
 								'right' => array(
-									'pk_name' => "view_id",
+									'pk_name' => "item_id",
 									'pk_value' => $v->m_view_id,
-									'process' => "cancel_delete",
-									'id' => "view",
+									'process' => "view",
+									'id' => "list_item",
 									'button_value' => "Cancel" ) 
 								) 
 							) . '
@@ -964,6 +964,67 @@ class View
 					</div>
 					'
 				);
+				break;
+				
+			case "get-admin-list-item":
+				
+				$v = $vars['active_record'];
+				$view_form = View::getHtml( "get-view-form", array( 'active_record' => $v ) );
+				$mod_form = View::getHtml( "get-edit-form", array( 'active_record' => $v ) );
+				$delete_form = View::getHtml( "get-delete-form", array( 'active_record' => $v ) );
+				$hover_enabled = ( array_key_exists( "hover_enabled", $vars['options'] ) && $vars['options']['hover_enabled'] == TRUE ) ? "1" : "0";
+				$li_classes = Common::getHtml( "get-admin-list-item-classes", array( 'type' => "page" ) );
+				
+				$html = '
+				<div class="' . $li_classes['html'] . '" hover_enabled="' . $hover_enabled . '">
+							
+					<div id="item_view_' . $v->m_view_id . '">						
+						' . $view_form['html'] . '
+					</div>
+										
+					<div id="item_mod_' . $v->m_view_id . '" style="display:none;">
+						' . $mod_form['html'] . '
+					</div>
+					
+					<div id="item_delete_' . $v->m_view_id . '" style="display:none;">
+						' . $delete_form['html'] . '
+					</div>
+					
+					<div class="title_button_container" id="item_control" style="display:none;">
+					';
+					
+					if( strtolower( $v->m_controller_name ) != "admin" &&
+						strtolower( $v->m_controller_name ) != "index" )
+					{
+						$buttons = Common::getHtml( "get-admin-item-buttons", array( 'item_id' => $v->m_view_id ) );
+						
+						$html .= '
+						' . $buttons['html'];
+					}
+					else 
+					{
+						$no_edit = Common::getHtml( 'get-item-no-edit' );
+						
+						$html .= '
+							' . $no_edit['html'];
+					}
+					
+					$html .= '
+							<div class="clear"></div>
+						
+					</div>
+					';
+					
+					if( $vars['options']['list_type'] == "reorder" )
+					{
+						$html .= Common::getHtml( "get-reorder-tab", array() );
+					}
+					
+				$html .= '
+				</div>
+				';
+				
+				$return = array( 'html' => $html );
 				break;
 				
 			default:

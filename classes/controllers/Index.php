@@ -18,6 +18,11 @@ class Index extends Controller{
 	public function __construct( $controller_vars )
 	{
 		parent::setControllerVars( $controller_vars );
+		
+		$this->m_valid_views = array(
+			'default' => "Home"
+		);
+		
 	}//constructor
 	
 	/**
@@ -25,11 +30,13 @@ class Index extends Controller{
 	 */
 	public function setContent() 
 	{
+		$this->m_controller_vars['sub'] = $this->validateCurrentView();
+		$content = $this->getHtml( $this->m_controller_vars['sub'], array() );
 		
 		//grab home article
 		$this->m_content = '
 		<div class="grid_12 center">
-			Hello world
+			' . $content['html'] . '
 		</div>
 		<div class="clear"></div>
 		';
@@ -48,10 +55,17 @@ class Index extends Controller{
 	{
 		switch( strtolower( trim( $cmd ) ) )
 		{
+			case "default":
+				$return = array( 'html' => "Hello World" );
+				break;
+				
 			default:
 				throw new Exception( "Error: Invalid HTML command." );
 				break;
 		}
+		
+		return $return;
+		
 	}//getHtml()
 		
 }//class Index

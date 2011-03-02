@@ -838,12 +838,11 @@ class Article
 								'extra_style' => 'style="width:41px;"' ),
 								
 							'right' => array(
-								'pk_name' => "article_id",
+								'pk_name' => "item_id",
 								'pk_value' => $a->m_article_id,
-								'process' => "cancel_" . $process,
-								'id' => "article",
-								'button_value' => "Cancel" ) 
-							) 
+								'process' => "view",
+								'id' => "list_item",
+								'button_value' => "Cancel" )							) 
 						) . '
 													
 						<input type="hidden" name="user_id" value="' . $user_id . '"/>
@@ -862,7 +861,7 @@ class Article
 				
 				$html = '
 				<div class="padder_10">
-					' . Common::getHtml( "title-bar", array( 'title' => "Really Delete Article?", 'classes' => '' ) ) . '
+					' . Common::getHtml( "title-bar", array( 'title' => "Really Delete Post?", 'classes' => '' ) ) . '
 					
 					<div class="button_container">
 						' . Common::getHtml( "get-form-buttons", array( 
@@ -875,10 +874,10 @@ class Article
 								'button_value' => "Delete" ),
 								
 							'right' => array(
-								'pk_name' => "article_id",
+								'pk_name' => "item_id",
 								'pk_value' => $a->m_article_id,
-								'process' => "cancel_delete",
-								'id' => "article",
+								'process' => "view",
+								'id' => "list_item",
 								'button_value' => "Cancel" ) 
 							) 
 						) . '
@@ -905,6 +904,40 @@ class Article
 				) . '&nbsp; <a href="#" id="article" process="refresh_section_selector" article_id="' . $a->m_article_id . '">
 						Refresh
 					</a>
+				';
+				
+				$return = array( 'html' => $html );
+				break;
+				
+			case "get-admin-list-item":
+				
+				$a = $vars['active_record'];
+				$view_form = Article::getHtml( "get-view-form", array( 'active_record' => $a ) );
+				$mod_form = Article::getHtml( "get-edit-form", array( 'active_record' => $a ) );
+				$delete_form = Article::getHtml( "get-delete-form", array( 'active_record' => $a ) );
+				$li_classes = Common::getHtml( "get-admin-list-item-classes", array( 'type' => "article" ) );
+				$buttons = Common::getHtml( "get-admin-item-buttons", array( 'item_id' => $a->m_article_id ) );
+				 
+				$html = '
+				<div class="' . $li_classes['html'] . '" hover_enabled="1">
+				
+					<div id="item_view_' . $a->m_article_id . '">						
+						' . $view_form['html'] . '
+					</div>
+										
+					<div id="item_mod_' . $a->m_article_id . '" style="display:none;">
+						' . $mod_form['html'] . '
+					</div>
+					
+					<div id="item_delete_' . $a->m_article_id . '" style="display:none;">
+						' . $delete_form['html'] . '
+					</div>
+					
+					<div class="title_button_container" id="item_control" style="display:none;">
+						' . $buttons['html'] . '
+					</div>
+
+				</div>
 				';
 				
 				$return = array( 'html' => $html );
