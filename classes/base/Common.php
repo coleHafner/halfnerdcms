@@ -681,7 +681,7 @@ class Common {
 							
 						$active_record = $records[$key];
 						$content_vars = array( 'active_record' => $active_record, 'options' => $html_vars );
-						$content = ( !$is_static ) ?  $active_controller->getHtml( $html_cmd, $content_vars ) : $active_controller::getHtml( $html_cmd, $content_vars );
+						$content = ( !$is_static ) ?  call_user_func_array( array( $active_controller, "getHtml" ), array( $html_cmd, $content_vars ) ) : call_user_func_array( $active_controller . '::getHtml', array( $html_cmd, $content_vars ) );
 						
 						$html .= '
 						<td valign="top">
@@ -746,7 +746,7 @@ class Common {
 					<li ' . $item_id . '>			
 					';	
 						$content_vars = array( 'active_record' => $active_record, 'options' => $html_vars );
-						$content = ( !$is_static ) ?  $active_controller->getHtml( $html_cmd, $content_vars ) : $active_controller::getHtml( $html_cmd, $content_vars );
+						$content = ( !$is_static ) ?  call_user_func_array( array( $active_controller, "getHtml" ), array( $html_cmd, $content_vars ) ) : call_user_func_array( $active_controller . '::getHtml', array( $html_cmd, $content_vars ) );
 						
 						$html .= '
 						' . $content['html'] . '
