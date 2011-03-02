@@ -400,6 +400,10 @@ Colors
 	border:1px solid #999;
 }
 
+.border_dark_tan {
+	border:1px solid #DEDBDB;
+}
+
 .border_bottom_dotted {
 	border-width:1px;
 	border-top-style:hidden;

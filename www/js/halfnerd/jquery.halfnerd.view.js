@@ -39,30 +39,6 @@ $( document ).ready( function(){
 					view.reorder();
 					break;
 					
-				case "show_add":
-					view.showCanvasAdd( view.view_id );
-					break;
-					
-				case "cancel_add":
-					view.hideCanvasAdd();
-					break;
-					
-				case "show_mod":
-					view.showCanvasMod( view.view_id );
-					break;
-					
-				case "cancel_modify":
-					view.hideCanvasMod( view.view_id );
-					break;
-					
-				case "show_delete":
-					view.showCanvasDelete( view.view_id );
-					break;
-					
-				case "cancel_delete":
-					view.hideCanvasDelete( view.view_id, function(){} );
-					break;
-					
 				case "show_reorder":
 					view.showReorderList();
 					break;
@@ -72,7 +48,7 @@ $( document ).ready( function(){
 					break;
 					
 				default:
-					$.colorbox({ href:'/ajax/halfnerd_helper.php?task=view&process=' + process + '&view_id=' + view.view_id });
+					alert( "Error: jquery.halfnerd.view.js says 'Process '" + process + "' is invalid.'" );
 					break;
 			}//end switch
 		});
@@ -215,100 +191,6 @@ validation functions
 Ui functions
 **********************************************************************************************************************************/
 
-	this.showCanvasMod = function( view_id )
-	{
-		//hide info
-		$( "#view_info_" + view_id ).fadeOut( function( ){
-		
-			$( "#view_canvas_delete_" + view_id ).fadeOut( function( ){
-			
-				//new obj
-				var inner = new View( 0 );
-				
-				var callback = function(){
-					//show canvas
-					$( "#view_canvas_mod_" + view_id ).slideDown();
-					
-					//disable hover
-					$( "#view_canvas_mod_" + view_id ).attr( "hover_enabled", "0" );
-				};
-				
-				//hide add
-				inner.hideCanvasAdd( callback );
-				
-			});
-		});
-	}//showCanvas()
-	
-	this.hideCanvasMod = function( view_id, callback )
-	{
-		callback = ( typeof( callback ) == "undefined" ) ? function(){} : callback;
-		
-		//hide canvas
-		$( "#view_canvas_mod_" + view_id ).slideUp( function(){
-			
-			//show info
-			$( "#view_info_" + view_id ).fadeIn( function(){
-				
-				//run callback
-				callback();					
-			});
-			
-		});
-	}//hideCanvas()
-	
-	this.showCanvasAdd = function( view_id )
-	{
-		//hide info
-		$( "#view_canvas_add" ).slideDown();
-		
-	}//showCanvas()
-	
-	this.hideCanvasAdd = function( callback )
-	{
-		callback = ( typeof( callback ) == "undefined" ) ? function(){} : callback;
-		
-		//hide info
-		$( "#view_canvas_add" ).slideUp( function(){
-			
-			//run callback
-			callback();
-		});
-		
-	}//hideCanvas()
-	
-	this.showCanvasDelete = function( view_id )
-	{
-		//hide info
-		$( "#view_info_" + view_id ).fadeOut( function( ){
-		
-			$( "#view_canvas_mod_" + view_id ).fadeOut( function( ){
-			
-				//show canvas
-				$( "#view_canvas_delete_" + view_id ).fadeIn();
-				
-			});
-		});
-		
-	}//showCanvas()
-	
-	this.hideCanvasDelete = function( view_id, callback )
-	{
-		callback = ( typeof( callback ) == "undefined" ) ? function(){} : callback;
-		
-		//hide canvas
-		$( "#view_canvas_delete_" + view_id ).fadeOut( function(){
-		
-			//show info
-			$( "#view_info_" + view_id ).fadeIn( function(){
-				
-				//run callback
-				callback();	
-			});
-			
-		});
-	}//hideCanvas()
-
 	this.showReorderList = function()
 	{
 		$.ajax({
@@ -321,7 +203,7 @@ Ui functions
 				$( "#view_list_container" ).html( html );
 				
 				//show reorder form
-				$( "#view_canvas_reorder" ).slideDown();
+				$( "#view_canvas_reorder" ).show();
 				
 				//make list sortable
 				$( "#view_list" ).sortable();

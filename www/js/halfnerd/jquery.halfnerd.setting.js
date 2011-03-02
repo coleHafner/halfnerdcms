@@ -35,29 +35,10 @@ $( document ).ready( function(){
 					setting.deleteRecord( setting.setting_id );
 					break;
 					
-				case "show_add":
-					setting.showCanvasAdd( setting.setting_id );
+				default:
+					alert( "Error: jquery.halfnerd.setting.js says 'Process '" + process + "' is invalid.'" );
 					break;
-					
-				case "cancel_add":
-					setting.hideCanvasAdd();
-					break;
-					
-				case "show_modify":
-					setting.showCanvasMod( setting.setting_id );
-					break;
-					
-				case "cancel_modify":
-					setting.hideCanvasMod( setting.setting_id );
-					break;
-					
-				case "show_delete":
-					setting.showCanvasDelete( setting.setting_id );
-					break;
-					
-				case "cancel_delete":
-					setting.hideCanvasDelete( setting.setting_id );
-					break;
+			
 			}//end switch
 		});
 });
@@ -75,7 +56,7 @@ action functions
 			type:'post',
 			url: '/ajax/halfnerd_helper.php?task=setting&process=add&setting_id=' + this.setting_id,
 			data:$( form_name ).serialize( true ),
-			success: function(){
+			success: function( reply ){
 				
 				//show success message
 				showMessage( "Setting Added", 1, function(){ setTimeout( 'window.location.reload()', 1000 ) } );
@@ -118,7 +99,7 @@ validation functions
 		
 		$.ajax({
 			type: 'post',
-			url: '/ajax/halfnerd_helper.php?task=setting&process=validate',
+			url: '/ajax/halfnerd_helper.php?task=setting&process=validate&setting_id=' + setting_id,
 			data: $( form_name ).serialize( true ),
 			success: function( reply ) {		
 				
@@ -152,80 +133,4 @@ validation functions
 		
 	}//validateAddModForm()
 	
-/**********************************************************************************************************************************
-Ui functions
-**********************************************************************************************************************************/
-	this.showCanvasMod = function( article_id )
-	{
-		//hide info
-		$( "#setting_info_" + setting_id ).fadeOut( function( ){
-		
-			$( "#setting_canvas_delete_" + setting_id ).fadeOut( function( ){
-			
-				//show canvas
-				$( "#setting_canvas_mod_" + setting_id ).slideDown();
-			});
-		});
-	}//showCanvas()
-	
-	this.hideCanvasMod = function( setting_id, callback )
-	{
-		callback = ( typeof( callback ) == "undefined" ) ? function(){} : callback;
-		
-		//hide canvas
-		$( "#setting_canvas_mod_" + setting_id ).slideUp( function(){
-		
-			//show info
-			$( "#setting_info_" + setting_id ).fadeIn( function(){
-				
-				callback();
-			});
-			
-		});
-	}//hideCanvas()
-	
-	this.showCanvasAdd = function( setting_id )
-	{
-		//hide section canvas
-		$( "#setting_canvas_add" ).slideDown();
-				
-	}//showCanvas()
-	
-	this.hideCanvasAdd = function( callback )
-	{
-		//hide section canvas
-		$( "#setting_canvas_add" ).slideUp();
-	}//hideCanvas()
-	
-	this.showCanvasDelete = function( setting_id )
-	{
-		//hide info
-		$( "#setting_info_" + setting_id ).fadeOut( function( ){
-		
-			$( "#setting_canvas_mod_" + setting_id ).fadeOut( function( ){
-			
-				//show canvas
-				$( "#setting_canvas_delete_" + setting_id ).slideDown();
-				
-			});
-		});
-		
-	}//showCanvas()
-	
-	this.hideCanvasDelete = function( setting_id, callback )
-	{
-		callback = ( typeof( callback ) == "undefined" ) ? function(){} : callback;
-		
-		//hide canvas
-		$( "#setting_canvas_delete_" + setting_id ).slideUp( function(){
-		
-			//show info
-			$( "#setting_info_" + setting_id ).fadeIn( function(){
-				
-				//run callback
-				callback();	
-			});
-			
-		});
-	}//hideCanvas()	
 }//class Setting

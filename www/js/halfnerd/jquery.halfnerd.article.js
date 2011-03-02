@@ -35,37 +35,14 @@ $( document ).ready( function(){
 					article.deleteRecord();
 					break;
 					
-				case "show_add":
-					article.showCanvasAdd( article.article_id );
-					break;
-					
-				case "cancel_add":
-					article.hideCanvasAdd();
-					break;
-					
-				case "show_mod":
-					article.showCanvasMod( article.article_id );
-					break;
-					
-				case "cancel_modify":
-					article.hideCanvasMod( article.article_id );
-					break;
-					
-				case "show_delete":
-					article.showCanvasDelete( article.article_id );
-					break;
-					
-				case "cancel_delete":
-					article.hideCanvasDelete( article.article_id );
-					break;
-					
 				case "refresh_section_selector":
 					article.refreshSectionSelector( article.article_id );
 					break;
 					
 				default:
-					$.colorbox({ href:'/ajax/halfnerd_helper.php?task=article&process=' + process + '&article_id=' + article.article_id });
+					alert( "Error: jquery.halfnerd.article.js says 'Process '" + process + "' is invalid.'" );
 					break;
+					
 			}//end switch
 		});
 });
@@ -175,100 +152,6 @@ validation functions
 /**********************************************************************************************************************************
 Ui functions
 **********************************************************************************************************************************/
-
-	this.showCanvasMod = function( article_id )
-	{
-		//hide info
-		$( "#article_info_" + article_id ).fadeOut( function( ){
-		
-			$( "#article_canvas_delete_" + article_id ).fadeOut( function( ){
-			
-				//new obj
-				var inner = new Article( 0 );
-				
-				var callback = function(){
-					//show canvas
-					$( "#article_canvas_mod_" + article_id ).slideDown();
-					
-					//disable hover
-					$( "#article_canvas_mod_" + article_id ).attr( "hover_enabled", "0" );
-				}
-				
-				//hide add
-				inner.hideCanvasAdd( callback );
-				
-			});
-		});
-	}//showCanvas()
-	
-	this.hideCanvasMod = function( article_id, callback )
-	{
-		callback = ( typeof( callback ) == "undefined" ) ? function(){} : callback;
-		
-		//hide canvas
-		$( "#article_canvas_mod_" + article_id ).slideUp( function(){
-		
-			//show info
-			$( "#article_info_" + article_id ).fadeIn( function(){
-				
-				callback();
-			});
-			
-		});
-	}//hideCanvas()
-	
-	this.showCanvasAdd = function( article_id )
-	{
-		//hide section
-		var section = new Section( 0 );
-		
-		//hide section canvas
-		section.hideManager( function(){ $( "#article_canvas_add" ).slideDown(); } );
-				
-	}//showCanvas()
-	
-	this.hideCanvasAdd = function( callback )
-	{
-		callback = ( typeof( callback ) == "undefined" ) ? function(){} : callback;
-		
-		//hide info
-		$( "#article_canvas_add" ).slideUp( function(){
-		
-			callback();
-		});
-	}//hideCanvas()
-	
-	this.showCanvasDelete = function( article_id )
-	{
-		//hide info
-		$( "#article_info_" + article_id ).fadeOut( function( ){
-		
-			$( "#article_canvas_mod_" + article_id ).fadeOut( function( ){
-			
-				//show canvas
-				$( "#article_canvas_delete_" + article_id ).slideDown();
-				
-			});
-		});
-		
-	}//showCanvas()
-	
-	this.hideCanvasDelete = function( article_id, callback )
-	{
-		callback = ( typeof( callback ) == "undefined" ) ? function(){} : callback;
-		
-		//hide canvas
-		$( "#article_canvas_delete_" + article_id ).slideUp( function(){
-		
-			//show info
-			$( "#article_info_" + article_id ).fadeIn( function(){
-				
-				//run callback
-				callback();	
-			});
-			
-		});
-	}//hideCanvas()
 
 	this.refreshSectionSelector = function( article_id )
 	{

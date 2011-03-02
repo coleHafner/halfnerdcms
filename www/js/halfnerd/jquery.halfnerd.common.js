@@ -85,6 +85,78 @@ $(document).ready(function(){
 	    		$( this ).find( "#item_control" ).hide();
 	    	}
     	});
+    
+    $( "#list_item" )
+    	.live( "click", function( event ){
+    		
+    		//cancel link action
+    		event.preventDefault();
+    		
+    		var process = $( this ).attr( "process" ).toLowerCase();
+    		var item_id = $( this ).attr( "item_id" );
+    		
+    		switch( process )
+    		{
+    			case "add":
+    				
+    				//not all add buttons will be paired with a manager
+    				if( $( "#item_manager" ).length > 0 )
+    				{
+    					$( "#item_manager" ).hide();
+    				}
+    				
+		    		$( "#item_add_0" ).show();
+    				break;
+    				
+    			case "mod":
+    	    		$( "#item_add_0" ).hide();
+		    		$( "#item_view_" + item_id ).hide();
+		    		$( "#item_delete_" + item_id ).hide();
+		    		$( "#item_mod_" + item_id ).show();
+		    		break;
+		    		
+    			case "delete":
+    				$( "#item_add_0" ).hide();
+		    		$( "#item_view_" + item_id ).hide();
+		    		$( "#item_mod_" + item_id ).hide();
+		    		$( "#item_delete_" + item_id ).show();
+		    		break;
+		    		
+    			case "view":
+    				
+    				$( "#item_add_0" ).hide();
+    				
+    				//only show view if id != 0
+    				if( item_id != "0" )
+    				{
+	    				$( "#item_mod_" + item_id ).hide();
+			    		$( "#item_delete_" + item_id ).hide();
+			    		$( "#item_view_" + item_id ).show();
+    				}
+    				break;
+    		}		
+    	});
+    
+    $( "#manager" )
+	.live( "click", function( event ){
+		
+		//cancel link action
+		event.preventDefault();
+		
+		var process = $( this ).attr( "process" ).toLowerCase();
+		
+		switch( process )
+		{
+			case "show":
+				$( "#item_add_0" ).hide();
+				$( "#item_manager" ).show();
+				break;
+				
+			case "hide":
+				$( "#item_manager" ).hide();
+				break;
+		}		
+	});
     	
 });
 	

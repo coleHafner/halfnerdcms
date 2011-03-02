@@ -318,7 +318,7 @@ switch( $task )
 				
 				$admin = new Admin( array() );
 				
-				$view_html = $admin->getHtml( "get-page-list", array( 
+				$view_html = $admin->getHtml( "manage-pages", array( 
 					'records' => View::getNavViews(), 
 					'hover_enabled' => FALSE,
 					'list_type' => "reorder" ) 
@@ -330,7 +330,7 @@ switch( $task )
 				
 				$admin = new Admin( array() );
 				
-				$view_html = $admin->getHtml( "get-page-list", array( 
+				$view_html = $admin->getHtml( "manage-pages", array( 
 					'records' => View::getViews( "active", "1" ), 
 					'hover_enabled' => TRUE,
 					'list_type' => "normal" ) 
@@ -502,7 +502,7 @@ switch( $task )
 	case "setting":
 		
 		$s = new Setting( $_GET['setting_id'] );
-		$is_addition = ( $s->m_setting_id > 0 ) ? TRUE : FALSE;
+		$is_addition = ( $s->m_setting_id == 0 ) ? TRUE : FALSE;
 		
 		switch( $process )
 		{
@@ -522,6 +522,7 @@ switch( $task )
 				break;
 				
 			case "delete":
+				$s->delete( TRUE );
 				break;
 		}
 		break;
