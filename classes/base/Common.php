@@ -102,22 +102,23 @@ class Common {
 			
 			//dev server
 			'dev' => array(
-				'absolute' => "/usr/local/www/halfnerdcms",
+				'js' => "/js",
 				'web' => "www",
 				'css' => "/css",
-				'css_ex' => "/css/extensions",
 				'images' => "/images",
-				'images_ex' => "/images/extensions",
-				'user_images' => "/images/users",
-				'js' => "/js",
-				'js_ex' => "/js/extensions",
-				'js_nerd' => "/js/halfnerd",
 				'classes' => "/classes",
+				'js_nerd' => "/js/halfnerd",
+				'js_ex' => "/js/extensions",
 				'classes_ex' => "/classes/ex",
-				'db_host' => "localhost",
-				'db_name' => "cms",
-				'db_user' => "cms_user",
+				'css_ex' => "/css/extensions",
+				'user_images' => "/images/users",
+				'images_ex' => "/images/extensions",
+				'classes_controllers' => "controllers",
+				'absolute' => "/home/users/web/b937/moo.halfnerdcom/cms",
+				'db_host' => "halfnerdcom.fatcowmysql.com",
 				'db_pass' => "passwd1000!",
+				'db_user' => "cms_user",
+				'db_name' => "halfnerd_cms"
 			),
 			
 			//live server

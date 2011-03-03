@@ -993,8 +993,7 @@ class View
 					<div class="title_button_container" id="item_control" style="display:none;">
 					';
 					
-					if( strtolower( $v->m_controller_name ) != "admin" &&
-						strtolower( $v->m_controller_name ) != "index" )
+					if( strtolower( $v->m_controller_name ) != "admin" )
 					{
 						$buttons = Common::getHtml( "get-admin-item-buttons", array( 'item_id' => $v->m_view_id ) );
 						

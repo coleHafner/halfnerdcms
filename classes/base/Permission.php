@@ -327,7 +327,7 @@ class Permission
 		{				
 			case "get-permissions-list-readonly":
 				
-				$selected_permissions = $vars['active_user_record']->m_permissions;
+				$selected_permissions = ( is_array( $vars['active_user_record']->m_permissions ) ) ? $vars['active_user_record']->m_permissions : array();
 				$all_p = self::getPermissions( "active", "1" );
 				
 				$html = '

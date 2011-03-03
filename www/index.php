@@ -16,7 +16,7 @@ $admin_controllers = array( "admin", "posts", "users", "account", "setting" );
 //setup objects
 $layout = ( in_array( strtolower( $_GET['v'] ), $admin_controllers ) ) ? new LayoutAdmin( $_GET ) : new Layout( $_GET );
 $auth = new Authentication( 0 );
-$common = $auth->m_common;
+$common = &$auth->m_common;
 
 //compile controller name
 $requested_controller = $layout->m_active_controller_name . ".php";

@@ -629,9 +629,8 @@ class User
 		
 	}//setLinkedObjects()
 	
-	public function getDefaultFormVars( &$u )
+	public function getDefaultFormVars( &$u = FALSE )
 	{
-		
 		if( $u->m_user_id > 0 )
 		{
 			$process = "modify";
