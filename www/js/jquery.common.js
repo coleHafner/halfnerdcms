@@ -22,7 +22,7 @@ $( document ).ready( function() {
 		event.preventDefault();
 		var requested_slide = $( this ).attr( "slide_num" );
 		var current_slide = $( "#current_slide_blog" ).attr( "value" );
-		var slide_width = parseInt( $( ".blog_slide" ).css( 'width' ).toString().replace( "px", "" ) );
+		var slide_width = parseInt( $( ".blog_slide" ).css( 'width' ).toString().replace( "px", "" ) ) + 12;//12 to account for 10px margin + 1px border on each side
 		if( requested_slide != current_slide )
 		{
 			var requested_position = requested_slide * slide_width;
