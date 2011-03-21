@@ -55,7 +55,8 @@ class Section
 	{
 		$this->m_common = new Common();
 		$this->m_form = new FormHandler( 1 );
-		$this->setMemberVars( $section_id, $objects );
+		$this->m_section_id = ( is_numeric( $section_id ) && $section_id > 0 ) ? $section_id : 0;
+		$this->setMemberVars( $objects );
 	}//constructor
 	
 	/**
@@ -64,10 +65,8 @@ class Section
 	 * @since	20100618, hafner
 	 * @return	boolean
 	 */
-	public function setMemberVars( $section_id, $objects )
+	public function setMemberVars( $objects )
 	{
-		$chosen_id = ( is_numeric( $section_id ) ) ? $section_id : 0;
-		
 		//get member vars
 		$sql = "
 		SELECT 
@@ -77,7 +76,7 @@ class Section
 		FROM 
 			common_Sections
 		WHERE 
-			section_id = " . $chosen_id;
+			section_id = " . $this->m_section_id;
 		$result = $this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
 		$row = ( $this->m_common->m_db->numRows( $result ) > 0 ) ? $this->m_common->m_db->fetchAssoc( $result ) : array();
 		

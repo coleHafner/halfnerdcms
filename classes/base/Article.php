@@ -111,7 +111,8 @@ class Article
 	{
 		$this->m_common = new Common();
 		$this->m_form = new FormHandler( 1 );
-		$this->setMemberVars( $article_id, $objects );
+		$this->m_article_id = ( is_numeric( $article_id ) && $article_id > 0 ) ? $article_id : 0;
+		$this->setMemberVars( $objects );
 	}//constructor
 	
 	/**
@@ -120,10 +121,8 @@ class Article
 	 * @since	20100618, hafner
 	 * @return	boolean
 	 */
-	public function setMemberVars( $article_id, $objects )
+	public function setMemberVars( $objects )
 	{
-		$chosen_id = ( $article_id > 0 ) ? $article_id : 0;
-		
 		//get member vars
 		$sql = "
 		SELECT 
@@ -140,7 +139,7 @@ class Article
 		FROM 
 			common_Articles
 		WHERE 
-			article_id = " . $chosen_id;
+			article_id = " . $this->m_article_id;
 		
 		$result = $this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
 		$row = ( $this->m_common->m_db->numRows( $result ) > 0 ) ? $this->m_common->m_db->fetchAssoc( $result ) : array();

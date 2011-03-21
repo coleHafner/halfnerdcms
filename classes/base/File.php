@@ -75,7 +75,8 @@ class File
 	{
 		$this->m_common = new Common();
 		$this->m_form = new FormHandler( 1 );
-		$this->setMemberVars( $file_id, $objects );
+		$this->m_file_id = ( is_numeric( $file_id ) && $file_id > 0 ) ? $file_id : 0;
+		$this->setMemberVars( $objects );
 	}//constructor
 	
 	/**
@@ -84,9 +85,8 @@ class File
 	 * @since	20100618, hafner
 	 * @return	boolean
 	 */
-	public function setMemberVars( $file_id, $objects )
+	public function setMemberVars( $objects )
 	{
-		$chosen_id = ( is_numeric( $file_id ) ) ? $file_id : 0;
 		//get member vars
 		$sql = "
 		SELECT 
@@ -98,7 +98,7 @@ class File
 		FROM 
 			common_Files
 		WHERE 
-			file_id = " . $chosen_id;
+			file_id = " . $this->m_file_id;
 		
 		$result = $this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
 		$row = ( $this->m_common->m_db->numRows( $result ) > 0 ) ? $this->m_common->m_db->fetchAssoc( $result ) : array();

@@ -62,7 +62,8 @@ class FileType
 	{
 		$this->m_common = new Common();
 		$this->m_form = new FormHandler( 1 );
-		$this->setMemberVars( $file_type_id, $objects );
+		$this->m_file_type_id = ( is_numeric( $file_type_id ) && $file_type_id > 0 ) ? $file_type_id : 0;
+		$this->setMemberVars( $objects );
 	}//constructor
 	
 	/**
@@ -72,10 +73,8 @@ class FileType
 	 * @return	boolean
 	 
 	 */
-	public function setMemberVars( $file_type_id, $objects )
+	public function setMemberVars( $objects )
 	{
-		$chosen_id = ( is_numeric( $file_type_id ) ) ? $file_type_id : 0;
-		
 		//get member vars
 		$sql = "
 		SELECT 
@@ -86,7 +85,7 @@ class FileType
 		FROM 
 			common_FileTypes
 		WHERE 
-			file_type_id = " . $chosen_id;
+			file_type_id = " . $this->m_file_type_id;
 		$result = $this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
 		$row = ( $this->m_common->m_db->numRows( $result ) > 0 ) ? $this->m_common->m_db->fetchAssoc( $result ) : array();
 		
