@@ -106,9 +106,7 @@ class Layout
 	{  
 		$login = ( strlen( $login_string ) > 0 ) ? $login_string : '';
 		
-		$return .= '
-		<body>
-		
+		/*
 		<!--header section-->
 		<div class="header_section">
 			<div class="container_12">
@@ -119,6 +117,10 @@ class Layout
 			</div>
 		</div>
 		<!--/header section-->
+		 */
+		
+		$return .= '
+		<body>
 		
 		<!--content section-->
 		<div class="content_section">
@@ -144,6 +146,7 @@ class Layout
 		<!--/content section-->
 		
 		<!--footer section-->
+		<!--style="position:absolute;bottom:0px;left:0px;width:100%;z-index:-1;"-->
 		<div class="footer_section">
 			<div class="container_12">
 				<div class="grid_12">

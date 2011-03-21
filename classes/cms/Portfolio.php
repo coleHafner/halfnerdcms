@@ -9,7 +9,7 @@ require_once( 'base/Section.php' );
 require_once( "base/Common.php" );
 require_once( 'base/View.php' );
 
-class Article
+class Portfolio
 {
 	/**
 	 * Instance of the Common class.
@@ -27,7 +27,7 @@ class Article
 	 * PK of the File Record.
 	 * @var	int
 	 */
-	protected $m_article_id;
+	protected $m_portfolio_id;
 	
 	/**
 	 * Id of the person who wrote this article.
@@ -105,13 +105,13 @@ class Article
 	 * Constructs the object.
 	 * @since	20100618, hafner
 	 * @return	State
-	 * @param	int				$article_id			id of the current record
+	 * @param	int				$portfolio_id			id of the current record
 	 */
-	public function __construct( $article_id, $objects = FALSE )
+	public function __construct( $portfolio_id, $objects = FALSE )
 	{
 		$this->m_common = new Common();
 		$this->m_form = new FormHandler( 1 );
-		$this->setMemberVars( $article_id, $objects );
+		$this->setMemberVars( $portfolio_id, $objects );
 	}//constructor
 	
 	/**
@@ -120,14 +120,14 @@ class Article
 	 * @since	20100618, hafner
 	 * @return	boolean
 	 */
-	public function setMemberVars( $article_id, $objects )
+	public function setMemberVars( $portfolio_id, $objects )
 	{
-		$chosen_id = ( $article_id > 0 ) ? $article_id : 0;
+		$chosen_id = ( $portfolio_id > 0 ) ? $portfolio_id : 0;
 		
 		//get member vars
 		$sql = "
 		SELECT 
-			article_id,
+			portfolio_id,
 			user_id,
 			section_id,
 			view_id,
@@ -138,15 +138,15 @@ class Article
 			priority,
 			active
 		FROM 
-			common_Articles
+			cms_Portfolio
 		WHERE 
-			article_id = " . $chosen_id;
+			portfolio_id = " . $chosen_id;
 		
 		$result = $this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
 		$row = ( $this->m_common->m_db->numRows( $result ) > 0 ) ? $this->m_common->m_db->fetchAssoc( $result ) : array();
 		
 		//set member vars
-		$this->m_article_id = $row['article_id'];
+		$this->m_portfolio_id = $row['portfolio_id'];
 		$this->m_user_id = $row['user_id'];
 		$this->m_section_id = $row['section_id'];
 		$this->m_view_id = $row['view_id'];
@@ -154,7 +154,7 @@ class Article
 		$this->m_title = stripslashes( $row['title'] );
 		$this->m_body = stripslashes( $row['body'] );
 		$this->m_tag_string = $row['tag_string'];
-		$this->m_post_timestamp =  ( $this->m_article_id > 0 ) ? $this->m_common->convertTimestamp( $row['post_timestamp'], TRUE ) : "";
+		$this->m_post_timestamp =  ( $this->m_portfolio_id > 0 ) ? $this->m_common->convertTimestamp( $row['post_timestamp'], TRUE ) : "";
 		$this->m_post_timestamp_diff = $row['post_timestamp'];
 		$this->m_priority = $row['priority'];
 		$this->m_active = $this->m_common->m_db->fixBoolean( $row['active'] );
@@ -173,7 +173,7 @@ class Article
 	public function getDataArray( $fix_clob = TRUE ) 
 	{
 		return array(
-			'article_id' => $this->m_article_id,
+			'portfolio_id' => $this->m_portfolio_id,
 			'user_id' => $this->m_user_id,
 			'section_id' => $this->m_section_id,
 			'view_id' => $this->m_view_id,
@@ -220,10 +220,10 @@ class Article
 				'view_id' => 0
 			);
 			
-			$input['article_id'] = $this->m_common->m_db->insertBlank( 'common_Articles', 'article_id', $req_fields );
+			$input['portfolio_id'] = $this->m_common->m_db->insertBlank( 'cms_Portfolio', 'portfolio_id', $req_fields );
 			
-			$this->m_article_id = $input['article_id'];
-			$return = $this->m_article_id;
+			$this->m_portfolio_id = $input['portfolio_id'];
+			$return = $this->m_portfolio_id;
 			$this->modify( $input, TRUE );
 		}
 		else
@@ -254,7 +254,7 @@ class Article
 		{
 			$sql = "
 			UPDATE 
-				common_Articles
+				cms_Portfolio
 			SET 
 				title = '" . $this->m_common->m_db->escapeString( $input['title'] ) . "',
 				body = '" .  $this->m_common->m_db->escapeString( $input['body'] ) . "',
@@ -264,11 +264,11 @@ class Article
 				view_id = " . $input['view_id'] . ",
 				priority = " . $this->getAutoPriority( $input['section_id'], $input['view_id'] ) . "
 			WHERE 
-				article_id = " . $this->m_article_id;
+				portfolio_id = " . $this->m_portfolio_id;
 				
 			$this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
 			
-			$return = $this->m_article_id;
+			$return = $this->m_portfolio_id;
 		}
 		else
 		{
@@ -291,21 +291,21 @@ class Article
 		if( $deactivate )
 		{
 			$sql = "
-			UPDATE common_Articles
+			UPDATE cms_Portfolio
 			SET active = 0
-			WHERE article_id = " . $this->m_article_id;
+			WHERE portfolio_id = " . $this->m_portfolio_id;
 			$this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
 		}
 		else
 		{
 			$sql = "
 			DELETE
-			FROM common_Articles
-			WHERE article_id = " . $this->m_article_id;
+			FROM cms_Portfolio
+			WHERE portfolio_id = " . $this->m_portfolio_id;
 			$this->m_common->m_db->query( $sql, __FILE__, __LINE__ );	
 		}
 		
-		return $this->m_article_id;
+		return $this->m_portfolio_id;
 		
 	}//delete()
 	
@@ -322,7 +322,7 @@ class Article
 		//check missing title
 		if( !array_key_exists( "title", $input ) || 
 			strlen( trim( $input['title'] ) ) == 0 ||
-			$input['title'] == "Article Title" )
+			$input['title'] == "Portfolio Title" )
 		{
 			$this->m_form->m_error = "You must select a title.";
 		}
@@ -334,8 +334,8 @@ class Article
 			if( !$this->m_form->m_error )
 			{
 				$dup_check = array( 
-					'table_name' => "common_Articles",
-					'pk_name' => "article_id",
+					'table_name' => "cms_Portfolio",
+					'pk_name' => "portfolio_id",
 					'check_values' => array( 'title' => strtolower( $input['title'] ) )
 				);
 				
@@ -352,7 +352,7 @@ class Article
 		{
 			if( !array_key_exists( "body", $input ) || 
 				strlen( trim( $input['body'] ) ) == 0 ||
-				$input['body'] == "Article Body" )
+				$input['body'] == "Portfolio Body" )
 			{
 				$this->m_form->m_error = "You must fill in the body.";
 			}
@@ -479,9 +479,9 @@ class Article
 		}
 		
 		$sql = "
-		UPDATE common_Articles
+		UPDATE cms_Portfolio
 		SET view_id = " . $view_id . "
-		WHERE article_id = " . $this->m_article_id;
+		WHERE portfolio_id = " . $this->m_portfolio_id;
 		$this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
 		
 		return TRUE;
@@ -511,9 +511,9 @@ class Article
 		}
 		
 		$sql = "
-		UPDATE common_Articles
+		UPDATE cms_Portfolio
 		SET section_id = " . $section_id . "
-		WHERE article_id = " . $this->m_article_id;
+		WHERE portfolio_id = " . $this->m_portfolio_id;
 		$this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
 		
 		return TRUE;
@@ -523,9 +523,9 @@ class Article
 	public function updateFile( $file_id )
 	{
 		$sql = "
-		UPDATE common_ArticleToFile
+		UPDATE common_PortfolioToFile
 		SET file_id = " . $file_id . "
-		WHERE article_id = " . $this->m_article_id;
+		WHERE portfolio_id = " . $this->m_portfolio_id;
 		
 		$this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
 		
@@ -544,9 +544,9 @@ class Article
 	public function updatePriority( $priority )
 	{
 		$sql = "
-		UPDATE common_Articles
+		UPDATE cms_Portfolio
 		SET priority = " . $priority . "
-		WHERE article_id = " . $this->m_articlie_id;
+		WHERE portfolio_id = " . $this->m_articlie_id;
 		
 		$this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
 		
@@ -565,9 +565,9 @@ class Article
 	public function updateFilePriority( $priority, $file_id )
 	{
 		$sql = "
-		UPDATE common_ArticleToFile
+		UPDATE common_PortfolioToFile
 		SET priority = " . $priority . "
-		WHERE article_id = " . $this->m_articlie_id . " AND
+		WHERE portfolio_id = " . $this->m_articlie_id . " AND
 		file_id = " . $file_id;
 		
 		$this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
@@ -578,13 +578,13 @@ class Article
 	
 	/**
 	 * Gets an article based on the view title and the section title.
-	 * Returns Article Object on success, FALSE otherwise.
+	 * Returns Portfolio Object on success, FALSE otherwise.
 	 * @since	20100728, hafner
 	 * @return	Mixed
 	 * @param	string				$article_title			id of the article to view relationship
 	 * @param	string				$section_title			id of the section
 	 */
-	public function getArticle( $view_title, $section_title )
+	public function getPortfolio( $view_title, $section_title )
 	{
 		$return = array();
 		
@@ -603,8 +603,8 @@ class Article
 		if( $view_id > 0 && $section_id > 0 )
 		{
 			$sql = "
-			SELECT article_id
-			FROM common_Articles
+			SELECT portfolio_id
+			FROM cms_Portfolio
 			WHERE view_id = " . $view_id . " AND
 			section_id = " . $section_id . "
 			ORDER BY priority ASC";
@@ -612,13 +612,13 @@ class Article
 			$result = $this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
 			while( $row = $this->m_common->m_db->fetchRow( $result ) )
 			{
-				$return[] = new Article( $row[0], FALSE );
+				$return[] = new Portfolio( $row[0], FALSE );
 			}
 		}
 		
 		return $return;
 		
-	}//getArticle()
+	}//getPortfolio()
 	
 	public function getFiles()
 	{
@@ -626,8 +626,8 @@ class Article
 		
 		$sql = "
 		SELECT file_id
-		FROM common_ArticleToFile
-		WHERE article_id = " . $this->m_article_id . "
+		FROM common_PortfolioToFile
+		WHERE portfolio_id = " . $this->m_portfolio_id . "
 		ORDER BY priority ASC";
 		
 		$result = $this->m_common->m_db->query( $sql, __FILE__, __LINE__ );
@@ -640,15 +640,15 @@ class Article
 		
 	}//getFiles()
 	
-	public static function getArticles( $field, $pk )
+	public static function getPortfolios( $field, $pk )
 	{
 		$return = array();
 		$common = new Common();
 		
 		$sql = "
-		SELECT article_id
-		FROM common_Articles
-		WHERE article_id > 0 AND
+		SELECT portfolio_id
+		FROM cms_Portfolio
+		WHERE portfolio_id > 0 AND
 		" . $field . " = " . $pk . "
 		ORDER BY post_timestamp DESC";
 		
@@ -656,12 +656,12 @@ class Article
 		
 		while( $row = $common->m_db->fetchRow( $result ) )
 		{
-			$return[] = new Article( $row[0], FALSE );
+			$return[] = new Portfolio( $row[0], FALSE );
 		}
 		
 		return $return;
 		
-	}//getArticles()
+	}//getPortfolios()
 	
 	/**
 	* Returns next priority for given section/view.
@@ -674,7 +674,7 @@ class Article
 	{
 		$sql = "
 		SELECT count(*)
-		FROM common_Articles
+		FROM cms_Portfolio
 		WHERE view_id = " . $view_id . " AND
 		section_id = " . $section_id;
 		
@@ -744,7 +744,7 @@ class Article
 				//get auth id
 				$a = $vars['active_record'];
 				
-				if( $a->m_article_id > 0 )
+				if( $a->m_portfolio_id > 0 )
 				{
 					$user_id = $a->m_user_id;
 					$title = $a->m_title;
@@ -785,10 +785,10 @@ class Article
 						'classes' => '' ) 
 					) . '
 					
-					<div id="result_' . $process . '_' . $a->m_article_id . '" class="result">
+					<div id="result_' . $process . '_' . $a->m_portfolio_id . '" class="result">
 					</div>
 	
-					<form id="article_form_' . $a->m_article_id . '">
+					<form id="article_form_' . $a->m_portfolio_id . '">
 						
 						<div class="padder_10">
 							<span class="title_span">
@@ -816,7 +816,7 @@ class Article
 							' . Common::getHtml( "selector-module", array( 
 								'title' => "Section", 
 								'content' => $section_selector,
-								'content_class' => "article_section_selector_" . $a->m_article_id ) ) . '
+								'content_class' => "article_section_selector_" . $a->m_portfolio_id ) ) . '
 								
 							<div class="clear"></div>
 							
@@ -832,8 +832,8 @@ class Article
 						' . Common::getHtml( "get-form-buttons", array( 
 						
 							'left' => array( 
-								'pk_name' => "article_id",
-								'pk_value' => $a->m_article_id,
+								'pk_name' => "portfolio_id",
+								'pk_value' => $a->m_portfolio_id,
 								'process' => $process,
 								'id' => "article",
 								'button_value' => ucwords( $process ),
@@ -841,7 +841,7 @@ class Article
 								
 							'right' => array(
 								'pk_name' => "item_id",
-								'pk_value' => $a->m_article_id,
+								'pk_value' => $a->m_portfolio_id,
 								'process' => "view",
 								'id' => "list_item",
 								'button_value' => "Cancel" )							) 
@@ -869,15 +869,15 @@ class Article
 						' . Common::getHtml( "get-form-buttons", array( 
 						
 							'left' => array( 
-								'pk_name' => "article_id",
-								'pk_value' => $a->m_article_id,
+								'pk_name' => "portfolio_id",
+								'pk_value' => $a->m_portfolio_id,
 								'process' => "delete",
 								'id' => "article",
 								'button_value' => "Delete" ),
 								
 							'right' => array(
 								'pk_name' => "item_id",
-								'pk_value' => $a->m_article_id,
+								'pk_value' => $a->m_portfolio_id,
 								'process' => "view",
 								'id' => "list_item",
 								'button_value' => "Cancel" ) 
@@ -903,7 +903,7 @@ class Article
 					'selected_option' => $a->m_section_id,
 					'default_option' => "Select Section",
 					'name' => 'section_id' ) 
-				) . '&nbsp; <a href="#" id="article" process="refresh_section_selector" article_id="' . $a->m_article_id . '">
+				) . '&nbsp; <a href="#" id="article" process="refresh_section_selector" portfolio_id="' . $a->m_portfolio_id . '">
 						Refresh
 					</a>
 				';
@@ -914,24 +914,24 @@ class Article
 			case "get-admin-list-item":
 				
 				$a = $vars['active_record'];
-				$view_form = Article::getHtml( "get-view-form", array( 'active_record' => $a ) );
-				$mod_form = Article::getHtml( "get-edit-form", array( 'active_record' => $a ) );
-				$delete_form = Article::getHtml( "get-delete-form", array( 'active_record' => $a ) );
+				$view_form = Portfolio::getHtml( "get-view-form", array( 'active_record' => $a ) );
+				$mod_form = Portfolio::getHtml( "get-edit-form", array( 'active_record' => $a ) );
+				$delete_form = Portfolio::getHtml( "get-delete-form", array( 'active_record' => $a ) );
 				$li_classes = Common::getHtml( "get-admin-list-item-classes", array( 'type' => "article" ) );
-				$buttons = Common::getHtml( "get-admin-item-buttons", array( 'item_id' => $a->m_article_id ) );
+				$buttons = Common::getHtml( "get-admin-item-buttons", array( 'item_id' => $a->m_portfolio_id ) );
 				 
 				$html = '
 				<div class="' . $li_classes['html'] . '" hover_enabled="1">
 				
-					<div id="item_view_' . $a->m_article_id . '">						
+					<div id="item_view_' . $a->m_portfolio_id . '">						
 						' . $view_form['html'] . '
 					</div>
 										
-					<div id="item_mod_' . $a->m_article_id . '" style="display:none;">
+					<div id="item_mod_' . $a->m_portfolio_id . '" style="display:none;">
 						' . $mod_form['html'] . '
 					</div>
 					
-					<div id="item_delete_' . $a->m_article_id . '" style="display:none;">
+					<div id="item_delete_' . $a->m_portfolio_id . '" style="display:none;">
 						' . $delete_form['html'] . '
 					</div>
 					
@@ -983,7 +983,7 @@ class Article
 	*/
 	public function __set( $var_name, $var_value )
 	{
-		$exclusions = array( 'm_article_id' );
+		$exclusions = array( 'm_portfolio_id' );
 
 		if( !in_array( $var_name, $exclusions ) )
 		{

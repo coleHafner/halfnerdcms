@@ -65,7 +65,6 @@ class LayoutAdmin
 		
 		<head>
 		
-			<meta name="viewport" content="width=device-width; user-scalable=1;" >
 			<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" >
 			
 			<title>' . $alias . ' - ' . $site . '</title>
@@ -88,7 +87,7 @@ class LayoutAdmin
 			<script type="text/javascript" src="' . $file_paths['js_nerd'] . '/jquery.halfnerd.setting.js"></script>
 			<script type="text/javascript" src="' . $file_paths['js_nerd'] . '/jquery.halfnerd.user.js"></script>
 			<script type="text/javascript" src="' . $file_paths['js_nerd'] . '/jquery.halfnerd.usertype.js"></script>
-			<script type="text/javascript" src="' . $file_paths['js_nerd'] . '/jquery.halfnerd.view.js"></script>
+			<script type="text/javascript" src="' . $file_paths['js_nerd'] . '/jquery.halfnerd.view.js"></script>	
 						
 		</head>
 		';
