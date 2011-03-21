@@ -109,9 +109,15 @@ padding, colors, borders
 	color:#CCC;
 }
 
+.bg_color_blue {
+	background-color:#104E8B;
+}
+
 .color_blue {
 	color:#104E8B;
 }
+
+
 
 .font_title {
 	font-weight:bold;
@@ -125,11 +131,7 @@ padding, colors, borders
 Widget
 ******************************************************************************************************************************************/
 
-.widget_holder {
-	background-color:#104E8B;
-}
-
-.widget_content_holder, .widget_nav_holder, .blog_slide, .slide, #slide_holder, #blog_holder {
+.widget_content_holder, .widget_nav_holder, .blog_slide, .slide, #slide_holder, #blog_holder, #p_holder, .p_slide {
 	position:relative;
 	height:550px;
 }
@@ -156,6 +158,54 @@ Widget
 	background-color:#FFF;
 	overflow:hidden;
 	float:left;
+}
+
+/******************************************************************************************************************************************
+Side Nav
+******************************************************************************************************************************************/
+.logo_holder {
+	position:relative;
+	width:100%;
+	height:80px;
+	margin-top:10px;
+	margin-bottom:5px;
+	text-align:center;
+	background: url( '/images/logo_ch.png' ) top left no-repeat;
+}
+
+.social_icons {
+	position:absolute;
+	bottom:0px;
+	left:0px;
+	width:100%;
+}
+
+.social_icons img {
+	width:20px;
+	height:20px;
+}
+
+.social_icons a {
+	position:relative;
+	border:0;
+	margin-right:7px;
+}
+
+.social_icons a:hover {
+	text-decoration:none;
+}
+
+/******************************************************************************************************************************************
+Portfolio
+******************************************************************************************************************************************/
+.portfolio_grid {
+	position:relative;
+	width:100%;
+	border-collapse:collapse;
+}
+
+.portfolio_grid td {
+	width:33%;
 }
 
 /******************************************************************************************************************************************
@@ -226,6 +276,7 @@ Vertical Slides
 #icon2 { background-color:#FFFF00; }
 #icon3 { background-color:#00FF00; }
 #icon4 { background-color:#00FFFF; }
+#icon5 { background-color:#0066FF; }
 
 /******************************************************************************************************************************************
 Horizontal slides
@@ -236,13 +287,38 @@ Horizontal slides
 	width:150px;
 	height:20px;
 	font-size:14px;
+	border-style:hidden;
 }
 
-.blog_slide, .blog_controls {
+#blog_search_button {
+	position:relative;
+	float:left;
+	border-left:1px solid #999;
+	height:22px;
+	padding-left:5px;
+	padding-right:5px;
+	line-height:22px;
+	vertical-align:middle;
+}
+
+#blog_search_button:hover {
+	cursor:pointer;
+	cursor:hand;
+	background-color:#00CCFF;
+}
+
+.blog_search_holder {
+	position:relative;
+	height:22px;
+	background-color:#FFF;
+	margin-right:7px;
+}
+
+.blog_slide, .blog_controls, .p_slide {
 	width:712px;
 }
 
-.blog_slide {
+.blog_slide, .p_slide {
 	margin-right:10px;
 }
 
@@ -251,23 +327,39 @@ Horizontal slides
 	border-collapse:collapse;
 }
 
-.blog_controls, .blog_controls_tab {
+.blog_controls, .blog_controls_tab, .p_controls {
 	position:absolute;
 	border:1px solid #999;
-	background-color:#EAEAEA;
+	/*background-color:#EAEAEA;*/
 	border-bottom:0;
 }
 
-.blog_controls {
-	bottom:-10px;
+.blog_controls, .p_controls {
+	bottom:0px;
 	left:10px;
 	z-index:100;
-	height:50px;
-	-moz-border-radius:.5em 0 0 0;
-	-webkit-border-radius:.5em 0 0 0;
-	border-radius:.5em 0 0 0;
+	height:32px;
+	-moz-border-radius:.5em .5em 0 0;
+	-webkit-border-radius:.5em .5em 0 0;
+	border-radius:.5em .5em 0 0;
 }
 
+.p_controls {
+	height:25px !important;
+}
+
+.p_img_holder {
+	position:relative;
+	padding:10px;
+	margin-top:5px;
+	background-color:#EAEAEA;
+	border:1px solid #999;
+}
+
+.p_img_holder img {
+	position:relative;
+	width:690px;
+}
 .blog_controls_tab {
 	top:-20px;
 	right:-1px;
@@ -290,12 +382,17 @@ Horizontal slides
 .blog_nav td a, .blog_nav td a#blog_search_button {
 	display:block;
 	padding:3px 10px 3px 10px;
-	background-color:#DEDBDB;
+	background-color:#FFF;
 }
 
 .blog_nav td a:hover, .blog_nav td a#blog_search_button:hover  {
 	text-decoration:none;
 	background-color:#00CCFF;	
+}
+
+.blog_nav td a.selected_blog {
+	background-color:#00CCFF;
+	color:#000;	
 }
 
 .blog_nav td a#blog_search_button {

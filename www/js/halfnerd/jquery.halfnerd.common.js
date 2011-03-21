@@ -5,7 +5,7 @@
  * @since	20101215
  */
  
-$(document).ready(function(){
+$(document).ready(function() {
 	
 	//init pickers
 	//initColorbox();
@@ -157,9 +157,19 @@ $(document).ready(function(){
 				break;
 		}		
 	});
-    	
+    
+    if( $( "#post_body_0" ).length > 0 )
+    {
+    	/*
+    	$( "#post_body_0" ).cleditor( { width:650, height:225, controls:
+            "bold | italic | underline | strikethrough | font size | " +
+            "style | color | highlight | bullets | numbering | " +
+            "indent | alignleft | center | alignright | justify | undo | redo | " +
+    		"rule | image | link | cut | copy | paste | pastetext" } );
+    	*/
+    }
 });
-	
+
 /**********************************************************************************************************************************
 common functions
 **********************************************************************************************************************************/

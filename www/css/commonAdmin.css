@@ -814,3 +814,9 @@ Admin
 	display:block;
 	padding-bottom:3px;
 }
+
+.post_body {
+	position:relative;
+	width:650px;
+	height:225px;
+}
