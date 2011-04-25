@@ -279,7 +279,7 @@ class PortfolioType
 		
 		return $return;
 		
-	}//getSections()
+	}//getPortfolioTypes()
 	
 	/**
 	 * Outputs the html nav.
@@ -293,8 +293,8 @@ class PortfolioType
 		{
 			case "get-manager":
 								
-				$sections = self::getSections( "active", "1" );
-				$section_list = self::getHtml( 'get-section-list', array( 'records' => $sections ) );
+				$records = self::getPortfolioTypes( "active", "1" );
+				$list = self::getHtml( "get-list", array( 'records' => $records ) );
 				
 				$html = '
 				<div class="padder_20_bottom">
@@ -304,7 +304,7 @@ class PortfolioType
 					</div>
 					
 					<div class="padder" id="section_items_container">			
-						' . $section_list['html'] . '
+						' . $list['html'] . '
 					</div>
 									
 				</div>
@@ -313,7 +313,7 @@ class PortfolioType
 				$return = array( 'html' => $html );
 				break;
 				
-			case "get-section-list":
+			case "get-list":
 				
 				$records = $vars['records'];
 				
@@ -324,7 +324,6 @@ class PortfolioType
 							<div class="padder_10_left">
 								<form id="section_form_0">
 									<input type="text" name="title" class="text_input text_long center color_black input_clear" value="Section Title" clear_if="Section Title" />
-									<input type="hidden" name="from_add" value="1" />
 								</form>
 							</div>
 						</td>

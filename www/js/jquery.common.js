@@ -27,7 +27,7 @@ $( document ).ready( function() {
 		
 		var requested_slide = $( this ).attr( "slide_num" );
 		var current_slide = $( "#current_slide_blog" ).attr( "value" );
-		var slide_width = parseInt( $( ".blog_slide" ).css( 'width' ).toString().replace( "px", "" ) ) + 12;//12 to account for 10px margin + 1px border on each side
+		var slide_width = parseInt( $( ".blog_slide" ).css( 'width' ).toString().replace( "px", "" ) ) + 12;
 		
 		if( requested_slide != current_slide )
 		{
@@ -55,21 +55,24 @@ $( document ).ready( function() {
 		
 		event.preventDefault();
 		
-		var requested_slide = $( this ).attr( "slide_num" );
-		var current_slide = $( "#current_slide_p" ).attr( "value" );
-		var slide_width = parseInt( $( ".p_slide" ).css( 'width' ).toString().replace( "px", "" ) ) + 12;//12 to account for 10px margin + 1px border on each side
-		//alert( "w: " + slide_width ); return false;
-		if( requested_slide != current_slide )
+		var direction = $( this ).attr( "direction" );
+		var max_slides = parseInt( $( "#max_slides_p" ).attr( "value" ) );
+		var current_slide = parseInt( $( "#current_slide_p" ).attr( "value" ) );
+		var requested_slide = ( direction == "forward" ) ? current_slide + 1 : current_slide - 1;
+		var slide_width = parseInt( $( ".p_slide" ).css( 'width' ).toString().replace( "px", "" ) ) + 12;
+		
+		if( requested_slide != current_slide && 
+			requested_slide > 0 && 
+			requested_slide <= max_slides )
 		{
 			var requested_position = requested_slide * slide_width;
 			var scroll_to = ( requested_position * -1 ) + slide_width;
+			
 			$( "#p_holder" ).animate( { left:scroll_to.toString() }, 1000, function(){
 				$( "#current_slide_p" ).attr( "value", requested_slide );
-				callback();
 			});
 		}
 	});
-	
 });
 
 function blogScrollTo( scroll_to, requested_slide, callback )

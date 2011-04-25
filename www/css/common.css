@@ -39,10 +39,6 @@ h3{
 	font-size:16px;
 }
 
-p{
-	line-height:1.33em;
-}
-
 ul {
 	list-style:none;
 }
@@ -50,6 +46,10 @@ ul {
 textarea {
 	position:relative;
 	line-height:1.66em;
+}
+
+.default_line_height {
+	line-height:1.33em;
 }
 
 /******************************************************************************************************************************************
@@ -84,6 +84,7 @@ padding, colors, borders
 .border_solid_grey{ border:1px solid #999; }
 
 .padder_5{ padding:5px; }
+.padder_5_bottom{ padding-bottom:5px; }
 .padder_5_top { padding-top:5px; }
 .padder_10 { padding:10px; }
 .padder_10_bottom { padding-bottom:10px; }
@@ -211,6 +212,10 @@ Portfolio
 /******************************************************************************************************************************************
 Vertical Slides
 ******************************************************************************************************************************************/
+
+.slide_header {
+	margin-bottom:10px;
+}
 
 .slide_controls {
 	position:relative;
@@ -360,6 +365,12 @@ Horizontal slides
 	position:relative;
 	width:690px;
 }
+
+.p_holder {
+	position:relative;
+	margin-top:12px;
+}
+
 .blog_controls_tab {
 	top:-20px;
 	right:-1px;
@@ -397,4 +408,18 @@ Horizontal slides
 
 .blog_nav td a#blog_search_button {
 	color:#000;	
+}
+
+/******************************************************************************************************************************************
+About page
+******************************************************************************************************************************************/
+.about_img {
+	position:relative;
+	float:left;
+	margin-right:10px;
+	padding:8px;
+}
+
+.about_img img {
+	width:155px;
 }

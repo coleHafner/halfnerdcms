@@ -57,6 +57,8 @@ class Index extends Controller{
 		{
 			case "slider":
 				
+				$p_entries = $this->getPortfolioEntries();
+				
 				$slides = array(
 					array( 'title' => "About", 'desc' => "Learn About Me", 'cmd' => 'about'  ),
 					array( 'title' => "Portfolio", 'desc' => "See My Work", 'cmd' => 'portfolio'  ),
@@ -74,12 +76,12 @@ class Index extends Controller{
 						<ul class="slide_controls">
 						';
 					
-					foreach( $slides as $i => $slide )
-					{
-						$slide_num = $i + 1;
-						$selected = ( $slide_num == 1 ) ? 'class="selected"' : '';
-						
-						$html .= '
+				foreach( $slides as $i => $slide )
+				{
+					$slide_num = $i + 1;
+					$selected = ( $slide_num == 1 ) ? 'class="selected"' : '';
+					
+					$html .= '
 							<li id="nav_item' . $slide_num . '" ' . $selected . '>
 								<div class="nav_item_icon_holder">
 									<div class="nav_item_icon rounded_corners" id="icon' . $slide_num . '">&nbsp;</div>
@@ -97,9 +99,9 @@ class Index extends Controller{
 								
 							</li>
 							';
-					} 
-					
-					$html .= '
+				} 
+				
+				$html .= '
 						</ul>
 						
 						<div class="social_icons">
@@ -118,22 +120,22 @@ class Index extends Controller{
 					<div class="widget_content_holder">
 						<div id="slide_holder">
 					';
+			
+				foreach( $slides as $i => $slide )
+				{
+					$slide_num = $i + 1;
+					$content = $this->getHtml( $slide['cmd'], array() );
 					
-					foreach( $slides as $i => $slide )
-					{
-						$slide_num = $i + 1;
-						$content = $this->getHtml( $slide['cmd'], array() );
-						
-						$html .= '
+					$html .= '
 							<div class="slide">
 								<div class="padder_10 padder_15_top">
 									' . $content['html'] . '
 								</div>
 							</div>
 							';
-					}
+				}
 					
-					$html .= '
+				$html .= '
 						</div>
 					</div>
 					
@@ -143,6 +145,7 @@ class Index extends Controller{
 				<input type="hidden" id="current_slide" value="1" />
 				<input type="hidden" id="current_slide_p" value="1" />
 				<input type="hidden" id="current_slide_blog" value="1" />
+				<input type="hidden" id="max_slides_p" value="' . count( $p_entries ) . '" />
 				';
 				
 				$return = array( 'html' => $html );
@@ -151,23 +154,70 @@ class Index extends Controller{
 			case 'about':
 				$return = array(
 					'html' => '
-					<div class="font_title">
+					
+					<div class="about_img bg_color_blue">
+						<img src="/images/about_img.jpg" />
+					</div>
+					
+					<div class="font_title padder_5_bottom">
 						About Me
 					</div>
 					
+					<span class="default_line_height">
+						
+						Hi. My name is Cole. Technology is my friend. I am a developer by heart, but I am slowly making my way into design.
+						More specifically, I am efficient in object oriented PHP, CSS, HTML, jQuery, and Javascript. I also design relational
+						databases. Combine all these skills together and you get one very well rounded developer!
+					</span>
+					
+					<div class="font_title padder_5_bottom" style="padding-top:10px;">
+						Qualifications
+					</div>
+						
+					<span class="default_line_height">
+						I graduated from Southern Oregon University in 2008 with a bachelors degree in Computer Science. Since then I\'ve been
+						working at a local advertising agency called Steelhead Advertising. My experience at Steelhead has allowed me to get a taste
+						for every aspect of web development. I\'ve done server side scripting, data importing, interface enhancement, database 
+						design, cross browser compatibility optimization, query building. . . You name it, I\'ve done it.
+					</span>
+						
+					<table style="position:relative;margin-top:20px;width:100%;">
+						<tr>
+							<td style="width:47%;vertical-align:top;">
+								<div class="font_title padder_5_bottom">
+									Work Ethic
+								</div>
+								<span class="default_line_height">
+									I work very hard to make my clients happy and the final product is always quality. I really try to get a sense of
+									my client\'s vision of the site. My websites are feature rich and I value simple, intuitive interfaces. I am active
+									in design communities and I have my fingers on the pulse of cutting edge techniques. Check out the portfolio section 
+									for examples of my work.  
+								</span>
+							</td>
+							
+							<td style="width:5%;">
+								&nbsp;
+							</td>
+							
+							<td style="width:48%;vertical-align:top;">
+								<div class="font_title padder_5_bottom">
+									Just For Fun
+								</div>
+								<span class="default_line_height">
+									I live in southern Oregon with my fiance and my dog. I live an active lifestyle and enjoy running. When I\'m not working 
+									I enjoy scuba diving and taking my dog on hikes in the Ashland hills. I like most kinds of music, but usually listen to 
+									classical piano when I write code.    
+								</span>
+							</td>
+						</tr>
+					</table>
 					'
 				);
 				break;
 				
 			case 'portfolio':
 				
-				$sites = array(
-					array( 'img' => 'bts', 'client' => "Bottom Time Scuba", 'type' => "Business", 'link' => 'http://bottomtimescuba.org', 'skills' => "HTML, CSS, MYSQL, PHP, JS" ),
-					array( 'img' => 'mdp', 'client' => "Madness Entertainment", 'type' => "Portfolio", 'link' => 'http://madnessentertainment.com', 'skills' => "HTML, CSS, MYSQL, PHP, JS" ),
-					array( 'img' => 'pbr', 'client' => "Rebekah Hill Photography", 'type' => "Portfolio", 'link' => 'http://pbr.halfnerddesigns.com', 'skills' => "HTML, CSS, MYSQL, PHP, JS" ),
-					array( 'img' => 'sbc', 'client' => "Simple Bicycle Co.", 'type' => "Business", 'link' => 'http://simplebicycleco.com', 'skills' => "HTML, CSS, MYSQL, PHP, JS" ),
-					array( 'img' => 'cah', 'client' => "Cole and Heather", 'type' => "Event", 'link' => 'http://coleandheather.com', 'skills' => "HTML, CSS, MYSQL, PHP, JS" )
-				);
+				$sites = $this->getPortfolioEntries();
 				
 				$html = '
 				<div id="p_holder">
@@ -182,11 +232,32 @@ class Index extends Controller{
 					$html .= '
 							<td>
 								<div class="p_slide" id="p_slide_' . $slide_num . '">
-									<div style="position:relative;margin-top:12px;">
+									<div class="p_header font_title">
 										' . $site['client'] . '
 									</div>
 									<div class="p_img_holder">
 										<img src="/images/site_' . $site['img'] . '_big.jpg" />
+									</div>
+									<div style="position:relative;margin-top:5px;">
+										<table style="position:relative;width:100%;">
+											<tr>
+												<td style="vertical-align:top;" class="default_line_height">
+													' . stripslashes( $site['desc'] ) . '
+												</td>
+												<td style="text-align:right;width:215px;vertical-align:middle;" class="default_line_height">
+												
+													<span style="position:relative;font-weight:bold;font-size:13px;" >
+														' . $site['skills'] . '
+													</span>
+													<br/>
+													
+													<a href="' . $site['link'] . '" target="_blank">
+														Launch Site&nbsp;&nbsp;
+													</a>
+													
+												</td>
+											</tr>
+										</table>
 									</div>
 								</div>
 							</td>
@@ -199,63 +270,25 @@ class Index extends Controller{
 				</div>
 				
 				<div class="p_controls">
-					<div class="padder_5" style="position:relative;">
-						<a href="#" class="show_slide_p" direction="back">&lt;&lt;</a>
-						&nbsp;||&nbsp;
-						<a href="#" class="show_slide_p" direction="forward">&gt;&gt;</a>
+					<div class="padder_5" style="position:relative;width:140px;">
+						<div style="position:relative;float:left;">
+							<a href="#" class="show_slide_p" direction="back">&lt;&lt; Prev</a>
+						</div>
+						<div style="position:relative;float:right;">		
+							<a href="#" class="show_slide_p" direction="forward">Next &gt;&gt;</a>
+						</div>
+						<div class="clear"></div>
 					</div>
 				</div>
 				';
 				
 				$return = array( 'html' => $html );
-				
-				/*
-				$grid_vars = array(
-					'records' => $sites,
-					'is_static' => FALSE,
-					'records_per_row' => 2,
-					'id' => 'id="portfolio_grid"',
-					'extra_classes' => 'class="portfolio_grid"',
-					'active_controller' => &$this,
-					'html_cmd' => 'get-portfolio-grid-item',
-					'empty_message' => "There are 0 portfolio entries at this time. Please check back later."
-				);
-				
-				$grid = Common::getHtml( "display-grid", $grid_vars );
-				
-				$html = '
-				<div class="font_title">
-					Portfolio
-				</div>
-				<div>
-					' . $grid['html'] . '
-				</div>
-				';
-				
-				$return = array( 'html' => $html );
-				*/
 				break;
 				
-			case "get-portfolio-grid-item":
-				
-				$site = $vars['active_record'];
-				
-				$html = '
-				<div style="position:relative;margin-top:12px;">
-					' . $site['client'] . '
-				</div>
-				<div style="position:relative;padding:10px 3px 10px 3px;margin-top:5px;background-color:#EAEAEA;border:1px solid #999;">
-					<img src="/images/site_' . $site['img'] . '_big.jpg" style="width:350px;"/>
-				</div>
-				';
-				
-				$return = array( "html" => $html );
-				break;
-
 			case 'lab':
 				$return = array(
 					'html' => '
-					<div class="font_title">
+					<div class="font_title slide_header">
 						Labs
 					</div>'
 				);
@@ -264,13 +297,14 @@ class Index extends Controller{
 			case 'contact':
 				$return = array(
 					'html' => '
-					<div class="font_title">
+					<div class="font_title slide_header">
 						Contact Me
 					</div>'
 				);
 				break;
 				
 			case 'blog':
+				
 				$blog_entries = array( 
 					array( 'title' => 'Welcome to Blogville. Population me.', 'content' => "this is test content" ),
 					array( 'title' => 'Blog1.', 'content' => "this is test content1" ),
@@ -322,11 +356,6 @@ class Index extends Controller{
 										<div class="clear"></div>
 									</div>
 								</td>
-								<!--
-								<td>
-									<a href="#" class="rounded_corners border_solid_grey" id="blog_search_button" style="margin-right:10px;">Search</a>
-								</td>
-								-->
 								';
 				
 				foreach( $blog_entries as $i => $blog )
@@ -367,6 +396,58 @@ class Index extends Controller{
 		return $return;
 		
 	}//getHtml()
+	
+	public function getPortfolioEntries()
+	{
+		return array(
+		
+			array( 
+				'img' => 'bts', 
+				'client' => "Bottom Time Scuba", 
+				'type' => "Business", 
+				'link' => 'http://bottomtimescuba.org', 
+				'skills' => "HTML, CSS, MYSQL, PHP", 
+				'desc' => "This is my first site. It was a fun little project for a local scuba shop. It was all done in procedural PHP. I added a custom CMS for the client. " 
+			),
+			
+			array( 
+				'img' => 'mdp', 
+				'client' => "Madness Entertainment", 
+				'type' => "Portfolio", 
+				'link' => 'http://madnessentertainment.com', 
+				'skills' => "HTML, CSS, MYSQL, PHP, jQuery", 
+				'desc' => "This project was for a friend\'s production studio. It integrates with Google\'s YouTube API, so they can showcase their videos via their youTube account." 
+			),
+			
+			array( 
+				'img' => 'pbr', 
+				'client' => "Rebekah Hill Photography", 
+				'type' => "Portfolio", 
+				'link' => 'http://pbr.halfnerddesigns.com', 
+				'skills' => "HTML, CSS, MYSQL, PHP, jQuery", 
+				'desc' => "This site is still in production. It was made for my photographer friend and integrates with Google\'s Picasa API so the client can manage their photos via her Picasa account." 
+			),
+			
+			array( 
+				'img' => 'sbc', 
+				'client' => "Simple Bicycle Co.", 
+				'type' => "Business", 
+				'link' => 'http://simplebicycleco.com', 
+				'skills' => "HTML, CSS, MYSQL, PHP, jQuery", 
+				'desc' => "This site is for a custom frame maker in Washington. It was built on my framework and customized to give my client complete control of the site\'s content." 
+			),
+			
+			array( 
+				'img' => 'cah', 
+				'client' => "Cole and Heather", 
+				'type' => "Event", 
+				'link' => 'http://coleandheather.com', 
+				'skills' => "HTML, CSS, MYSQL, PHP, JS", 
+				'desc' => "This is a personal project for my upcoming wedding. It was built on my framework and has a RSVP guest system built in. It also integrates with Google Maps API for easy directions to the wedding." 
+			)
+		);
+		
+	}//getPortfolioEntries()
 		
 }//class Index
 ?>

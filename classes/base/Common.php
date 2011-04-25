@@ -82,7 +82,7 @@ class Common {
 	{
 		return array(
 			'local' => array(
-				'absolute' => "/usr/local/www/halfnerdcms",
+				'absolute' => "/usr/local/www/halfnerdcms.com",
 				'web' => "www",
 				'css' => "/css",
 				'css_ex' => "/css/extensions",

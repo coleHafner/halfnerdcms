@@ -329,7 +329,7 @@ class Portfolio
 		
 	}//setLinkedObjects()
 	
-	public static function getPortfolios( $field, $pk )
+	public static function getPortfolioEntries( $field, $pk )
 	{
 		$return = array();
 		$common = new Common();
@@ -367,10 +367,148 @@ class Portfolio
 		{
 			case "get-view-form":
 				break;
-			
-			case "get-edit-form":
-				break;
 				
+			case "get-edit-form":
+				
+				$record = $vars['active_record'];
+				
+				if( $record->m_portfolio_id > 0 )
+				{
+						
+				}
+				
+				$form_big = self::getHtml( "get-photo-form", array( 'active_record' => $record, 'file_type' => "img_big" ) );
+				$form_small = self::getHtml( "get-photo-form", array( 'active_record' => $record, 'file_type' => "img_small" ) );
+				
+				$html = '
+				<table style="width:100%;">
+					<tr>
+						<td colspan="2">
+							<div class="padder_10">
+								<span class="title_span">
+									Title:
+								</span>
+								<input type="text" name="title" class="text_input text_extra_long" value="' . $title  . '" />
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td style="width:50%;">
+							<div class="padder_10">
+								<span class="title_span">
+									Url:
+								</span>
+								<input type="text" name="url" class="text_input text_extra_long" value="' . $url  . '" />
+							</div>
+						</td>
+						<td style="width:50%;">
+							<div class="padder_10">
+								<span class="title_span">
+									Project Type:
+								</span>
+								' . $type_selector . '
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td style="width:50%;">
+							<div class="padder_10">
+								<span class="title_span">
+									Image Small ( 225 x 125 ): 
+								</span>
+								' . $form_small['html'] . '
+							</div>
+						</td>
+						<td style="width:50%;">
+							<div class="padder_10">
+								<span class="title_span">
+									Image Big ( 600 x 335 ): 
+								</span>
+								' . $form_big['html'] . '
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td colspan="2">
+							<div class="padder_10 padder_no_top">
+								<span class="title_span">
+									Description: 
+								</span>
+								<textarea name="description" class="post_body">' . $desc .'</textarea>
+							</div>
+						</td>
+					</tr>
+				</table>
+				';
+				
+				$return = array( 'html' => $html );
+				break;
+			
+			case "get-photo-form":
+				
+				//set user
+				$record = $vars['active_record'];
+				$unique_file_name = File::getUniqueFileName();
+				$img_src = $record->m_linked_objects[$vars['file_type']]->m_file_name;
+				
+				$file_type_id = $common->m_db->getIdFromTitle( "portfolio image", array(
+					'table' => "common_FileTypes",
+					'pk_name' => "file_type_id",
+					'title_field' => "title" )
+				);
+				
+				$html = '
+				<table style="position:relative;width:500px;">
+					<tr>
+						<td>
+							<div class="thumb_holder bg_color_white user_holder padder border_dark_grey">
+								<img src="' . $img_src['html'] . '" />
+							</div>
+						</td>
+						<td>
+							<form 	method="post" 
+									target="hidden_frame"
+									enctype="multipart/form-data"
+									id="user_image_upload_form" 
+									action="/ajax/halfnerd_helper.php?task=user&process=update_photo&user_id=' . $u->m_user_id . '">
+								
+								<div class="padder_10">
+									<input id="user_photo_file" class="user_toggle_photo_options" active_option="file" type="file" name="file_to_upload" />
+								</div>
+								
+								<input type="hidden" name="file_type_id" id="file_type_id" value="' . $file_type_id . '" />
+								<input type="hidden" name="unique_file_name" id="unique_file_name" value="' . $unique_file_name . '" />	
+								
+							</form>
+							<div class="padder_10">' .	
+								Common::getHtml( "get-form-buttons", array( 
+									
+									'left' => array( 
+										'pk_name' => "user_id",
+										'pk_value' => $u->m_user_id,
+										'process' => "update_photo",
+										'id' => "user",
+										'button_value' => "Save",
+										'extra_style' => 'style="width:41px;"' ),
+										
+									'right' => array(
+										'href' => $common->makeLink( array(
+										'v' => "users",
+										'sub' => $u->m_username ) ),
+										'button_value' => "Cancel",
+										'extra_style' => 'style="width:41px;"' ),
+									 
+									'table_style' => 'style="position:relative;float:left;"' ) 
+								) . '
+							</div>	
+						</td>
+					</tr>
+				</table>
+				';
+					
+				$return = array( 'html' => $html );
+				break;
+					
 			case "get-delete-form":
 				break;
 							

@@ -315,7 +315,6 @@ class Admin extends Controller{
 					</div>
 	
 					<div class="user_container" id="permission_list_container">
-						' . $permission_list['html'] . '
 						' . $list['html'] . '
 					</div>
 					
@@ -444,7 +443,7 @@ class Admin extends Controller{
 				
 				$title = "Manage Portfolio Entries";
 				$p_entries = Portfolio::getPortfolioEntries( "active", "1" );
-				$p_type_manager = PortfolioType::getHtml( "get-manager", array() );
+				$manager = PortfolioType::getHtml( "get-manager", array() );
 				$add_button = Common::getHtml( "get-admin-item-add-button", array() );
 				$item_classes = Common::getHtml( "get-admin-list-item-classes", array() );
 				$add_form = Portfolio::getHtml( "get-edit-form", array( 'active_record' => new User( 0 ) ) );
@@ -492,15 +491,15 @@ class Admin extends Controller{
 				<div class="item_list_container">
 					
 					<div id="item_manager" class="' . $item_classes['html'] . '" style="display:none;" hover_enabled="0">
-						' . $user_type_manager['html'] . '
+						' . $manager['html'] . '
 					</div>
 					
 					<div id="item_add_0" class="' . $item_classes['html'] . '" style="display:none;" hover_enabled="0">
 						' . $add_form['html'] . '
 					</div>
 	
-					<div class="rounded_corners border_dark_grey margin_10_top" id="user_grid_container">
-						' . $grid['html'] . '
+					<div class="user_container center" id="permission_list_container">
+						' . $list['html'] . '
 					</div>
 				</div>
 				';
