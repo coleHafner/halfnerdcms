@@ -81,13 +81,7 @@ class Users extends Controller{
 				
 				$users = User::getUsers( "active", "1" );
 				$search_bar = self::getHtml( "get-search-bar" );
-				
-				$headline = self::getHtml( "get-headline", array(
-					'title' => "View All Users",
-					'extra_content' => $search_bar['html'] ) 
-				);
-				
-				
+				$headline = self::getHtml( "get-headline", array( 'title' => "View All Users", 'extra_content' => $search_bar['html'] ) );
 				
 				$grid_vars = array(
 					'records' => $users,
@@ -107,10 +101,7 @@ class Users extends Controller{
 				$headline['html'] . '
 				
 				<div class="border_dark_grey rounded_corners">
-				
-					<div class="padder">
-						' . $grid['html'] . '
-					</div>
+					' . $grid['html'] . '
 				</div>
 				';
 									
@@ -119,16 +110,17 @@ class Users extends Controller{
 					
 			case "search":
 				
+				$search_results = User::getUserSearchResults( $this->m_controller_vars['id1'] );
 				$search_bar = self::getHtml( "get-search-bar", array( 'search_term' => $this->m_controller_vars['id1'] ) );
 				
 				$headline = self::getHtml( "get-headline", array(
-					'title' => 'Search Results For "' . $this->m_controller_vars['id1'] . '"',
+					'title' => '<span class="color_orange">Your search returned ' . count( $search_results ) . ' result(s).</span>',
 					'extra_content' => $search_bar['html'] ) 
-				);
+				);	
 				
 				$empty_message = ' 
-				<div class="center">
-					Your Search Returned 0 Results.
+				<div class="center padder_10 padder_15_top">
+					Your seach for "' . stripslashes( $this->m_controller_vars['id1'] ) . '" is fruitless.
 					<br/><br/> 
 					<a href="' . $this->m_common->makeLink( array( 
 						'v' => "users",
@@ -138,22 +130,25 @@ class Users extends Controller{
 				</div>
 				';
 				
-				$grid_html = User::getHtml( "get-user-grid", array(
-					'records' => User::getUserSearchResults( $this->m_controller_vars['id1'] ), 
-					'container_class' => "user_badge",
-					'show_controls' => FALSE,
-					'hover_enabled' => "0",
-					'empty_message' => $empty_message ) 
+				$grid_vars = array(
+					'records' => $search_results,
+					'is_static' => TRUE,
+					'records_per_row' => 2,
+					'id' => 'id="user_grid"',
+					'extra_classes' => 'class="user_grid"',
+					'active_controller' => "User",
+					'html_cmd' => 'get-view-form-badge',
+					'html_vars' => array( 'show_controls' => FALSE, 'hover_enabled' => FALSE ),
+					'empty_message' => $empty_message
 				);
+				
+				$grid = Common::getHtml( "display-grid", $grid_vars );
 				
 				$html = 
 				$headline['html'] . '
 				
 				<div class="border_dark_grey rounded_corners">
-				
-					<div class="padder">
-						' . $grid_html['html'] . '
-					</div>
+					' . $grid['html'] . '
 				</div>
 				';
 									
@@ -194,7 +189,7 @@ class Users extends Controller{
 				$extra_content = ( array_key_exists( "extra_content", $vars ) ) ? $vars['extra_content'] : "";
 				
 				$html = '
-				<div class="padder bg_gradient_linear bg_color_tan margin_20_bottom">
+				<div class="padder bg_gradient_linear bg_color_tan margin_10_bottom">
 				
 					<div class="header color_orange" style="position:relative;float:left;padding-top:8px;">
 						' . $vars['title'] . '

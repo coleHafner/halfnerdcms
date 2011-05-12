@@ -388,65 +388,63 @@ class Permission
 				}
 				
 				$html = '
-				<div class="padder_10">
-					' . Common::getHtml( "title-bar", array( 'title' => ucfirst( $process ) . " Permission", 'classes' => '' ) ) . '
-					<form id="permission_form_' . $p->m_permission_id . '">
-						<table style="width:100%;">
-							<tr>
-								<td style="width:160px;text-align:left;vertical-align:top;">
-									<div class="padder">
-										<span class="title_span">
-											Title:
-										</span>
-										<input name="title" type="text" class="text_input text_long" value="' . $title . '" />
-									</div>
-									
-									<div class="padder">
-										<span class="title_span">
-											Permission ID:
-										</span>
-										<input name="alias" type="text" class="text_input text_long" value="' . $alias . '" />
-									</div>
-								</td>
-								<td style="width:10px;">
-								</td>
-								<td style="vertical-align:top;">
-									<div style="position:relative;padding-top:5px;">
-										<span class="title_span">
-											Permission Summary:
-										</span>
-										<textarea name="summary" style="position:relative;height:93px;width:100%;">' . $summary . '</textarea>
-									</div>
-								</td>
-							</tr>
-						</table>
-						
-						<div class="padder_10_top">
-						' . Common::getHtml( "get-form-buttons", array( 
-						
-							'left' => array( 
-								'pk_name' => "permission_id",
-								'pk_value' => $p->m_permission_id,
-								'process' => $process,
-								'id' => "permission",
-								'button_value' => ucwords( $process ),
-								'extra_style' => 'style="width:41px;"' ),
+				' . Common::getHtml( "title-bar", array( 'title' => ucfirst( $process ) . " Permission", 'classes' => '' ) ) . '
+				<form id="permission_form_' . $p->m_permission_id . '">
+					<table style="width:100%;">
+						<tr>
+							<td style="width:160px;text-align:left;vertical-align:top;">
+								<div class="padder">
+									<span class="title_span">
+										Title:
+									</span>
+									<input name="title" type="text" class="text_input text_long" value="' . $title . '" />
+								</div>
 								
-							'right' => array(
-								'pk_name' => "item_id",
-								'pk_value' => $p->m_permission_id,
-								'process' => "view",
-								'id' => "list_item",
-								'button_value' => "Cancel" )
-							) 
-						) . '
-						</div> 
-						
-						<input type="hidden" name="permission_id" value="' . $p->m_permission_id . '"/>
-						<input type="hidden" name="from_add" value="' . $from_add . '"/>
+								<div class="padder">
+									<span class="title_span">
+										Permission ID:
+									</span>
+									<input name="alias" type="text" class="text_input text_long" value="' . $alias . '" />
+								</div>
+							</td>
+							<td style="width:10px;">
+							</td>
+							<td style="vertical-align:top;">
+								<div style="position:relative;padding-top:5px;">
+									<span class="title_span">
+										Permission Summary:
+									</span>
+									<textarea name="summary" style="position:relative;height:93px;width:100%;">' . $summary . '</textarea>
+								</div>
+							</td>
+						</tr>
+					</table>
+					
+					<div class="padder_10_top">
+					' . Common::getHtml( "get-form-buttons", array( 
+					
+						'left' => array( 
+							'pk_name' => "permission_id",
+							'pk_value' => $p->m_permission_id,
+							'process' => $process,
+							'id' => "permission",
+							'button_value' => ucwords( $process ),
+							'extra_style' => 'style="width:41px;"' ),
+							
+						'right' => array(
+							'pk_name' => "item_id",
+							'pk_value' => $p->m_permission_id,
+							'process' => "view",
+							'id' => "list_item",
+							'button_value' => "Cancel" )
+						) 
+					) . '
+					</div> 
+					
+					<input type="hidden" name="permission_id" value="' . $p->m_permission_id . '"/>
+					<input type="hidden" name="from_add" value="' . $from_add . '"/>
 
-					</form>
-				</div>
+				</form>
 				';
 				
 				$return = array( 'html' => $html );

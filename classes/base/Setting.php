@@ -290,7 +290,6 @@ class Setting
 	
 	public static function getSettings( $field, $value )
 	{
-		$key = 1;
 		$return = array();
 		$common = new Common();
 		
@@ -305,8 +304,7 @@ class Setting
 		
 		while( $row = $common->m_db->fetchRow( $result ) )
 		{
-			$return[$key] = new Setting( $row[0], FALSE );
-			$key++;
+			$return[] = new Setting( $row[0], FALSE );
 		}
 		
 		return $return;
@@ -374,10 +372,7 @@ class Setting
 				$s = $vars['active_record'];
 				
 				$html = '
-				
-				<span class="title_span header color_accent">
-					Add New Setting
-				</span>
+				' . Common::getHtml( "title-bar", array( 'title' => "Add Setting", 'classes' => '' ) ) . '
 				<div class="padder_10_top">
 					<form id="setting_form_0">
 						<div style="position:relative;width:35%;float:left;">
@@ -454,15 +449,11 @@ class Setting
 				}
 				
 				$html = '
-				<div class="padder">
-				
-					<div class="padder header color_accent" style="padding-left:12px;">
-						' . $main_title . '
-					</div>
-					
+				<div class="padder_10">
+					' . Common::getHtml( "title-bar", array( 'title' => $main_title, 'classes' => '', 'center' => FALSE ) ) . '
 					<form id="setting_form_' . $s->m_setting_id . '">
 					
-						<div class="padder_10">
+						<div class="padder_10_bottom">
 							<table style="margin:auto;">
 								<tr>
 									<td>
@@ -475,7 +466,7 @@ class Setting
 							</table>
 						</div>
 						
-						<div class="padder_10 ' . $second_line_css . '">
+						<div class="padder_10_bottom ' . $second_line_css . '">
 							
 							<table style="margin:auto;">
 								<tr>
@@ -490,30 +481,28 @@ class Setting
 							</table>
 						</div>
 						
-						<div class="padder">' . 
-							Common::getHtml( "get-form-buttons", array( 
-								'left' => array( 
-									'pk_name' => "setting_id",
-									'pk_value' => $s->m_setting_id,
-									'process' => "modify",
-									'id' => "setting",
-									'button_value' => "Modify",
-									'extra_style' => 'style="width:41px;"' ),
-									
-								'right' => array(
-									'pk_name' => "item_id",
-									'pk_value' => $s->m_setting_id,
-									'process' => "view",
-									'id' => "list_item",
-									'button_value' => "Cancel",
-									'extra_style' => 'style="width:41px;"' ),
-		
-								'table_style' => 'style="position:relative;width:100px;padding-left:10px;"'
-								)
-							) . '
-						</div>
+						' . 
+						Common::getHtml( "get-form-buttons", array( 
+							'left' => array( 
+								'pk_name' => "setting_id",
+								'pk_value' => $s->m_setting_id,
+								'process' => "modify",
+								'id' => "setting",
+								'button_value' => "Modify",
+								'extra_style' => 'style="width:41px;"' ),
+								
+							'right' => array(
+								'pk_name' => "item_id",
+								'pk_value' => $s->m_setting_id,
+								'process' => "view",
+								'id' => "list_item",
+								'button_value' => "Cancel",
+								'extra_style' => 'style="width:41px;"' ),
+	
+							'table_style' => 'style="position:relative;width:100px;"'
+							)
+						) . '
 					</form>
-					
 				</div>
 				';
 				

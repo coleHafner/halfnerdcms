@@ -8,5 +8,5 @@ RewriteRule ^_([a-z]+) ?v=$1 [NC]
 
 ErrorDocument 404	/index.php
 
-php_value include_path "./:/usr/local/lib/php:/usr/local/www/halfnerdcms/classes:/usr/local/www/halfnerdcms/classes/extensions"
+php_value include_path "./:/usr/local/lib/php:/usr/local/www/halfnerdcms.com/classes"
 php_flag register_globals off

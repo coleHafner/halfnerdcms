@@ -261,14 +261,8 @@ class UserType
 				$list = self::getHtml( 'get-type-list', array( 'records' => $records ) );
 				
 				$html = '
-				<div class="padder_20_bottom">
-					
-					<div class="padder_10 center header color_accent">
-						Manage User Types
-					</div>
-					
-					<div id="result_user_type_0" class="result">
-					</div>
+				' . Common::getHtml( "title-bar", array( 'title' => "Manage User Types", 'classes' => '' ) ) . '
+				<div class="padder_20_bottom padder_10_top">
 					
 					<div class="padder" id="user_type_items_container">			
 						' . $list['html'] . '

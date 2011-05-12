@@ -172,66 +172,55 @@ Alignment and spacing
 	padding-left:5px;
 }
 
-.padder_10 {
-	padding:10px;
-}
+.padder_3 { padding:3px; }
+.padder_3_top { padding-top:3px; }
+.padder_3_right { padding-right:3px; }
+.padder_3_bottom { padding-bottom:3px; }
+.padder_3_left { padding-left:3px; }
 
-.padder_10_left {
-	padding-left:10px;
-}
+.padder_5 { padding:5px; }
+.padder_5_top { padding-top:5px; }
+.padder_5_right{ padding-right:5px; }
+.padder_5_bottom { padding-bottom:5px; }
+.padder_5_left{ padding-left:5px; }
 
-.padder_10_bottom {
-	padding-bottom:10px;
-}
+.padder_10 { padding:10px; }
+.padder_10_top{ padding-top:10px; }
+.padder_10_right{ padding-right:10px; }
+.padder_10_bottom { padding-bottom:10px; }
+.padder_10_left{ padding-left:10px; }
 
-.padder_10_top {
-	padding-top:10px;
-}
+.padder_15 { padding:15px; }
+.padder_15_top{ padding-top:15px; }
+.padder_15_left{ padding-left:15px; }
 
-.padder_15 {
-	padding:15px;
-}
+.padder_20 { padding:20px; }
+.padder_20_top { padding-top:20px; }
+.padder_20_right { padding-right:20px; }
+.padder_20_bottom { padding-bottom:20px; }
+.padder_20_left { padding-left:20px; }
 
-.padder_15_right {
-	padding-right:15px;
-}
+.padder_25 { padding:25px; }
+.padder_25_top { padding-top:25px; }
+.padder_25_right { padding-right:25px; }
+.padder_25_bottom { padding-bottom:25px; }
+.padder_25_left { padding-left:25px; }
 
-.padder_20 {
-	padding:20px;
-}
+.padder_30 { padding:30px; }
+.padder_30_top { padding-top:30px; }
+.padder_30_right { padding-right:30px; }
+.padder_30_bottom { padding-bottom:30px; }
+.padder_30_left { padding-left:30px; }
 
-.padder_20_left {
-	padding-left:20px;
-}
+.padder_no_top { padding-top:0; }
+.padder_no_right { padding-right:0; }
+.padder_no_bottom { padding-bottom:0; }
+.padder_no_left { padding-left:0; }
 
-.padder_20_bottom {
-	padding-bottom:20px;
-}
-
-.padder_20_top {
-	padding-top:20px;
-}
-
-.padder_no_top {
-	padding-top:0px;
-}
-
-.padder_no_bottom {
-	padding-bottom:0px;
-}
-
-.margin_20_bottom {
-	margin-bottom:20px;
-}
-
-.margin_20_top {
-	margin-top:20px;
-}
-
-.margin_10_top {
-	margin-top:10px;
-}
-
+.margin_10_top { margin-top:10px; }
+.margin_10_right { margin-right:10px; }
+.margin_10_bottom { margin-bottom:10px; }
+.margin_10_left { margin-left:10px; }
 
 .left_floater {
 	position:relative;
@@ -560,25 +549,23 @@ Images
 /******************************************************************************************************************************************
 Modules
 ******************************************************************************************************************************************/
-.selector_module {
+.selector_module, .selector_module_basic {
 	position:relative;
 	float:left;
 	width:48%;
+	
+}
+
+.selector_module {
 	border:1px solid #999;
 	height:80px;
 }
 
-.selector_module_basic{
+.selector_module_spacer {
 	position:relative;
 	float:left;
-	width:48%;
-}
-
-.selector_module_spacer {
-		position:relative;
-		float:left;
-		width:3%;
-		height:100px;
+	width:3%;
+	height:100px;
 }
 
 .manager_items {
@@ -589,6 +576,11 @@ Modules
 
 .manager_items tr{
 	height:45px;
+}
+
+.side_bar_container {
+	position:relative;
+	height:200px;
 }
 
 
@@ -672,7 +664,7 @@ Users
 .user_grid {
 	position:relative;
 	width:100%;
-	border-spacing:10px;
+	border-spacing:7px;
 }
 
 .user_grid td{
@@ -817,6 +809,6 @@ Admin
 
 .post_body {
 	position:relative;
-	width:650px;
+	width:100%;
 	height:225px;
 }

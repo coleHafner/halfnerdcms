@@ -173,7 +173,7 @@ action functions
 	
 	this.doSearch = function()
 	{
-		var location = "http://" + $( "#user_base_url" ).val() + "/_users/search/" + $( "#user_search_term" ).val();
+		var location = "http://" + $( "#user_base_url" ).val() + "/?v=users&sub=search&id1=" + $( "#user_search_term" ).val();
 		window.location = location; 
 		
 	}//doSearch()

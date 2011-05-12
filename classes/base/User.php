@@ -960,33 +960,16 @@ class User
 					$u->m_user_id == $active_user->m_user_id )
 				{
 					$html = '
+					' . Common::getHtml( "title-bar", array( 'title' => ucfirst( $form_vars['process'] ) . " User", 'classes' => '' ) ) . '
 					<form id="user_add_mod_form_' . $u->m_user_id . '">
-						<div class="padder center header color_accent">
-							' . ucfirst( $form_vars['process'] ) . ' User
-						</div>
-						
-						<div class="padder center result" id="result_' . $form_vars['process'] . '_' . $u->m_user_id . '">
-						</div>
-						
-						<div class="header_sub color_terciary">
-							Login Info
-						</div>
-						
+					
 						' . $login_form['html'] . '
-						
-						<div class="header_sub color_terciary padder_10_top">
-							Personal Info
-						</div>
 						
 						' . $contact_form['html'];
 						
 					if( $active_user->permissionUserHasAny( array( 'usr' ) ) )
 					{
 						$html .= '
-						<div class="header_sub color_terciary padder_10_top">
-							User Access Info
-						</div>
-						
 						' . $permission_form['html'];
 					}
 					else
@@ -999,7 +982,7 @@ class User
 						
 						$html .= '
 						<input type="hidden" name="user_type_id" value="' . $reg_user_id . '" />
-						';
+							';
 					}
 					
 					$html .= '	
@@ -1154,9 +1137,8 @@ class User
 							About:
 						</span>
 						
-						<div class="padder_10_right">
-							<textarea name="bio" class="text_input text_extra_long text_area">' . $form_vars['bio'] . '</textarea>
-						</div>
+						<textarea name="bio" class="post_body">' . $form_vars['bio'] . '</textarea>
+						
 					</div>' . 
 				$form['form_close'];
 				
@@ -1203,7 +1185,7 @@ class User
 				
 					$html = 
 					$form['form_open'] . '
-						<div class="padder padder_10_top">
+						<div class="padder padder_10_top" style="position:relative;padding-left:7px;">
 							' . Common::getHtml( "selector-module", array( 
 								'title' => "User Title", 
 								'content' => $user_types['html'],
@@ -1250,10 +1232,8 @@ class User
 				);
 				
 				$html = '
-				<div class="padder center header color_accent">
-					Update My Photo
-				</div>
-				
+				' . Common::getHtml( "title-bar", array( 'title' => "Update My Photo", 'classes' => '' ) ) . '
+					
 				<table style="position:relative;">
 					<tr>
 						<td>
@@ -1637,7 +1617,6 @@ class User
 	
 	public static function getUsers( $field, $value )
 	{
-		$i = 1;
 		$return = array();
 		$common = new Common();
 		
@@ -1652,8 +1631,7 @@ class User
 		
 		while( $row = $common->m_db->fetchRow( $result ) )
 		{
-			$return[$i] = new User( $row[0], FALSE );
-			$i++;
+			$return[] = new User( $row[0], FALSE );
 		}
 		
 		return $return;
@@ -1662,28 +1640,29 @@ class User
 	
 	public static function getUserSearchResults( $search_term )
 	{
-		$i = 1;
 		$return = array();
 		$common = new Common();
 		
-		$sql = "
-		SELECT 
-			user_id
-		FROM 
-			common_Users
-		WHERE 
-			user_id > 0 AND
-			active = 1 AND
-			LOWER( username ) LIKE '%" . strtolower( trim( $search_term ) ) . "%'
-		ORDER BY 
-			username ASC";
-		
-		$result = $common->m_db->query( $sql, __FILE__, __LINE__ );
-		
-		while( $row = $common->m_db->fetchRow( $result ) )
+		if( strlen( trim( $search_term ) ) > 0 )
 		{
-			$return[$i] = new User( $row[0], FALSE );
-			$i++;
+			$sql = "
+			SELECT 
+				user_id
+			FROM 
+				common_Users
+			WHERE 
+				user_id > 0 AND
+				active = 1 AND
+				LOWER( username ) LIKE '%" . strtolower( trim( $search_term ) ) . "%'
+			ORDER BY 
+				username ASC";
+			
+			$result = $common->m_db->query( $sql, __FILE__, __LINE__ );
+			
+			while( $row = $common->m_db->fetchRow( $result ) )
+			{
+				$return[] = new User( $row[0], FALSE );
+			}
 		}
 		
 		return $return;

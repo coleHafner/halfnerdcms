@@ -662,6 +662,48 @@ class Article
 		
 	}//getArticles()
 	
+	public static function getArticleFromTags( $view_title, $section_title )
+	{
+		$return = FALSE;
+		$common = new Common();
+		
+		$sql = "
+		SELECT a.article_id 
+		FROM common_Articles a
+		JOIN common_Views v ON LOWER( TRIM( v.controller_name ) ) = '" . strtolower( trim( $view_title ) ) . "'
+		JOIN common_Sections s ON LOWER( TRIM( s.title ) ) = '" . strtolower( trim( $section_title ) ) . "'
+		WHERE a.section_id = s.section_id 
+		AND a.view_id = a.view_id
+		AND a.active = 1";
+		
+		$result = $common->m_db->query( $sql, __FILE__, __LINE__ );
+		
+		if( $common->m_db->numRows( $result ) > 0 )
+		{
+			$return = array();
+			while( $row = $common->m_db->fetchRow( $result ) )
+			{
+				$return[] = new Article( $row[0] );
+			}
+		}
+		
+		return $return;
+		
+	}//getArticleFromTags()
+	
+	public function splitBody()
+	{
+		$return = '';
+		$split = explode( "\n", $this->m_body );
+		
+		foreach( $split as $p )
+		{
+			if( strlen( trim( $p ) ) > 0 ) { $return[] = $p; }
+		}
+		
+		return $return;
+	}//splitBody()
+	
 	/**
 	* Returns next priority for given section/view.
 	* @author	20101213, Hafner
@@ -778,79 +820,71 @@ class Article
 				$section_selector = $selector['html'];
 				
 				$html = '
-				<div class="padder_10">
-					' . Common::getHtml( "title-bar", array( 
-						'title' => ucWords( $process ) . " Post", 
-						'classes' => '' ) 
-					) . '
+				' . Common::getHtml( "title-bar", array( 'title' => ucWords( $process ) . " Post", 'classes' => '' ) ) . '
 					
-					<div id="result_' . $process . '_' . $a->m_article_id . '" class="result">
+				<form id="article_form_' . $a->m_article_id . '">
+					
+					<div class="padder_10">
+						<span class="title_span">
+							Title:
+						</span>
+						<input type="text" name="title" class="text_input text_extra_long" value="' . $title  . '" />
 					</div>
-	
-					<form id="article_form_' . $a->m_article_id . '">
-						
-						<div class="padder_10">
-							<span class="title_span">
-								Title:
-							</span>
-							<input type="text" name="title" class="text_input text_extra_long" value="' . $title  . '" />
-						</div>
-						
-						<div class="padder_10 padder_no_top">
-							<span class="title_span">
-								Guts:
-							</span>
-							<textarea name="body" id="' . $body_id . '" class="post_body">' . $body .'</textarea>
-						</div>
-						
-						
-						<div class="padder_10">
-							' . Common::getHtml( "selector-module", array( 
-								'title' => "View", 
-								'content' => $view_selector,
-								'content_class' => "" ) ) . '
-								
-							' . Common::getHtml( "selector-module-spacer", array() ) . '
+					
+					<div class="padder_10 padder_no_top">
+						<span class="title_span">
+							Guts:
+						</span>
+						<textarea name="body" id="' . $body_id . '" class="post_body">' . $body .'</textarea>
+					</div>
+					
+					
+					<div class="padder_10">
+						' . Common::getHtml( "selector-module", array( 
+							'title' => "View", 
+							'content' => $view_selector,
+							'content_class' => "" ) ) . '
 							
-							' . Common::getHtml( "selector-module", array( 
-								'title' => "Section", 
-								'content' => $section_selector,
-								'content_class' => "article_section_selector_" . $a->m_article_id ) ) . '
-								
-							<div class="clear"></div>
+						' . Common::getHtml( "selector-module-spacer", array() ) . '
+						
+						' . Common::getHtml( "selector-module", array( 
+							'title' => "Section", 
+							'content' => $section_selector,
+							'content_class' => "article_section_selector_" . $a->m_article_id ) ) . '
 							
-						</div>
+						<div class="clear"></div>
 						
-						<div class="padder_10 padder_no_top">
-							<span class="title_span">
-								Tags ( separate with space ):
-							</span>
-							<input type="text" name="tag_string" class="text_input text_extra_long" value="' . $tag_string  . '" />
-						</div>
-						
-						' . Common::getHtml( "get-form-buttons", array( 
-						
-							'left' => array( 
-								'pk_name' => "article_id",
-								'pk_value' => $a->m_article_id,
-								'process' => $process,
-								'id' => "article",
-								'button_value' => ucwords( $process ),
-								'extra_style' => 'style="width:41px;"' ),
-								
-							'right' => array(
-								'pk_name' => "item_id",
-								'pk_value' => $a->m_article_id,
-								'process' => "view",
-								'id' => "list_item",
-								'button_value' => "Cancel" )							) 
-						) . '
-													
-						<input type="hidden" name="user_id" value="' . $user_id . '"/>
-						<input type="hidden" name="from_add" value="' . $from_add . '"/>
-						
-					</form>
-				</div>
+					</div>
+					
+					<div class="padder_10 padder_no_top">
+						<span class="title_span">
+							Tags ( separate with space ):
+						</span>
+						<input type="text" name="tag_string" class="text_input text_extra_long" value="' . $tag_string  . '" />
+					</div>
+					
+					' . Common::getHtml( "get-form-buttons", array( 
+					
+						'left' => array( 
+							'pk_name' => "article_id",
+							'pk_value' => $a->m_article_id,
+							'process' => $process,
+							'id' => "article",
+							'button_value' => ucwords( $process ),
+							'extra_style' => 'style="width:41px;"' ),
+							
+						'right' => array(
+							'pk_name' => "item_id",
+							'pk_value' => $a->m_article_id,
+							'process' => "view",
+							'id' => "list_item",
+							'button_value' => "Cancel" )							) 
+					) . '
+												
+					<input type="hidden" name="user_id" value="' . $user_id . '"/>
+					<input type="hidden" name="from_add" value="' . $from_add . '"/>
+					
+				</form>
 				';
 				
 				$return = array( 'html' => $html );
@@ -940,6 +974,18 @@ class Article
 
 				</div>
 				';
+				
+				$return = array( 'html' => $html );
+				break;
+				
+			case "pretty-article":
+				
+				$html = '';
+				
+				foreach( $vars['paragraphs'] as $p )
+				{
+					$html .= $vars['open_tag'] . $p . $vars['close_tag'];
+				}
 				
 				$return = array( 'html' => $html );
 				break;

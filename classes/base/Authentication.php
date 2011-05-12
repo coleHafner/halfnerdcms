@@ -167,6 +167,10 @@ class Authentication
 					<div>
 						Howdy, ' . ucwords( $user->m_username ) . '
 						&nbsp;|&nbsp
+						<a href="' . $common->makeLink( array(  'v' => "admin" ) ) . '">
+							Control Panel
+						</a>
+						&nbsp;|&nbsp
 						<a href="' . $common->makeLink( array(  'v' => "account", 'sub' => "update-contact" ) ) . '">
 							My Account
 						</a>

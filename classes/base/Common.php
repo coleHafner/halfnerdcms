@@ -55,7 +55,7 @@ class Common {
 			
 			if( in_array( $field, $valid_fields ) )
 			{
-				if( $this->m_env == "local" )
+				if( $this->m_env == "local" && FALSE )
 				{
 					$val = ( strtolower( $field ) == "v" ) ? "_" . $val : $val;
 					$return .= "/" . strtolower( $val );
@@ -361,6 +361,7 @@ class Common {
 		WHERE " . $pk . " > 0 AND active = 1
 		";
 		
+		//echo $sql . "\n<br/>";
 		$result = $this->m_db->query( $sql, __FILE__, __LINE__ );
 		
 		while( $row = $this->m_db->fetchAssoc( $result ) )
@@ -401,9 +402,12 @@ class Common {
 				break;
 				
 			case "title-bar":
+				$center = ( array_key_exists( "center", $vars ) && $vars['center'] === FALSE ) ? "" : "center ";
 				$return = '
-				<div class="center header color_accent ' . $vars['classes'] . '">
-					' .  $vars['title'] . '
+				<div class="padder_10_bottom">
+					<div class="' . $center . 'header color_accent ' . $vars['classes'] . '">
+						' .  $vars['title'] . '
+					</div>
 				</div>
 				';
 				break;
@@ -551,27 +555,35 @@ class Common {
 				break;
 				
 			case "select-list":
-				$return = '
-				<select name="' . $vars['name'] . '" class="select_list ' . $vars['class'] . '">
-					<option value="0">
-						' . $vars['default_option'] . '
-					</option>
-					';
 				
-				foreach( $vars['options'] as $i => $info )	
+				$return = '';
+				
+				if( is_array( $vars['options'] ) &&
+					count( $vars['options'] ) > 0 )
 				{
-					$selected = ( $vars['selected_option'] == $info['id'] ) ? 'selected="selected"' : '';
-					
+				
+					$return = '
+					<select name="' . $vars['name'] . '" class="select_list ' . $vars['class'] . '">
+						<option value="0">
+							' . $vars['default_option'] . '
+						</option>
+						';
+				
+					foreach( $vars['options'] as $i => $info )	
+					{
+						$selected = ( $vars['selected_option'] == $info['id'] ) ? 'selected="selected"' : '';
+						
+						$return .= '
+						<option value="' . $info['id'] . '" ' . $selected . '>
+							' . $info['title'] . '
+						</option>
+						';
+					}
+						
 					$return .= '
-					<option value="' . $info['id'] . '" ' . $selected . '>
-						' . $info['title'] . '
-					</option>
+					</select>
 					';
 				}
-					
-				$return .= '
-				</select>
-				';
 					
 				break;
 				
@@ -608,22 +620,23 @@ class Common {
 				break;
 				
 			case "get-side-bar":
+				
 				$html = '
-				<div class="center rounded_corners color_accent border_dark_grey" style="height:200px;">
+				<div class="center rounded_corners color_accent border_dark_grey margin_10_bottom side_bar_container">
 					<div class="padder">
-						thing 1
+						Ad 1
 					</div>
 				</div>
 				
-				<div class="center rounded_corners color_accent border_dark_grey margin_20_top" style="height:200px;">
+				<div class="center rounded_corners color_accent border_dark_grey margin_10_bottom side_bar_container">
 					<div class="padder">
-						thing 2
+						Ad 2
 					</div>
 				</div>
 				
-				<div class="center rounded_corners color_accent border_dark_grey margin_20_top" style="height:200px;">
+				<div class="center rounded_corners color_accent border_dark_grey margin_10_bottom side_bar_container">
 					<div class="padder">
-						thing 3
+						Ad 3
 					</div>
 				</div>
 				';
@@ -680,8 +693,8 @@ class Common {
 								break;
 							}
 							
-						$active_record = $records[$key];
-						$content_vars = array( 'active_record' => $active_record, 'options' => $html_vars );
+						$active_record = $records[$key - 1];
+						$content_vars = array( 'active_record' => $active_record, 'options' => $html_vars, 'item_num' => $key );
 						$content = ( !$is_static ) ?  call_user_func_array( array( $active_controller, "getHtml" ), array( $html_cmd, $content_vars ) ) : call_user_func_array( $active_controller . '::getHtml', array( $html_cmd, $content_vars ) );
 						
 						$html .= '
@@ -759,7 +772,7 @@ class Common {
 				else
 				{
 					$html .= '
-					<li>
+					<li class="center">
 						' . $empty_message . '
 					</li>
 					';
@@ -857,6 +870,19 @@ class Common {
 				 );
 				break;
 				
+			case "construction-message":
+				$return = array( 'html' => '
+					<div class="construction_container box_shadow bg_dark padder_10">
+						<div class="construction_inner bg_white center">
+							<div class="construction_text center">
+								Under Construction...
+							</div>
+						</div>
+					</div>
+					'
+				);
+				break;
+				
 			default:
 				throw new exception( "Error: Invalid HTML command." );
 				break;
@@ -940,6 +966,12 @@ class Common {
 		return ( $row[0] == 1 ) ? ucfirst( strtolower( $get['v'] ) ) : "Index";
 		
 	}//validateView()
+	
+	public static function constructionEnvironments()
+	{
+		return array();
+		
+	}//constructionEnvironments()
 	
 	/**
 	 * Allows access to this classes member variables.

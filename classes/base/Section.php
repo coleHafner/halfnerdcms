@@ -305,14 +305,8 @@ class Section
 				$section_list = self::getHtml( 'get-section-list', array( 'records' => $sections ) );
 				
 				$html = '
-				<div class="padder_20_bottom">
-					
-					<div class="padder_10 center header color_accent">
-						Manage Sections
-					</div>
-					
-					<div id="result_section_0" class="result">
-					</div>
+				' . Common::getHtml( "title-bar", array( 'title' => "Manage Sections", 'classes' => '' ) ) . '
+				<div class="padder_20_bottom padder_10_top">
 					
 					<div class="padder" id="section_items_container">			
 						' . $section_list['html'] . '

@@ -114,17 +114,14 @@ class Account extends Controller{
 		switch( strtolower( trim( $cmd ) ) )
 		{
 			case "update-login":
-				$user_html = User::getHtml( "get-login-form", array( 
-					'active_record' => &$vars['active_user'],
-					'render_form_tag' => TRUE ) 
-				);
+				
+				$item_classes = Common::getHtml( "get-admin-list-item-classes", array() );
+				$user_html = User::getHtml( "get-login-form", array( 'active_record' => &$vars['active_user'], 'render_form_tag' => TRUE ) );
 				
 				//compile html
 				$html = '
-				<div class="bg_color_light_tan rounded_corners" style="position:relative;">
-					<div class="padder_10">
-						' .  $user_html['html'] . '
-					</div> 							
+				<div class="' . $item_classes['html'] .'" style="position:relative;">
+					' .  $user_html['html'] . ' 							
 				</div>
 				';
 				
@@ -133,17 +130,13 @@ class Account extends Controller{
 				
 			case "update-permissions":
 				
-				$user_html = User::getHtml( "get-permission-form", array( 
-					'active_record' => &$vars['active_user'],
-					'render_form_tag' => TRUE ) 
-				);
+				$item_classes = Common::getHtml( "get-admin-list-item-classes", array() );
+				$user_html = User::getHtml( "get-permission-form", array( 'active_record' => &$vars['active_user'], 'render_form_tag' => TRUE ) );
 				
 				//compile html
 				$html = '
-				<div class="bg_color_light_tan rounded_corners" style="position:relative;">
-					<div class="padder_10">
-						' .  $user_html['html'] . '
-					</div> 							
+				<div class="' . $item_classes['html'] . '" style="position:relative;">
+					' .  $user_html['html'] . ' 							
 				</div>
 				';
 				
@@ -151,17 +144,14 @@ class Account extends Controller{
 				break;
 				
 			case "update-contact":
-				$user_html = User::getHtml( "get-contact-form", array( 
-					'active_record' => &$vars['active_user'],
-					'render_form_tag' => TRUE ) 
-				);
+				
+				$item_classes = Common::getHtml( "get-admin-list-item-classes", array() );
+				$user_html = User::getHtml( "get-contact-form", array( 'active_record' => &$vars['active_user'], 'render_form_tag' => TRUE ) );
 				
 				//compile html
 				$html = '
-				<div class="bg_color_light_tan rounded_corners" style="position:relative;">
-					<div class="padder_10">
-						' .  $user_html['html'] . '
-					</div> 							
+				<div class="' . $item_classes['html'] . '" style="position:relative;">
+					' .  $user_html['html'] . ' 							
 				</div>
 				';
 				
@@ -170,16 +160,13 @@ class Account extends Controller{
 				
 			case "update-photo":
 				
-				$user_html = User::getHtml( "get-photo-form", array( 
-					'active_record' => &$vars['active_user'] ) 
-				);
+				$item_classes = Common::getHtml( "get-admin-list-item-classes", array() );
+				$user_html = User::getHtml( "get-photo-form", array( 'active_record' => &$vars['active_user'] ) );
 				
 				//compile html
 				$html = '
-				<div class="bg_color_light_tan rounded_corners" style="position:relative;">
-					<div class="padder_10">
-						' .  $user_html['html'] . '
-					</div> 							
+				<div class="' . $item_classes['html'] . '" style="position:relative;">
+					' .  $user_html['html'] . ' 							
 				</div>
 				';
 				

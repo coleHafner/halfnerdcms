@@ -12,9 +12,6 @@ require_once( "base/Setting.php" );
 require_once( "base/Controller.php" );
 require_once( "base/Permission.php" );
 require_once( "base/Authentication.php" );
-require_once( "cms/Portfolio.php" );
-require_once( "cms/PortfolioType.php" );
-require_once( "cms/Skill.php" );
 
 class Admin extends Controller{
 	
@@ -33,8 +30,7 @@ class Admin extends Controller{
 			'manage-permissions' => "Permissions", 
 			'manage-posts' => "Posts",
 			'manage-settings' => "Settings",
-			'manage-users' => "Users",
-			'manage-portfolio' => "Portfolio"
+			'manage-users' => "Users"
 		);
 		
 	}//constructor
@@ -438,75 +434,7 @@ class Admin extends Controller{
 					'hover_enabled' => "1" ) 
 				);
 				break;
-				
-			case "manage-portfolio":
-				
-				$title = "Manage Portfolio Entries";
-				$p_entries = Portfolio::getPortfolioEntries( "active", "1" );
-				$manager = PortfolioType::getHtml( "get-manager", array() );
-				$add_button = Common::getHtml( "get-admin-item-add-button", array() );
-				$item_classes = Common::getHtml( "get-admin-list-item-classes", array() );
-				$add_form = Portfolio::getHtml( "get-edit-form", array( 'active_record' => new User( 0 ) ) );
-				
-				$title_button = '
-				<div class="title_button_container" style="width:auto;">
-				
-					' . $add_button['html'] . '
 					
-					' . Common::getHtml( "get-button-round", array(
-						'id' => "manager",
-						'process' => "show",
-						'pk_name' => "item_id",
-						'pk_value' => "0",
-						'button_value' => "Manage Types",
-						'inner_div_style' => 'style="padding-top:4px;padding-left:1px;font-size:10px;"',
-						'link_style' => 'style="float:right;width:90px;"') 
-					) . '
-					
-					' . Common::getHtml( "get-button-round", array(
-						'id' => "manager",
-						'process' => "show",
-						'pk_name' => "item_id",
-						'pk_value' => "0",
-						'button_value' => "Manage Skills",
-						'inner_div_style' => 'style="padding-top:4px;padding-left:1px;font-size:10px;"',
-						'link_style' => 'style="float:right;width:90px;"') 
-					) . '
-				 
-				 </div>
-				';
-					
-				$list_vars = array(
-					'records' => $portfolio_entries,
-					'is_static' => TRUE,
-					'id' => 'id="permission_list"',
-					'active_controller' => "Permission",
-					'html_cmd' => 'get-admin-list-item',
-					'empty_message' => "There are 0 portfolio entries at this time. Click the '+' button to add one."
-				);
-				
-				$list = Common::getHtml( "display-list", $list_vars );
-				
-				$html = '
-				<div class="item_list_container">
-					
-					<div id="item_manager" class="' . $item_classes['html'] . '" style="display:none;" hover_enabled="0">
-						' . $manager['html'] . '
-					</div>
-					
-					<div id="item_add_0" class="' . $item_classes['html'] . '" style="display:none;" hover_enabled="0">
-						' . $add_form['html'] . '
-					</div>
-	
-					<div class="user_container center" id="permission_list_container">
-						' . $list['html'] . '
-					</div>
-				</div>
-				';
-				
-				$return = array( 'title' => $title, 'title_button' => $title_button, 'html' => $html );
-				break;	
-				
 			default:
 				throw new Exception( "Error: HTML command '" . $cmd . "' is invalid." );
 				break;

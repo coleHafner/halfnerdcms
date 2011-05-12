@@ -71,11 +71,12 @@ class LayoutAdmin
 
 			<link rel="stylesheet" href="' . $file_paths['css_ex'] . '/960_grid.css" type="text/css" />
 			<link rel="stylesheet" href="' . $file_paths['css_ex'] . '/jquery-ui-1.8.1.custom.css" type="text/css" />
-			<link rel="stylesheet" href="' . $file_paths['css_ex'] . '/colorbox.css" type="text/css" />
+			<link rel="stylesheet" href="' . $file_paths['css_ex'] . '/jquery.tagsinput.css" type="text/css" />
 			<link rel="stylesheet" href="' . $file_paths['css'] . '/commonAdmin.css" type="text/css" />
 			
 			<script type="text/javascript" src="' . $file_paths['js_ex'] . '/jquery-1.4.2.js"></script>
 			<script type="text/javascript" src="' . $file_paths['js_ex'] . '/jquery-ui-1.8.1.custom.min.js"></script>
+			<script type="text/javascript" src="' . $file_paths['js_ex'] . '/jquery.tagsinput.js"></script>
 			
 			<script type="text/javascript" src="' . $file_paths['js_nerd'] . '/jquery.halfnerd.common.js"></script>
 			<script type="text/javascript" src="' . $file_paths['js_nerd'] . '/jquery.halfnerd.auth.js"></script>
@@ -120,7 +121,7 @@ class LayoutAdmin
 					<div class="padder_10">
 					
 						<div class="logo_container rounded_corners bg_color_tan center border_color_accent">
-							<img src="/images/logo.png"/>
+							<img src="/images/logo_cms.png"/>
 						</div>
 						
 						<div class="logo_words_container header_mega color_accent">

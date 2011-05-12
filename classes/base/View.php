@@ -808,93 +808,86 @@ class View
 				';
 				
 				$return = array( 'html' => '
-					<div class="padder_10">
-						' . Common::getHtml( "title-bar", array( 'title' => ucWords( $process ) . " View", 'classes' => '' ) ) . '
-						
-						<div id="result_' . $process . '_' . $v->m_view_id . '" class="result">
+				' . Common::getHtml( "title-bar", array( 'title' => ucWords( $process ) . " View", 'classes' => '' ) ) . '
+				<form id="view_form_' . $v->m_view_id . '">
+					<div>
+						<div style="position:relative;float:left;width:35%;">
+							<div class="padder_10">
+								
+								<span class="title_span">
+									Nav Display Name:
+								</span>
+								
+								<input type="text" name="alias" class="text_input text_long" value="' . $alias . '" />
+							</div>
+							
+							<div class="padder_10 padder_no_top">
+								
+								<span class="title_span">
+									Controller File Name:
+								</span>
+								
+								<input type="text" name="controller_name" class="text_input text_long ' . $disabled_class . '" value="' . $controller_name . '" ' . $controller_disabled . ' />
+							</div>
+							
+							<div class="padder_10 padder_no_top">
+								
+								<span class="title_span">
+									External Link:
+								</span>
+								
+								<input type="text" name="external_link" class="text_input text_long" value="' . $external_link . '" />
+							</div>
 						</div>
 						
-						<form id="view_form_' . $v->m_view_id . '">
-							<div>
-								<div style="position:relative;float:left;width:35%;">
-									<div class="padder_10">
-										
-										<span class="title_span">
-											Nav Display Name:
-										</span>
-										
-										<input type="text" name="alias" class="text_input text_long" value="' . $alias . '" />
-									</div>
+						<div style="position:relative;float:left;width:65%;padding-top:50px;">
+						
+							<div class="padder_10">
+								' . Common::getHtml( "selector-module", array( 
+									'title' => "Show Page In Main Nav?", 
+									'content' => $show_in_nav_html,
+									'content_class' => "padder_10_top" ) ) . '
 									
-									<div class="padder_10 padder_no_top">
-										
-										<span class="title_span">
-											Controller File Name:
-										</span>
-										
-										<input type="text" name="controller_name" class="text_input text_long ' . $disabled_class . '" value="' . $controller_name . '" ' . $controller_disabled . ' />
-									</div>
+								' . Common::getHtml( "selector-module-spacer", array() ) . '
+								
+								' . Common::getHtml( "selector-module", array( 
+									'title' => "Does Page Require Login?", 
+									'content' => $requires_auth_html,
+									'content_class' => "padder_10_top" ) ) . '
 									
-									<div class="padder_10 padder_no_top">
-										
-										<span class="title_span">
-											External Link:
-										</span>
-										
-										<input type="text" name="external_link" class="text_input text_long" value="' . $external_link . '" />
-									</div>
-								</div>
-								
-								<div style="position:relative;float:left;width:65%;padding-top:50px;">
-								
-									<div class="padder_10">
-										' . Common::getHtml( "selector-module", array( 
-											'title' => "Show Page In Main Nav?", 
-											'content' => $show_in_nav_html,
-											'content_class' => "padder_10_top" ) ) . '
-											
-										' . Common::getHtml( "selector-module-spacer", array() ) . '
-										
-										' . Common::getHtml( "selector-module", array( 
-											'title' => "Does Page Require Login?", 
-											'content' => $requires_auth_html,
-											'content_class' => "padder_10_top" ) ) . '
-											
-										<div class="clear"></div>
-										
-									</div>
-									
-								</div>
-								
 								<div class="clear"></div>
 								
 							</div>
 							
-							<input type="hidden" name="from_add" value="' . $from_add . '" />
-							' . $hidden_controller_name_input . '
+						</div>
 						
-							' . Common::getHtml( "get-form-buttons", array( 
-							
-								'left' => array( 
-									'pk_name' => "view_id",
-									'pk_value' => $v->m_view_id,
-									'process' => $process,
-									'id' => "view",
-									'button_value' => ucwords( $process ),
-									'extra_style' => 'style="width:41px;"' ),
-									
-								'right' => array(
-									'pk_name' => "item_id",
-									'pk_value' => $v->m_view_id,
-									'process' => "view",
-									'id' => "list_item",
-									'button_value' => "Cancel" ) 
-								) 
-							) . '
-						</form>
+						<div class="clear"></div>
 						
 					</div>
-					'
+					
+					<input type="hidden" name="from_add" value="' . $from_add . '" />
+					' . $hidden_controller_name_input . '
+				
+					' . Common::getHtml( "get-form-buttons", array( 
+					
+						'left' => array( 
+							'pk_name' => "view_id",
+							'pk_value' => $v->m_view_id,
+							'process' => $process,
+							'id' => "view",
+							'button_value' => ucwords( $process ),
+							'extra_style' => 'style="width:41px;"' ),
+							
+						'right' => array(
+							'pk_name' => "item_id",
+							'pk_value' => $v->m_view_id,
+							'process' => "view",
+							'id' => "list_item",
+							'button_value' => "Cancel" ) 
+						) 
+					) . '
+				</form>'
+				
 				);
 				break;
 				
@@ -934,33 +927,30 @@ class View
 			case "get-reorder-form":
 				
 				$return = array( 'html' => '
-					<div class="padder_10">
-						' . Common::getHtml( "title-bar", array( 'title' => "Reorder Navigation", 'classes' => '' ) ) . '
-						
-						<div class="center" style="margin-top:10px;">
-							Drag and drop the items below to reorder the pages in the main navigation.
-						</div>
-						
-						<div class="button_container" style="margin-top:10px;">
-							' . Common::getHtml( "get-form-buttons", array( 
-						
-								'left' => array( 
-									'pk_name' => "view_id",
-									'pk_value' => "0",
-									'process' => "reorder",
-									'id' => "view",
-									'button_value' => "Save Order" ),
-									
-								'right' => array(
-									'pk_name' => "view_id",
-									'pk_value' => $v->m_view_id,
-									'process' => "cancel_reorder",
-									'id' => "view",
-									'button_value' => "Cancel",
-									'extra_style' => 'style="width:61px;"' ) 
-								) 
-							) . '
-						</div>
+					' . Common::getHtml( "title-bar", array( 'title' => "Reorder Navigation", 'classes' => '' ) ) . '	
+					<div class="center">
+						Drag and drop the items below to reorder the pages in the main navigation.
+					</div>
+					
+					<div class="button_container" style="margin-top:10px;">
+						' . Common::getHtml( "get-form-buttons", array( 
+					
+							'left' => array( 
+								'pk_name' => "view_id",
+								'pk_value' => "0",
+								'process' => "reorder",
+								'id' => "view",
+								'button_value' => "Save Order" ),
+								
+							'right' => array(
+								'pk_name' => "view_id",
+								'pk_value' => $v->m_view_id,
+								'process' => "cancel_reorder",
+								'id' => "view",
+								'button_value' => "Cancel",
+								'extra_style' => 'style="width:61px;"' ) 
+							) 
+						) . '
 					</div>
 					'
 				);
