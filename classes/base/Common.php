@@ -100,8 +100,8 @@ class Common {
 		
 		$return = array( 'local' => $common_paths, 'dev' => $common_paths, 'live' => $common_paths );
 		$return['local']['absolute'] = "/usr/local/www/halfnerdcms.com";
-		$return['dev']['absolute'] = "/usr/local/www/halfnerdcms.com";
-		$return['live']['absolute'] = "/usr/local/www/halfnerdcms.com";
+		$return['dev']['absolute'] = "/home8/colehafn/public_html/halfnerd.com";
+		$return['live']['absolute'] = "/home8/colehafn/public_html/halfnerd.com";
 		
 		return $return;
 		
