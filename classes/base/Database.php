@@ -1,5 +1,7 @@
 <?
 
+require_once( "base/Config.php" );
+
 /**
  * A class to handle the interactions with the database.
  * @since	20100508, hafner
@@ -41,12 +43,13 @@ class Database {
 	 * Contstructs the database object.
 	 * @return 	Database
 	 */
-	public function __construct( $paths ) {
-	
-		$this->m_host = $paths['db_host'];
-		$this->m_user = $paths['db_user'];
-		$this->m_pass = $paths['db_pass'];
-		$this->m_db_name = $paths['db_name'];
+	public function __construct() 
+	{
+		
+		$this->m_host = Config::getSetting( "db_host" );
+		$this->m_user = Config::getSetting( "db_user" );
+		$this->m_pass = Config::getSetting( "db_pass" );
+		$this->m_db_name = Config::getSetting( "db_name" );
 		
 		$this->m_resource = $this->connect();
 		$this->selectDb();

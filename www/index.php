@@ -3,10 +3,15 @@
 session_start();
 
 //include files
+require_once( "base/Config.php" );
 require_once( "base/Common.php" );
-require_once( 'base/Layout.php' );
 require_once( 'base/LayoutAdmin.php' );
 require_once( 'base/Authentication.php' );
+
+//determine layout details
+$layout_class = Config::getSetting( "layout_class" );
+$layout_file = Config::getSetting( "layout_file" );
+require_once( "base/" . $layout_file );
 
 //guarantee vars
 $_GET['session'] = $_SESSION;
@@ -14,9 +19,21 @@ $_GET['v'] = Common::validateView( $_GET );
 $admin_controllers = array( "admin", "posts", "users", "account", "setting" );
 
 //setup objects
-$layout = ( in_array( strtolower( $_GET['v'] ), $admin_controllers ) ) ? new LayoutAdmin( $_GET ) : new Layout( $_GET );
+$layout = ( in_array( strtolower( $_GET['v'] ), $admin_controllers ) ) ? new LayoutAdmin( $_GET ) : new $layout_class( $_GET );
 $auth = new Authentication( 0 );
 $common = &$auth->m_common;
+
+//display under construction?
+if( Config::getSetting( "construction_mode" ) === TRUE ) 
+{ 
+	$c = Common::getHtml( "under-construction", array() );
+	
+	//render page
+	echo $layout->getHtmlHeadSection();
+	echo $c['html']; 
+	echo $layout->getClosingTags();
+	exit;
+}
 
 //compile controller name
 $requested_controller = $layout->m_active_controller_name . ".php";
@@ -32,6 +49,7 @@ if( !$common->controllerFileExists( $requested_controller ) )
 		'requested_controller' => $requested_controller, 
 		'controller_path' => $common->compileControllerLocationBasePath() ) 
 	);
+	echo $layout->getClosingTags();
 	exit;
 }
 

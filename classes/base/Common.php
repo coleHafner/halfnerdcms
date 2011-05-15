@@ -9,6 +9,7 @@ require_once( "base/Database.php" );
 require_once( "base/File.php" );
 require_once( "base/FileType.php" );
 require_once( "base/FileHandler.php" );
+require_once( "base/Config.php" );
 
 class Common {
 	
@@ -27,13 +28,10 @@ class Common {
 	public function __construct() {
 		
 		//set relative path
-		$this->m_env = $this->determineEnv();
-		
-		$all_paths = $this->getPathInfo();
-		$cur_paths = $all_paths[$this->m_env];
+		$this->m_env = Config::getSetting( "environment" );
 		
 		//setup db connection
-		$this->m_db = new Database( $cur_paths );
+		$this->m_db = new Database();
 		
 	}//constructor()
 	
@@ -55,7 +53,9 @@ class Common {
 			
 			if( in_array( $field, $valid_fields ) )
 			{
-				if( $this->m_env == "local" && FALSE )
+				$clean_urls = Config::getSetting( "clean_urls" );
+				
+				if( $clean_urls === TRUE )
 				{
 					$val = ( strtolower( $field ) == "v" ) ? "_" . $val : $val;
 					$return .= "/" . strtolower( $val );
@@ -64,7 +64,7 @@ class Common {
 				{
 					$delim = ( $counter == 0 ) ? "/?" : "&"; 
 					$return .= $delim . $field . "=" . strtolower( $val );
-					$counter++;		
+					$counter++;
 				}
 			}
 		}//loop through controller vars
@@ -78,148 +78,34 @@ class Common {
 		
 	}//makeFilePath()
 	
-	public function getPathInfo() 
+	public function getPathInfo()
 	{
-		return array(
-			'local' => array(
-				'absolute' => "/usr/local/www/halfnerdcms.com",
-				'web' => "www",
-				'css' => "/css",
-				'css_ex' => "/css/extensions",
-				'images' => "/images",
-				'images_ex' => "/images/extensions",
-				'user_images' => "/images/users",
-				'js' => "/js",
-				'js_ex' => "/js/extensions",
-				'js_nerd' => "/js/halfnerd",
-				'classes' => "/classes",
-				'classes_ex' => "/classes/ex",
-				'db_host' => "localhost",
-				'db_name' => "cms",
-				'db_user' => "cms_user",
-				'db_pass' => "passwd1000!"
-			),
-			
-			//dev server
-			'dev' => array(
-				'js' => "/js",
-				'web' => "www",
-				'css' => "/css",
-				'images' => "/images",
-				'classes' => "/classes",
-				'js_nerd' => "/js/halfnerd",
-				'js_ex' => "/js/extensions",
-				'classes_ex' => "/classes/ex",
-				'css_ex' => "/css/extensions",
-				'user_images' => "/images/users",
-				'images_ex' => "/images/extensions",
-				'classes_controllers' => "controllers",
-				'absolute' => "/home/users/web/b937/moo.halfnerdcom/cms",
-				'db_host' => "halfnerdcom.fatcowmysql.com",
-				'db_pass' => "passwd1000!",
-				'db_user' => "cms_user",
-				'db_name' => "halfnerd_cms"
-			),
-			
-			//live server
-			'live' => array(
-				'absolute' => "/usr/local/www/halfnerdcms",
-				'web' => "www",
-				'css' => "/css",
-				'css_ex' => "/css/extensions",
-				'images' => "/images",
-				'images_ex' => "/images/extensions",
-				'user_images' => "/images/users",
-				'js' => "/js",
-				'js_ex' => "/js/extensions",
-				'js_nerd' => "/js/halfnerd",
-				'classes' => "/classes",
-				'classes_ex' => "/classes/ex",
-				'db_host' => "localhost",
-				'db_name' => "cms",
-				'db_user' => "cms_user",
-				'db_pass' => "passwd1000!",
-			)
-		);
-		
+		return self::getPathInfoStatic();
 	}//getPathInfo()
 	
-	/**
-	 * Turns an array of sql constraints into a string.
-	 * @since	20100620, hafner
-	 * @return string
-	 * @param	array			$constraints		array( '[field_name1]' => '[value1]', '[field_name2]' => '[value2]' etc. . . ) )
-	 * @param	array			$operators			if TRUE $constraints = array( [0] => array( '[field_name1]' => '[value1]', ['operator'] => "<= || >= || =" ), [1]  => array( '[field_name2]' => '[value2]', ['operator'] => "<= || >= || =" ) etc. . . ) )
-	 */
-	public function compileSqlConstraints( $constraints )
+	public static function getPathInfoStatic() 
 	{
-		if( is_array( $constraints ) && count( $constraints ) > 0 )
-		{	
-			$counter = 1;
-			$return = " WHERE ";
-			$total_vals = count( $constraints );
-			
-			foreach( $constraints as $field => $val )
-			{
-				$joiner = ( $counter != $total_vals ) ? " AND" : "";
-				$l = ( !is_numeric( $val ) ) ? "'" : "";
-				$r = ( !is_numeric( $val ) ) ? "'" : "";
-				
-				$return .= "
-				LOWER( TRIM( " . $field . " ) ) = " . $l .  strtolower( trim( $val ) ) . $r . $joiner;  
-				$counter++;
-			}
-		}
-		else
-		{
-			print_r( $dup_check );
-			throw new exception( "Error: Invalid input for Common->compileSqlConstraints()" );
-		}
+		$common_paths = array(
+			'web' => "www",
+			'css' => "/css",
+			'css_ex' => "/css/extensions",
+			'images' => "/images",
+			'images_ex' => "/images/extensions",
+			'user_images' => "/images/users",
+			'js' => "/js",
+			'js_ex' => "/js/extensions",
+			'js_nerd' => "/js/halfnerd",
+			'classes' => "/classes"
+		);
 		
-		return $return;
-	
-	}//compileSqlConstraints()
-	
-	/**
-	 * Determines the environment.
-	 * @since	20100621, hafner
-	 * @return	string
-	 */
-	public function determineEnv()
-	{
-		$return = "local";
-		$paths = $this->getPathInfo();
-		
-		$dev_path = $paths['dev']['absolute'] . "/" . $paths['dev']['web'];
-		$live_path = $paths['live']['absolute'] . "/" . $paths['live']['web'];
-		
-		if( file_exists( $dev_path . "/is_dev.txt" ) )
-		{
-			$return = "dev";	
-		}
-		else if( file_exists( $live_path . "/is_live.txt" ) )
-		{
-			$return = "live";	
-		}
+		$return = array( 'local' => $common_paths, 'dev' => $common_paths, 'live' => $common_paths );
+		$return['local']['absolute'] = "/usr/local/www/halfnerdcms.com";
+		$return['dev']['absolute'] = "/usr/local/www/halfnerdcms.com";
+		$return['live']['absolute'] = "/usr/local/www/halfnerdcms.com";
 		
 		return $return;
 		
-	}//determineEnv()
-	
-	/**
-	 * Used primarily in the mdp_helper.php file.
-	 * @since	20100628, hafner
-	 * @return	mixed
-	 * @param	boolean			$return			whether or not the action was a success
-	 * @param	string			$message		success/failure message
-	 */
-	function sendJsonResponse( $return, $message )
-	{
-		//send JSON header and response
-		header( 'Content-type: application/x-json' );
-		echo json_encode( $return );
-		
-	}//sendJsonResponse()
+	}//getPathInfo()
 	
 	public function convertTimestamp( $ts, $include_time = TRUE )
 	{
@@ -385,10 +271,15 @@ class Common {
 		switch( strtolower( $cmd ) )
 		{
 			case "under-construction":
+				
+				$classes = self::getHtml( "get-admin-list-item-classes", array() );
+				
 				$return = array( 
-					'body' => '
-					<div class="under_construction_container">
-						This section is  under construction...
+					'html' => '
+					<div class="border_solid_grey rounded_corners construction_container">
+						<div class="padder center construction_inner">
+							This site is under construction...
+						</div>
 					</div>
 					' 
 				);
