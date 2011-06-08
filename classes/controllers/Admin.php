@@ -292,16 +292,18 @@ class Admin extends Controller{
 				 </div>
 				';
 				
-				$list_vars = array(
+				$grid_vars = array(
 					'records' => $permissions,
 					'is_static' => TRUE,
-					'id' => 'id="permission_list"',
+					'records_per_row' => 2,
+					'id' => 'id="setting_grid"',
+					'extra_classes' => 'class="user_grid"',
 					'active_controller' => "Permission",
 					'html_cmd' => 'get-admin-list-item',
 					'empty_message' => "There are 0 permissions at this time. Click the '+' button to add one."
 				);
 				
-				$list = Common::getHtml( "display-list", $list_vars );
+				$grid = Common::getHtml( "display-grid", $grid_vars );
 				
 				$html = '
 				<div class="item_list_container">
@@ -309,9 +311,13 @@ class Admin extends Controller{
 					<div id="item_add_0" class="' . $item_classes['html'] . '" style="display:none;" hover_enabled="0">
 						' . $add_form['html'] . '
 					</div>
-	
-					<div class="user_container" id="permission_list_container">
-						' . $list['html'] . '
+					
+					<div class="item_list_container border_dark_grey rounded_corners margin_10_top" id="setting_list_container">
+					
+						<div id="setting_grid_container">
+							' . $grid['html'] . '
+						</div>
+							
 					</div>
 					
 				</div>
@@ -351,7 +357,7 @@ class Admin extends Controller{
 				<div id="item_add_0" class="' . $item_classes['html'] . '" style="display:none;">
 					' . $add_form['html'] . '
 				</div>
-					
+				
 				<div class="item_list_container border_dark_grey rounded_corners margin_10_top" id="setting_list_container">
 				
 					<div id="setting_grid_container">

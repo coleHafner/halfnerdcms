@@ -354,7 +354,7 @@ class Common {
 				if( !array_key_exists( "href", $vars) )
 				{
 					$additional_attributes = ( array_key_exists( "additional_attributes", $vars ) ) ? $vars['additional_attributes'] : "";
-					$link_guts = 'id="' . $vars['id'] . '" process="' . $vars['process'] . '" ' . $vars['pk_name'] . '="' . $vars['pk_value'] . '"' . $additional_attributes;
+					$link_guts = 'href="#" id="' . $vars['id'] . '" process="' . $vars['process'] . '" ' . $vars['pk_name'] . '="' . $vars['pk_value'] . '"' . $additional_attributes;
 				}
 				else
 				{
@@ -754,7 +754,7 @@ class Common {
 				
 			case "get-item-no-edit":
 				$return = array( 'html' => '
-					<div class="font_no padder" style="float:right;">
+					<div class="font_no" style="float:right;">
 						Cannot Edit
 					</div>
 					'

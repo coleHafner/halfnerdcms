@@ -998,10 +998,10 @@ class User
 									'extra_style' => 'style="width:41px;"' ),
 									
 								'right' => array(
-									'pk_name' => "user_id",
+									'pk_name' => "item_id",
 									'pk_value' => $u->m_user_id,
-									'process' => "cancel_" . $form_vars['process'],
-									'id' => "user",
+									'process' => "view",
+									'id' => "list_item",
 									'button_value' => "Cancel",
 									'extra_style' => 'style="width:41px;"' ), 
 								)
